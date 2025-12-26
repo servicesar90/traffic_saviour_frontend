@@ -115,11 +115,25 @@ export default function Campaign({ camp, pastedUrl  }) {
   
     const text = await res.text();
     console.log("result", camp, "text", text,camp?.id);
+
+
+
+    
   
     let status = "failed";
     if (text.trim() != camp?.cid) {
       status = "false";
       showSuccessToast("Integration Error try again " + status);
+      const data = {
+      integration: false,
+      integrationUrl: null,
+      integrationType: null
+    }
+    console.log("cyc",camp.id);
+    const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data);
+    
+    
+
       return
     }
     if (text.trim() === camp?.cid) {
