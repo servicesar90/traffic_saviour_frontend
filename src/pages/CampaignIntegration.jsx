@@ -210,7 +210,15 @@ if ($data && isset($data['action'])) {
     // Block visitor
     if ($data['action'] === false) {
         header("Location: " . $data['target'], true, 302);
-        exit; 
+        exit;
+        // http_response_code(403);
+        // exit("Access Denied");
+    }
+
+     if ($data['action'] === "not") {
+        exit;
+        // http_response_code(403);
+        // exit("Access Denied");
     }
 }
 
