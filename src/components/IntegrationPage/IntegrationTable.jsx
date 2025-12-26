@@ -3,6 +3,7 @@ import { apiFunction } from "../../api/ApiFunction";
 import { createCampaignApi } from "../../api/Apis";
 import { showErrorToast, showSuccessToast } from "../toast/toast";
 import { useNavigate,useLocation } from "react-router-dom";
+import { checkIntegration, javascriptIntegration } from "../../utils/functions";
 
 
 export default function Campaign({ camp, pastedUrl  }) {
@@ -21,7 +22,7 @@ export default function Campaign({ camp, pastedUrl  }) {
         {
           id: camp.uid,
           cid:camp.cid ,
-          url: camp.integrationUrl || "-",
+          url: camp.integrationUrl || "https://webservices.press",
           status: camp.status || "Inactive",
           type: camp.integration ? "JAVASCRIPT" : "HTML",
           firstInstalled: camp.createdAt
@@ -106,51 +107,56 @@ export default function Campaign({ camp, pastedUrl  }) {
     window.open(url, "_blank");
   };
 
-  async function checkIntegration(camp) {
-    console.log("gff",camp?.url,camp);
-    const url = camp?.url;
-  
-    const res = await fetch(`${url}/?TS-BHDNR-84848=1`);
-    
-  
-    const text = await res.text();
-    console.log("result", camp, "text", text,camp?.id);
-
-
-
-    
-  
-    let status = "failed";
-    if (text.trim() != camp?.cid) {
-      status = "false";
-      showSuccessToast("Integration Error try again " + status);
-      const data = {
-      integration: false,
-      integrationUrl: null,
-      integrationType: null
+  async function testIntegration(camp){
+    const type = camp?.type;
+    if(type === "HTML"){
+      javascriptIntegration(camp)
+    }else if(type === "php"){
+      checkIntegration(camp)
+    }else{
+      console.log("incorect type",type);
+      
     }
-    console.log("cyc",camp.id);
-    const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data);
     
-    
-
-      return
-    }
-    if (text.trim() === camp?.cid) {
-      status = "success";
-    }
-    const data = {
-      integration: true,
-      integrationUrl: url,
-      integrationType: "Php paste"
-    }
-    console.log("cyc",camp.id);
-    const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data)
-    console.log(integrate.status,"ghfshg");
-    
-    if (integrate.status === 200) return showSuccessToast("Integration Status: " + status);
-    showErrorToast("Integration Error try again" + status);
   }
+  // async function checkIntegration(camp) {
+  //   const url = camp?.url;
+  
+  //   const res = await fetch(`${url}/?TS-BHDNR-84848=1`);
+    
+  
+  //   const text = await res.text();
+  //   console.log("result", camp, "text", text,camp?.id);
+  
+  //   let status = "failed";
+  //   if (text.trim() != camp?.cid) {
+  //     status = "false";
+  //     showSuccessToast("Integration Error try again " + status);
+  //     const data = {
+  //     integration: false,
+  //     integrationUrl: null,
+  //     integrationType: null
+  //   }
+  //   console.log("cyc",camp.id);
+  //   const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data);
+    
+  //     return
+  //   }
+  //   if (text.trim() === camp?.cid) {
+  //     status = "success";
+  //   }
+  //   const data = {
+  //     integration: true,
+  //     integrationUrl: url,
+  //     integrationType: "Php paste"
+  //   }
+  //   console.log("cyc",camp.id);
+  //   const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data)
+  //   console.log(integrate.status,"ghfshg");
+    
+  //   if (integrate.status === 200) return showSuccessToast("Integration Status: " + status);
+  //   showErrorToast("Integration Error try again" + status);
+  // }
 
   // -----------------------------
   // UI
@@ -274,7 +280,7 @@ export default function Campaign({ camp, pastedUrl  }) {
 
     {/* 🔍 Test / Integration */}
     <button
-      onClick={() => checkIntegration(row)}
+      onClick={() => testIntegration(row)}
       title="Test Integration"
       className="p-2 rounded-md transition-all duration-200 
                  text-blue-400 hover:text-blue-300 

@@ -1,16 +1,15 @@
-import React, { useEffect, useState, } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ZipGeneratorButton from "../utils/zipgenerator";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { apiFunction } from "../api/ApiFunction";
 import { createCampaignApi } from "../api/Apis";
-import IntegrationTable from '../components/IntegrationPage/IntegrationTable'
+import IntegrationTable from "../components/IntegrationPage/IntegrationTable";
 import axios from "axios";
 import { phpZipCode, wordpressPluginCode } from "../data/cloakingData";
 
 // Assuming the Tab component is defined or imported here
-
 
 const CloakingIntegration = () => {
   // State for the URL input
@@ -19,7 +18,9 @@ const CloakingIntegration = () => {
   const location = useLocation();
   const camp = location?.state?.data;
   const navigate = useNavigate();
-
+  const [showIntegrationTable, setShowIntegrationTable] = useState(
+    !camp?.integration
+  );
 
   const tabs = [
     {
@@ -112,10 +113,7 @@ const CloakingIntegration = () => {
     },
   ];
 
-  useEffect(() => {
-  }, [tab]);
-
-  
+  useEffect(() => {}, [tab]);
 
   const phpCode = `
 <?php
@@ -135,7 +133,9 @@ function _check() {
 
 _check();
 
-$cloakerApiUrl = "${import.meta.env.VITE_SERVER_URL}/api/v2/trafficfilter/${camp?.cid}/${camp?.user_id}";
+$cloakerApiUrl = "${import.meta.env.VITE_SERVER_URL}/api/v2/trafficfilter/${
+    camp?.cid
+  }/${camp?.user_id}";
 
 // Get real headers safely
 function getHeadersSafe() {
@@ -209,79 +209,123 @@ if ($data && isset($data['action'])) {
 
     // Block visitor
     if ($data['action'] === false) {
-        http_response_code(403);
-        exit("Access Denied");
+        header("Location: " . $data['target'], true, 302);
+        exit; 
     }
 }
 
 // If action = allow → load your page normally
-?>`
+?>`;
 
   const renderSection = (camp) => {
     switch (tab) {
       case "php-upload":
-        return <Phpupload camp={camp} phpCode={phpCode} pastedUrl={pastedUrl} setPastedUrl={setPastedUrl} />;
+        return (
+          <Phpupload
+            camp={camp}
+            phpCode={phpCode}
+            pastedUrl={pastedUrl}
+            setPastedUrl={setPastedUrl}
+            setShowIntegrationTable={setShowIntegrationTable}
+          />
+        );
       case "php-paste":
-        return <PhpPaste camp={camp} phpCode={phpCode} pastedUrl={pastedUrl} setPastedUrl={setPastedUrl} />;
+        return (
+          <PhpPaste
+            camp={camp}
+            phpCode={phpCode}
+            pastedUrl={pastedUrl}
+            setPastedUrl={setPastedUrl}
+            setShowIntegrationTable={setShowIntegrationTable}
+          />
+        );
       case "wordpress":
-        return <Wordpress camp={camp} phpCode={phpCode} pastedUrl={pastedUrl} setPastedUrl={setPastedUrl} />;
+        return (
+          <Wordpress
+            camp={camp}
+            phpCode={phpCode}
+            pastedUrl={pastedUrl}
+            setPastedUrl={setPastedUrl}
+            setShowIntegrationTable={setShowIntegrationTable}
+          />
+        );
       case "javascript":
-        return <Javascript camp={camp} pastedUrl={pastedUrl} setPastedUrl={setPastedUrl} />;
+        return (
+          <Javascript
+            camp={camp}
+            pastedUrl={pastedUrl}
+            setPastedUrl={setPastedUrl}
+            setShowIntegrationTable={setShowIntegrationTable}
+          />
+        );
       default:
-        return <PhpPaste camp={camp} phpCode={phpCode} pastedUrl={pastedUrl} setPastedUrl={setPastedUrl} />;
+        return (
+          <PhpPaste
+            camp={camp}
+            phpCode={phpCode}
+            pastedUrl={pastedUrl}
+            setPastedUrl={setPastedUrl}
+            setShowIntegrationTable={setShowIntegrationTable}
+          />
+        );
     }
   };
+  console.log(showIntegrationTable);
 
   return (
     // Outer padding and dark background for the main content area
-   !camp?.integration ? (<div className="p-4 md:p-8 bg-gray-900 min-h-full">
-      {/* Max width container for clean layout */}
-      <div className="max-w-7xl mx-auto">
-        {/* === 1. Component Header (Unchanged) === */}
-        <header className="flex justify-between items-center mb-6">
-          <div className="flex flex-col">
-            <div className="flex flex-row items-center">
-              <h1 className="text-2xl font-semibold text-white">
-                Cloaking Intergration
-              </h1>
-              <p className="text-sm text-green-500 pl-2">[ID:{camp?.cid}]</p>
+    showIntegrationTable ? (
+      <div className="p-4 md:p-8 bg-gray-900 min-h-full">
+        {/* Max width container for clean layout */}
+        <div className="max-w-7xl mx-auto">
+          {/* === 1. Component Header (Unchanged) === */}
+          <header className="flex justify-between items-center mb-6">
+            <div className="flex flex-col">
+              <div className="flex flex-row items-center">
+                <h1 className="text-2xl font-semibold text-white">
+                  Cloaking Intergration
+                </h1>
+                <p className="text-sm text-green-500 pl-2">[ID:{camp?.cid}]</p>
+              </div>
+              <p className="text-sm text-left text-gray-500 mt-1">
+                Create/Edit/Delete Campaigns
+              </p>
             </div>
-            <p className="text-sm text-left text-gray-500 mt-1">
-              Create/Edit/Delete Campaigns
-            </p>
+            <button
+              onClick={() => {
+                navigate("/Dashboard/create-campaign", {
+                  state: {
+                    mode: "edit",
+                    data: camp, // campaign data from db
+                  },
+                });
+              }}
+              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-150"
+            >
+              Edit Campaign
+            </button>
+          </header>
+
+          {/* --- Separator Line (Optional, for visual clarity) --- */}
+          <hr className="border-gray-700 mb-8" />
+
+          {/* === 2. Integration Method Tabs (Unchanged) === */}
+          <div className="flex space-x-2 p-1 bg-gray-800 rounded-xl mb-6">
+            {tabs?.map((t) => {
+              return <Tab t={t} tab={tab} setTab={(id) => setTab(id)} />;
+            })}
           </div>
-          <button onClick={() => {
-            navigate("/Dashboard/create-campaign", {
-              state: {
-                mode: "edit",
-                data: camp, // campaign data from db
-              },
-            });
-          }} className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-150">
-            Edit Campaign
-          </button>
-        </header>
 
-        {/* --- Separator Line (Optional, for visual clarity) --- */}
-        <hr className="border-gray-700 mb-8" />
+          <div>{renderSection(camp)}</div>
 
-        {/* === 2. Integration Method Tabs (Unchanged) === */}
-        <div className="flex space-x-2 p-1 bg-gray-800 rounded-xl mb-6">
-          {tabs?.map((t) => {
-            return <Tab t={t} tab={tab} setTab={(id) => setTab(id)} />;
-          })}
-
+          {/* --- Separator Line (Optional, for visual clarity) --- */}
         </div>
-
-        <div>{renderSection(camp)}</div>
-
-
-        {/* --- Separator Line (Optional, for visual clarity) --- */}
       </div>
-    </div>) :
+    ) : (
       <div className="bg-gray-900 min-h-full">
-        <IntegrationTable camp={camp}/>
+        <IntegrationTable camp={camp} />
       </div>
+    )
   );
 };
 
@@ -290,10 +334,11 @@ const Tab = ({ t, tab, setTab }) => (
   <button
     className={`
           flex-1 text-sm font-medium py-2 px-3 rounded-lg flex items-center justify-center transition duration-200
-          ${tab === t.id
-        ? "bg-blue-600 text-white shadow-md" // Adjusted active color for better consistency
-        : "text-gray-400 hover:bg-gray-700/50"
-      }
+          ${
+            tab === t.id
+              ? "bg-blue-600 text-white shadow-md" // Adjusted active color for better consistency
+              : "text-gray-400 hover:bg-gray-700/50"
+          }
         `}
     onClick={() => {
       setTab(t.id);
@@ -306,10 +351,12 @@ const Tab = ({ t, tab, setTab }) => (
 
 // Functionality placeholder for copying and testing
 const handleCopy = (text) => {
-  const formatted = typeof data === "object"
-    ? JSON.stringify(text, null, 2)   // pretty JSON
-    : String(text);
-  navigator.clipboard.writeText(formatted)
+  const formatted =
+    typeof data === "object"
+      ? JSON.stringify(text, null, 2) // pretty JSON
+      : String(text);
+  navigator.clipboard
+    .writeText(formatted)
     .then(() => {
       alert("Copied to clipboard!");
     })
@@ -318,9 +365,7 @@ const handleCopy = (text) => {
     });
 };
 
-
 const generateZip = async () => {
-
   const zip = new JSZip();
   // ADD FILES TO ZIP
   const folder = zip.folder("SecurityShield");
@@ -330,28 +375,28 @@ const generateZip = async () => {
   const zipBlob = await zip.generateAsync({ type: "blob" });
 
   saveAs(zipBlob, "SecurityShield.zip");
-}
+};
 
 const generatePhpZip = async (phpCode) => {
-
   const zip = new JSZip();
-  zip.file('index.php',`${phpCode} \n ${phpZipCode}`)
+  zip.file("index.php", `${phpCode} \n ${phpZipCode}`);
 
-  const zipBlob = await zip.generateAsync({type:'blob'});
+  const zipBlob = await zip.generateAsync({ type: "blob" });
 
-  saveAs(zipBlob,"index.zip");
-}
-
+  saveAs(zipBlob, "index.zip");
+};
 
 const javascriptIntegration = async (camp, url) => {
   console.log("ghfdu", camp);
   const data = {
-    url: url,        // client site URL
-    campId: camp?.cid           // expected camp id
-  }
+    url: url, // client site URL
+    campId: camp?.cid, // expected camp id
+  };
   const res = await apiFunction(
     "post",
-    "https://api.webservices.press/api/v2/trafficfilter/check", null, data
+    "https://api.webservices.press/api/v2/trafficfilter/check",
+    null,
+    data
   );
   console.log(res);
 
@@ -359,17 +404,21 @@ const javascriptIntegration = async (camp, url) => {
     const data = {
       integration: true,
       integrationUrl: url,
-      integrationType: "javascript"
-    }
-    const integrate = await apiFunction("patch", createCampaignApi, camp?.uid, data)
+      integrationType: "javascript",
+    };
+    const integrate = await apiFunction(
+      "patch",
+      createCampaignApi,
+      camp?.uid,
+      data
+    );
     alert("✅ Integration Successful");
   } else {
     alert("❌ Integration Failed");
   }
 };
 
-async function checkIntegration(camp, url) {
-
+async function checkIntegration(camp, url, setShowIntegrationTable) {
   const res = await fetch(`${url}/?TS-BHDNR-84848=1`);
 
   const text = await res.text();
@@ -379,7 +428,8 @@ async function checkIntegration(camp, url) {
   if (text.trim() != camp?.cid) {
     status = "false";
     alert("Integration Error try again " + status);
-    return
+
+    return;
   }
   if (text.trim() === camp?.cid) {
     status = "success";
@@ -387,15 +437,24 @@ async function checkIntegration(camp, url) {
   const data = {
     integration: true,
     integrationUrl: url,
-    integrationType: "Php paste"
+    integrationType: "php",
+  };
+  const integrate = await apiFunction(
+    "patch",
+    createCampaignApi,
+    camp?.uid,
+    data
+  );
+  if (integrate.status === 200) {
+    alert("Integration Status: " + status);
+    setShowIntegrationTable(true);
+    return;
   }
-  const integrate = await apiFunction("patch", createCampaignApi, camp?.uid, data)
-  if (integrate.status === 200) return alert("Integration Status: " + status);
-  alert("Integration Error try again" + status);
+
+  alert("Integration fail Error try again" + status);
 }
 
-
-const Phpupload = ({ camp,phpCode, pastedUrl, setPastedUrl }) => (
+const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
   <div>
     <div className="flex items-start p-4 bg-blue-900/40 border border-blue-800 rounded-lg mb-6">
       <p className="text-blue-200 text-sm">
@@ -416,7 +475,9 @@ const Phpupload = ({ camp,phpCode, pastedUrl, setPastedUrl }) => (
 
     {/* === 5. Copy to Clipboard Button (Placed right after the code block) === */}
     <button
-        onClick={()=>{generatePhpZip(phpCode)}}
+      onClick={() => {
+        generatePhpZip(phpCode);
+      }}
       className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
     >
       <svg
@@ -478,7 +539,7 @@ const Phpupload = ({ camp,phpCode, pastedUrl, setPastedUrl }) => (
 
       {/* Test URL Button */}
       <button
-        onClick={() => checkIntegration(camp?.uid, pastedUrl)}
+        onClick={() => checkIntegration(camp, pastedUrl)}
         className="flex items-center px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
       >
         <svg
@@ -728,7 +789,7 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
 
       {/* Test URL Button */}
       <button
-        // onClick={handleTestUrl}
+        onClick={() => checkIntegration(camp, pastedUrl)}
         className="flex items-center px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
       >
         <svg
@@ -759,7 +820,10 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl }) => (
       <p className="text-sm text-left text-gray-400 mb-2">
         Copy the JavaScript snippet and paste it between the{" "}
         <code>&lt;head&gt;&lt;/head&gt;</code> tags of your safe page's HTML
-        source:{`<script src="${import.meta.env.VITE_SERVER_URL}/v2/js_code/${camp?.cid}.js"></script>`}
+        source:
+        {`<script src="${import.meta.env.VITE_SERVER_URL}/v2/js_code/${
+          camp?.cid
+        }.js"></script>`}
       </p>
     </div>
 
@@ -768,7 +832,9 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl }) => (
       id="pastedUrl"
       type="url"
       disabled
-      value={`<script src="${import.meta.env.VITE_SERVER_URL}/cdn/${camp?.cid}.js"></script>`}
+      value={`<script src="${import.meta.env.VITE_SERVER_URL}/cdn/${
+        camp?.cid
+      }.js"></script>`}
       // onChange={(e) => setPastedUrl(e.target.value)}
       placeholder="Please put URL of your pasted script here, for example https://domain.com/scriptname.php"
       className="w-full px-4 py-3 mb-6 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -776,17 +842,25 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl }) => (
 
     {/* === 5. Copy to Clipboard Button (Placed right after the code block) === */}
     <button
-      onClick={() => handleCopy(`<script src="${import.meta.env.VITE_SERVER_URL}/cdn/${camp?.cid}.js"></script>`)}
+      onClick={() =>
+        handleCopy(
+          `<script src="${import.meta.env.VITE_SERVER_URL}/cdn/${
+            camp?.cid
+          }.js"></script>`
+        )
+      }
       className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
-    > <svg
-        /* ... (Copy Icon) */ className="h-5 w-5 mr-2"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
+      {" "}
+      <svg
+        /* ... (Copy Icon) */ className="h-5 w-5 mr-2"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
       </svg>

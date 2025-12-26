@@ -35,5 +35,7 @@ export const updatePassword = `${base_url}/auth/reset-password`;
 export const updateCampaignStatus = `${base_url}/api/v2/campaign`
 
 
-export const addUrlCampData = `${base_url}/api/v2/analyticsCamp`
+export const addUrlCampData = `${base_url}/api/v2/analyticsCamp`;
+
+export const getAllAnalyticsCamp=`${base_url}/api/v2/webanalytics`;
 

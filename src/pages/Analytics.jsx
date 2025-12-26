@@ -453,9 +453,10 @@
 
 import React, { useEffect, useCallback, useState } from "react";
 
-import { addUrlCampData, getAllCampaign } from "../api/Apis";
+import { addUrlCampData, getAllCampaign,getAllAnalyticsCamp } from "../api/Apis";
 import { apiFunction } from "../api/ApiFunction";
 import { useNavigate } from "react-router-dom";
+
 
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
 
@@ -564,7 +565,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
   const fetchCampaigns = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await apiFunction("get", getAllCampaign, null, null);
+      const response = await apiFunction("get", getAllAnalyticsCamp, null, null);
      
       
       const dataRows = response.data.data || [];
@@ -576,6 +577,37 @@ const [isSubmitting, setIsSubmitting] = useState(false);
       setIsLoading(false); // Stop loading
     }
   }, []);
+
+
+  const handleDeleteCampaign = async (id) => {
+  if (!id) return;
+
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this campaign?"
+  );
+  if (!confirmDelete) return;
+
+  try {
+    const res = await apiFunction(
+      "delete",
+      getAllAnalyticsCamp,
+    id,   // 👈 ID here
+      null
+    );
+
+    showSuccessToast("Campaign deleted successfully");
+
+    // 🔄 Refresh list after delete
+    fetchCampaigns();
+
+  } catch (error) {
+   
+    showErrorToast(
+      error?.response?.data?.message || "Failed to delete campaign"
+    );
+  }
+};
+
 
 const addUrlCamp = async () => {
   // basic validation
@@ -612,8 +644,8 @@ const addUrlCamp = async () => {
       showSuccessToast('Campaign Created Successfully..!!')
     }
   } catch (error) {
-    console.error("Add URL Error:", error);
-    alert("Failed to add URL");
+    
+    showErrorToast("Failed to add URL");
   } finally {
     setIsSubmitting(false);
   }
@@ -733,7 +765,7 @@ const addUrlCamp = async () => {
               className="grid grid-cols-8 gap-4 px-6 py-3 border-t border-gray-700 text-gray-200 hover:bg-[#25344E]"
             >
               <div>{index + 1}</div>
-              <div>{item?.campaign_info?.campaignName || "NA"}</div>
+              <div>{item?.name || "NA"}</div>
               <div className="relative group inline-block">
                 {/* Icon/trigger */}
                 <span className="text-blue-400 cursor-pointer">ℹ️</span>
@@ -748,7 +780,7 @@ const addUrlCamp = async () => {
                 </div>
               </div>
 
-              <div>{item?.campclicks?.total_t_clicks}</div>
+              <div>{item?.clickCount || "0"}</div>
 
               <div>
                 <Button
@@ -764,7 +796,7 @@ const addUrlCamp = async () => {
                 <button
                   onClick={() => {
                     setSelectedCdnCode({
-                      cdn: item?.javascriptCDN || "",
+                      cdn: item?.integrationCode || "",
                       link: item?.integrationUrl || "",
                     });
                     setOpenCodeModal(true);
@@ -780,8 +812,9 @@ const addUrlCamp = async () => {
               <div>
                 <Button
                   variant="icon"
+                  className="cursor-pointer"
                   icon={TrashIcon}
-                  onClick={() => onDeleteClick(item.id)}
+                  onClick={() => handleDeleteCampaign(item.id)}
                 />
               </div>
             </div>
