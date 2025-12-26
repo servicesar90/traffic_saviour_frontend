@@ -209,8 +209,10 @@ if ($data && isset($data['action'])) {
 
     // Block visitor
     if ($data['action'] === false) {
-        http_response_code(403);
-        exit("Access Denied");
+        header("Location: " . $data['target'], true, 302);
+        exit;
+        // http_response_code(403);
+        // exit("Access Denied");
     }
 }
 
