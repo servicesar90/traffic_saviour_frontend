@@ -214,6 +214,12 @@ if ($data && isset($data['action'])) {
         // http_response_code(403);
         // exit("Access Denied");
     }
+
+     if ($data['action'] === "not") {
+        exit;
+        // http_response_code(403);
+        // exit("Access Denied");
+    }
 }
 
 // If action = allow → load your page normally
