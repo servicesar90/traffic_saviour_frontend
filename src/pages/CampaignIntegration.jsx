@@ -455,18 +455,18 @@ async function checkIntegration(camp, url, setShowIntegrationTable) {
   );
   if (integrate.status === 200) {
     alert("Integration Status: " + status);
-    setShowIntegrationTable(true);
+      setShowIntegrationTable(false);
     return;
   }
-
+  setShowIntegrationTable(true);
   alert("Integration fail Error try again" + status);
 }
 
-const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
+const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTable }) => (
   <div>
     <div className="flex items-start p-4 bg-blue-900/40 border border-blue-800 rounded-lg mb-6">
       <p className="text-blue-200 text-sm">
-        <span className="font-semibold">Important:</span> Use the PHP upload
+        <span className="font-semibold">Important:{setShowIntegrationTable}</span> Use the PHP upload
         method when your safe page, money page, and cloaked URL are all distinct
         and separate.
       </p>
@@ -547,7 +547,7 @@ const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
 
       {/* Test URL Button */}
       <button
-        onClick={() => checkIntegration(camp, pastedUrl)}
+        onClick={() => checkIntegration(camp, pastedUrl,setShowIntegrationTable)}
         className="flex items-center px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
       >
         <svg
@@ -567,7 +567,7 @@ const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
   </div>
 );
 
-const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
+const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTable }) => (
   <div>
     {/* === 3. Guidance/Warning Banner (Unchanged) === */}
     <div className="flex items-start p-4 bg-blue-900/40 border border-blue-800 rounded-lg mb-6">
@@ -682,7 +682,7 @@ const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
   </div>
 );
 
-const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
+const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTable }) => (
   <div>
     {/* <div className="flex items-start p-4 bg-blue-900/40 border border-blue-800 rounded-lg mb-6">
       <p className="text-blue-200 text-sm">
@@ -817,7 +817,7 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl }) => (
   </div>
 );
 
-const Javascript = ({ camp, pastedUrl, setPastedUrl }) => (
+const Javascript = ({ camp, pastedUrl, setPastedUrl,setShowIntegrationTable }) => (
   <div>
     <div className="mb-4">
       <p className="text-sm text-left text-white-400 mb-2">

@@ -4,12 +4,14 @@ import { createCampaignApi } from "../../api/Apis";
 import { showErrorToast, showSuccessToast } from "../toast/toast";
 import { useNavigate,useLocation } from "react-router-dom";
 import { checkIntegration, javascriptIntegration } from "../../utils/functions";
+import { useEffect, useState } from "react";
 
 
 export default function Campaign({ camp, pastedUrl  }) {
   // -----------------------------
   // Derived values from backend
   // -----------------------------
+  const [campaign,setCampaign] = useState(camp)
 
   console.log(camp);
   
@@ -17,19 +19,19 @@ export default function Campaign({ camp, pastedUrl  }) {
     camp?.campaign_info?.campaignName || "NA";
     const navigate = useNavigate();
 
-  const tableData = camp
+  const tableData = campaign
     ? [
         {
-          id: camp.uid,
-          cid:camp.cid ,
-          url: camp.integrationUrl || "https://webservices.press",
-          status: camp.status || "Inactive",
-          type: camp.integration ? "JAVASCRIPT" : "HTML",
-          firstInstalled: camp.createdAt
-            ? new Date(camp.createdAt).toLocaleString("en-IN")
+          id: campaign.uid,
+          cid:campaign.cid ,
+          url: campaign.integrationUrl || "https://webservices.press",
+          status: campaign.status || "Inactive",
+          type: campaign.integrationType,
+          firstInstalled: campaign.createdAt
+            ? new Date(campaign.createdAt).toLocaleString("en-IN")
             : "-",
-          lastUpdated: camp.updatedAt
-            ? new Date(camp.updatedAt).toLocaleString("en-IN")
+          lastUpdated: campaign.updatedAt
+            ? new Date(campaign.updatedAt).toLocaleString("en-IN")
             : "-",
           
         },
@@ -109,7 +111,7 @@ export default function Campaign({ camp, pastedUrl  }) {
 
   async function testIntegration(camp){
     const type = camp?.type;
-    if(type === "HTML"){
+    if(type === "javascript"){
       javascriptIntegration(camp)
     }else if(type === "php"){
       checkIntegration(camp)
@@ -119,6 +121,17 @@ export default function Campaign({ camp, pastedUrl  }) {
     }
     
   }
+
+  const fetchdata = async()=>{
+    const res = await apiFunction("get",createCampaignApi,camp.uid,null);
+    if(res.status === 200) setCampaign(res.data.data)
+    console.log("bfbdsh",res.data.data);
+    
+  }
+
+  useEffect(()=>{
+    fetchdata()
+  },[])
   // async function checkIntegration(camp) {
   //   const url = camp?.url;
   
