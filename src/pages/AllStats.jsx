@@ -37,6 +37,8 @@ const Dashboard = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [openDropdownId, setOpenDropdownId] = useState(null);
    const [dropdownPos, setDropdownPos] = useState(null);
+   const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [clickSummary, setClickSummary] = useState({
     totalClicks: 0,
     safeClicks: 0,
@@ -45,11 +47,24 @@ const Dashboard = () => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  const handleRefresh = () => {
-    fetchIpClicks();
-    fetchStats();
-    fetchCampaigns();
-  };
+  const handleRefresh = async () => {
+  if (isRefreshing) return;
+
+  try {
+    setIsRefreshing(true);
+
+    await Promise.all([
+      fetchIpClicks(),
+      fetchStats(),
+      fetchCampaigns(),
+    ]);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setTimeout(() => setIsRefreshing(false), 600); // smooth UX
+  }
+};
+
 
   const goToCampaign = (id) => alert("Open campaign: " + id);
   const prevPage = () => setPage((p) => Math.max(1, p - 1));
@@ -667,25 +682,38 @@ const Dashboard = () => {
             </svg>
             Add New Campaign
           </button>
-          <button
-            onClick={handleRefresh}
-            className="flex items-center cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md font-medium text-sm shadow-lg transition duration-150"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            Refresh
-          </button>
+         <button
+  onClick={handleRefresh}
+  disabled={isRefreshing}
+  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm shadow-lg transition-all duration-200 cursor-pointer
+    ${
+      isRefreshing
+        ? "bg-gray-600 cursor-not-allowed opacity-80"
+        : "bg-gray-700 hover:bg-gray-600 cursor-pointer"
+    }
+  `}
+>
+  <svg
+    className={`h-5 w-5 ${
+      isRefreshing ? "animate-spin" : ""
+    }`}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+    />
+  </svg>
+
+  <span className="whitespace-nowrap">
+    {isRefreshing ? "Refreshing data..." : "Refresh"}
+  </span>
+</button>
+
         </div>
       </div>
 

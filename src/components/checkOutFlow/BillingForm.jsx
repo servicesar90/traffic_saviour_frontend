@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { COUNTRY_LIST } from "../../data/dataList";
 import { useNavigate } from "react-router-dom";
 
@@ -17,10 +17,27 @@ export function BillingForm({ onNext }) {
     postcode: "",
     phone: "",
     email: "",
-    username: "",
+   
   });
 
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+  const userData = JSON.parse(localStorage.getItem("user"));
+
+  if (userData) {
+    const fullName = userData.name?.trim() || "";
+    const nameParts = fullName.split(" ").filter(Boolean);
+
+    setForm((prev) => ({
+      ...prev,
+      firstName: nameParts[0] || "",
+      lastName: nameParts.slice(1).join(" ") || "",
+      email: userData.email || "",
+    }));
+  }
+}, []);
+
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -40,7 +57,7 @@ export function BillingForm({ onNext }) {
     if (!form.city.trim()) newErrors.city = "City is required";
     if (!form.postcode.trim()) newErrors.postcode = "Postcode is required";
     if (!form.email.trim()) newErrors.email = "Email is required";
-    if (!form.username.trim()) newErrors.username = "Username is required";
+  
 
     // Email validation
     if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) {
@@ -53,9 +70,7 @@ export function BillingForm({ onNext }) {
     }
 
     // Username length
-    if (form.username && form.username.length < 4) {
-      newErrors.username = "Username must be at least 4 characters";
-    }
+    
 
     // Postcode length
     if (form.postcode && form.postcode.length < 3) {
@@ -228,20 +243,7 @@ export function BillingForm({ onNext }) {
       </div>
 
       {/* Username */}
-      <div>
-        <label className="text-sm font-medium text-slate-600">
-          Account username <span className="text-red-500">*</span>
-        </label>
-        <input
-          name="username"
-          className="mt-2 w-full text-black  border border-slate-300 p-3 rounded-lg focus:border-orange-500 outline-none"
-          value={form.username}
-          onChange={handleChange}
-        />
-        {errors.username && (
-          <p className="text-red-500 text-xs mt-1">{errors.username}</p>
-        )}
-      </div>
+      
 
       {/* Buttons */}
       <div className="flex justify-between pt-6">

@@ -1,11 +1,11 @@
-import React,{useState} from "react";
+import React,{useState,useEffect} from "react";
 import PropTypes from "prop-types";
 import { apiFunction } from "../api/ApiFunction";
 import { blacklistIpApi } from "../api/Apis";
 import { showSuccessToast, showErrorToast } from "../components/toast/toast";
 
 const BlacklistedIPsPage = ({
-  ips = [],
+
   totalItems,
   currentPage,
   itemsPerPage,
@@ -60,55 +60,196 @@ const BlacklistedIPsPage = ({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
   const [openIpModal, setOpenIpModal] = useState(false);
 const [ipList, setIpList] = useState("");
-const [ipAddress, setIpAddress] = useState("");
+// ✅ ONLY ONCE
+const [ips, setIps] = useState([]);
+const [loadingIps, setLoadingIps] = useState(false);
+const [isRefreshing, setIsRefreshing] = useState(false);
 
 
 
-;
+
+
+const TrashIcon = ({ onClick }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5 text-red-500 hover:text-red-400 cursor-pointer"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    onClick={onClick}
+  >
+    <path
+      fillRule="evenodd"
+      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
 
 
 
 
-const addBlacklistedIps = async (ipAddress) => {
+const isValidIPv4 = (ip) => {
+  const ipv4Regex =
+    /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
+  return ipv4Regex.test(ip);
+};
+
+const isValidIPv6 = (ip) => {
+  const ipv6Regex =
+    /^(([0-9a-fA-F]{1,4}):){7}([0-9a-fA-F]{1,4})$/;
+  return ipv6Regex.test(ip);
+};
+
+const isValidIP = (ip) => isValidIPv4(ip) || isValidIPv6(ip);
+
+
+
+
+const addBlacklistedIps = async (rawText) => {
   try {
     const userData = JSON.parse(localStorage.getItem("user"));
     const userId = userData?.id;
 
     if (!userId) {
-      console.error("User not logged in");
+      showErrorToast("User not logged in");
       return;
     }
 
-    const data = {
-      userId: userId,
-      IPAddress: ipAddress, // ⚠️ backend field name
-    };
+    const ipArray = rawText
+      .split("\n")
+      .map(ip => ip.trim())
+      .filter(ip => ip.length > 0);
 
-    const response = await apiFunction(
-      "post",
-      blacklistIpApi,
-      null,
-      data
-    );
+    if (ipArray.length === 0) {
+      showErrorToast("Please enter at least one IP");
+      return;
+    }
 
-    console.log("IP added successfully:", response.data);
+    // 🚫 STRICT VALIDATION
+    const invalidIps = ipArray.filter(ip => !isValidIP(ip));
+
+    if (invalidIps.length > 0) {
+      showErrorToast(
+        `Invalid IP(s): ${invalidIps.join(", ")}`
+      );
+      return; // ❌ STOP SUBMIT
+    }
+
+    // ✅ All IPs valid → proceed
+    for (const ip of ipArray) {
+      const payload = {
+        userId,
+        IPAddress: ip,
+      };
+      await apiFunction("post", blacklistIpApi, null, payload);
+      await fetchBlacklistedIps();
+    }
+
+
+    showSuccessToast(`${ipArray.length} IP(s) added successfully`);
+    setIpList("");
+    setOpenIpModal(false);
+
   } catch (error) {
-    console.error(
-      "Error adding IP:",
-      error.response?.data || error.message
+    console.error(error);
+    showErrorToast("Failed to add IP(s)");
+  }
+};
+
+
+const fetchBlacklistedIps = async () => {
+  try {
+    setLoadingIps(true);
+
+    const userData = JSON.parse(localStorage.getItem("user"));
+    const userId = userData?.id;
+
+    if (!userId) {
+      showErrorToast("User not logged in");
+      return;
+    }
+
+    const res = await apiFunction(
+  "get",
+  `${blacklistIpApi}?userId=${userId}`,
+  null,
+  null
+);
+ 
+
+
+
+    const rawData = res?.data || [];
+
+    
+  
+    
+
+    const formatted = rawData.map((item, index) => ({
+      sn: index + 1,
+      ip: item.IPAddress || "-",
+      addedOn: item.createdAt
+        ? new Date(item.createdAt).toLocaleString("en-IN")
+        : "-",
+      id: item.id,
+    }));
+
+    setIps(formatted);
+  } catch (error) {
+    console.error(error);
+    showErrorToast("Failed to fetch IPs");
+  } finally {
+    setLoadingIps(false);
+  }
+};
+
+const deleteBlacklistedIp = async (id) => {
+  try {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this IP?"
     );
+
+    if (!confirmDelete) return;
+
+    await apiFunction(
+      "delete",
+      blacklistIpApi,
+      id,
+      null
+    );
+
+    showSuccessToast("IP deleted successfully");
+
+    // 🔁 refresh list OR local remove
+    setIps((prev) => prev.filter((ip) => ip.id !== id));
+  } catch (error) {
+    console.error(error);
+    showErrorToast("Failed to delete IP");
+  }
+};
+
+const handleRefresh = async () => {
+  if (isRefreshing) return;
+
+  try {
+    setIsRefreshing(true);
+    await fetchBlacklistedIps();
+  } finally {
+    setTimeout(() => setIsRefreshing(false), 500); // smooth finish
   }
 };
 
 
-const handleAddIp = () => {
-  if (!ipAddress) {
-    alert("Please enter IP address");
-    return;
-  }
 
-  addBlacklistedIps(ipAddress);
-};
+
+useEffect(() => {
+  fetchBlacklistedIps();
+}, []);
+
+
+
+
+
 
 
 
@@ -146,57 +287,82 @@ const handleAddIp = () => {
             Add New Ip
           </button>
           <button
-           
-            className="flex items-center cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md font-medium text-sm shadow-lg transition duration-150"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            Refresh
-          </button>
+  onClick={handleRefresh}
+  disabled={isRefreshing}
+  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm shadow-lg transition-all duration-200
+    ${
+      isRefreshing
+        ? "bg-gray-600 cursor-not-allowed opacity-80"
+        : "bg-gray-700 hover:bg-gray-600 cursor-pointer"
+    }
+  `}
+>
+  <svg
+    className={`h-5 w-5 transition-transform duration-300 ${
+      isRefreshing ? "animate-spin" : ""
+    }`}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+    />
+  </svg>
+
+  {isRefreshing ? "Refreshing..." : "Refresh"}
+</button>
+
         </div>
         </div>
 
         {/* Table */}
-        <div className="bg-[#1E293B] rounded-2xl shadow-xl overflow-hidden border border-gray-700">
-          <div className="grid grid-cols-4 gap-4 px-6 py-4 bg-[#2B3B58] text-gray-300 text-xs font-semibold uppercase tracking-wider">
-            <div>SN</div>
-            <div>IP Address</div>
-            <div>Added On</div>
-            <div>Actions</div>
+       <div className="bg-[#1E293B] rounded-2xl shadow-xl overflow-hidden border border-gray-700">
+
+  {/* Header */}
+  <div className="grid grid-cols-[60px_minmax(0,1fr)_200px_100px] gap-4 px-6 py-4 bg-[#2B3B58] text-gray-300 text-xs font-semibold uppercase tracking-wider">
+    <div>SN</div>
+    <div>IP Address</div>
+    <div>Added On</div>
+    <div className="text-center">Actions</div>
+  </div>
+
+  {/* Body */}
+  <div className="max-h-[420px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+
+    {!loadingIps &&
+      ips.map((ip) => (
+        <div
+          key={ip.id}
+          className="grid grid-cols-[60px_minmax(0,1fr)_200px_100px] gap-4 px-6 py-3 text-sm text-gray-200 border-t border-gray-700 hover:bg-[#25344E] transition-colors"
+        >
+          <div>{ip.sn}</div>
+
+          {/* 🔥 IP COLUMN FIX */}
+          <div
+            className="font-mono truncate overflow-hidden whitespace-nowrap"
+            title={ip.ip} // hover pe full IP dikhega
+          >
+            {ip.ip}
           </div>
 
-          {ips.length === 0 ? (
-            <div className="py-20 text-center text-gray-500 text-sm border-t border-gray-700">
-              No IP addresses found.
-            </div>
-          ) : (
-            ips.map((ip, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-4 gap-4 px-6 py-3 text-sm text-gray-200 border-t border-gray-700 hover:bg-[#25344E] transition-colors"
-              >
-                <div>{ip.sn}</div>
-                <div>{ip.ip}</div>
-                <div>{ip.addedOn}</div>
-                <div>{ip.actions || "-"}</div>
-              </div>
-            ))
-          )}
+          <div>{ip.addedOn}</div>
+
+          <div className="flex justify-center items-center">
+            <TrashIcon onClick={() => deleteBlacklistedIp(ip.id)} />
+          </div>
         </div>
+      ))}
+  </div>
+</div>
+
+
 
         {/* Pagination Footer */}
-        <div className="flex flex-col md:flex-row justify-between items-center mt-6 text-sm text-gray-400 gap-4">
+        {/* <div className="flex flex-col md:flex-row justify-between items-center mt-6 text-sm text-gray-400 gap-4">
           <span>
             {startItem}–{endItem} of {totalItems} items —{" "}
             <button onClick={onViewAll} className="text-blue-500 hover:underline">
@@ -212,7 +378,7 @@ const handleAddIp = () => {
               Next
             </Button>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {openIpModal && (
@@ -228,13 +394,13 @@ const handleAddIp = () => {
 
       {/* Body */}
       <div className="px-6 py-4">
-        <textarea 
-          value={text}
-          onChange={(e) => setIpList(e.target.value)}
-          placeholder=""
-          rows={6}
-          className="w-full bg-[#020617] border border-gray-700 rounded-md p-3 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
-        />
+       <textarea
+  value={ipList}
+  onChange={(e) => setIpList(e.target.value)}
+  rows={6}
+  className="w-full bg-[#020617] border border-gray-700 rounded-md p-3 text-sm text-gray-200"
+/>
+
 
         <p className="text-sm text-gray-400 mt-3">
           Enter one IP per line. Examples:
@@ -257,16 +423,14 @@ const handleAddIp = () => {
           ✕ Cancel
         </button>
 
-        <button
-          onClick={() => {
-            console.log(ipList);
-            setOpenIpModal(false);
-            addBlacklistedIps(ipAddress)
-          }}
-          className="px-4 py-2 cursor-pointer  bg-blue-600 hover:bg-blue-700 rounded-md text-white transition flex items-center gap-1"
-        >
-          + Add
-        </button>
+       <button
+  onClick={() => addBlacklistedIps(ipList)}
+  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white cursor-pointer"
+>
+  + Add
+</button>
+
+
 
       </div>
     </div>
