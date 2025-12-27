@@ -68,30 +68,30 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
       label: "Click Logs",
       route: "/Dashboard/reports",
     },
-    {
-      label: "Stats Overview",
-      route: "/Dashboard/clicklogs",
-    },
-    {
-      label: "Tracking",
-      route: "/employerHome/UnlockedCandidates",
-    },
-    {
-      label: "Group By Stats",
-      route: "/employerHome/UnlockedCandidates",
-    },
-    {
-      label: "Cost Management",
-      route: "/employerHome/UnlockedCandidates",
-    },
-    {
-      label: "Campaign Timeline",
-      route: "/employerHome/UnlockedCandidates",
-    },
-    {
-      label: "Delete Campaigns",
-      route: "/employerHome/UnlockedCandidates",
-    },
+    // {
+    //   label: "Stats Overview",
+    //   route: "/Dashboard/clicklogs",
+    // },
+    // {
+    //   label: "Tracking",
+    //   route: "/employerHome/UnlockedCandidates",
+    // },
+    // {
+    //   label: "Group By Stats",
+    //   route: "/employerHome/UnlockedCandidates",
+    // },
+    // {
+    //   label: "Cost Management",
+    //   route: "/employerHome/UnlockedCandidates",
+    // },
+    // {
+    //   label: "Campaign Timeline",
+    //   route: "/employerHome/UnlockedCandidates",
+    // },
+    // {
+    //   label: "Delete Campaigns",
+    //   route: "/employerHome/UnlockedCandidates",
+    // },
   ];
 
   const handleNavigate = (route) => {

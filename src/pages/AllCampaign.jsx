@@ -23,6 +23,8 @@ function AllCampaignsDashboard() {
   const [error, setError] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [clickSummary, setClickSummary] = useState({
     totalClicks: 0,
     safeClicks: 0,
@@ -271,11 +273,23 @@ function AllCampaignsDashboard() {
   };
 
   // --- Existing Handlers ---
-  const handleRefresh = () => {
-    // alert("Refreshing campaign list...");
-    fetchCampaigns();
-    fetchStats();
-  };
+ const handleRefresh = async () => {
+  if (isRefreshing) return;
+
+  try {
+    setIsRefreshing(true);
+
+    await Promise.all([
+      fetchCampaigns(),
+      fetchStats(),
+    ]);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setTimeout(() => setIsRefreshing(false), 600); // smooth finish
+  }
+};
+
 
   const handleApplyFilter = () => {
     alert(
@@ -604,24 +618,37 @@ function AllCampaignsDashboard() {
             Add New Campaign
           </button>
           <button
-            onClick={handleRefresh}
-            className="flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md font-medium text-sm shadow-lg transition duration-150"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            Refresh
-          </button>
+  onClick={handleRefresh}
+  disabled={isRefreshing}
+  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm shadow-lg transition-all duration-200
+    ${
+      isRefreshing
+        ? "bg-gray-600 cursor-not-allowed opacity-80"
+        : "bg-gray-700 hover:bg-gray-600 cursor-pointer"
+    }
+  `}
+>
+  <svg
+    className={`h-5 w-5 transition-transform ${
+      isRefreshing ? "animate-spin" : ""
+    }`}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+    />
+  </svg>
+
+  <span>
+    {isRefreshing ? "Refreshing..." : "Refresh"}
+  </span>
+</button>
+
         </div>
       </header>
 
