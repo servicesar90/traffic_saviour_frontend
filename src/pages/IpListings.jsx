@@ -1,5 +1,8 @@
-import React from "react";
+import React,{useState} from "react";
 import PropTypes from "prop-types";
+import { apiFunction } from "../api/ApiFunction";
+import { blacklistIpApi } from "../api/Apis";
+import { showSuccessToast, showErrorToast } from "../components/toast/toast";
 
 const BlacklistedIPsPage = ({
   ips = [],
@@ -55,6 +58,60 @@ const BlacklistedIPsPage = ({
 
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+  const [openIpModal, setOpenIpModal] = useState(false);
+const [ipList, setIpList] = useState("");
+const [ipAddress, setIpAddress] = useState("");
+
+
+
+;
+
+
+
+
+const addBlacklistedIps = async (ipAddress) => {
+  try {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    const userId = userData?.id;
+
+    if (!userId) {
+      console.error("User not logged in");
+      return;
+    }
+
+    const data = {
+      userId: userId,
+      IPAddress: ipAddress, // ⚠️ backend field name
+    };
+
+    const response = await apiFunction(
+      "post",
+      blacklistIpApi,
+      null,
+      data
+    );
+
+    console.log("IP added successfully:", response.data);
+  } catch (error) {
+    console.error(
+      "Error adding IP:",
+      error.response?.data || error.message
+    );
+  }
+};
+
+
+const handleAddIp = () => {
+  if (!ipAddress) {
+    alert("Please enter IP address");
+    return;
+  }
+
+  addBlacklistedIps(ipAddress);
+};
+
+
+
 
   return (
     <div style={{ fontFamily: "Outfit, sans-serif", fontWeight: 400 }} className="min-h-screen bg-[#0b0d14] text-gray-100 p-8 font-sans">
@@ -68,14 +125,46 @@ const BlacklistedIPsPage = ({
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Button variant="primary" icon={PlusIcon} onClick={onAddIp}>
-              Add New IP
-            </Button>
-            <Button variant="secondary" icon={RefreshIcon} onClick={onRefresh}>
-              Refresh
-            </Button>
-          </div>
+          <div className="flex space-x-3">
+          <button
+             onClick={() => setOpenIpModal(true)}
+            className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-medium text-sm shadow-lg transition duration-150 cursor-pointer"
+          >
+            <svg
+              className="h-5 w-5 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add New Ip
+          </button>
+          <button
+           
+            className="flex items-center cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md font-medium text-sm shadow-lg transition duration-150"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            Refresh
+          </button>
+        </div>
         </div>
 
         {/* Table */}
@@ -125,27 +214,69 @@ const BlacklistedIPsPage = ({
           </div>
         </div>
       </div>
+
+      {openIpModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+
+    {/* Modal Box */}
+    <div className="w-full max-w-xl bg-[#0f172a] text-gray-200 rounded-xl shadow-2xl border border-gray-700">
+
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-700 text-lg font-semibold">
+        Add IP
+      </div>
+
+      {/* Body */}
+      <div className="px-6 py-4">
+        <textarea 
+          value={text}
+          onChange={(e) => setIpList(e.target.value)}
+          placeholder=""
+          rows={6}
+          className="w-full bg-[#020617] border border-gray-700 rounded-md p-3 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+        />
+
+        <p className="text-sm text-gray-400 mt-3">
+          Enter one IP per line. Examples:
+        </p>
+
+        <div className="text-sm text-gray-500 mt-1 space-y-1">
+          <div>240.4.91.158</div>
+          <div>115546</div>
+          <div>6b5d:4417:cee5:9676:6926:b272:d8ae:f9e6</div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-gray-700 flex justify-end gap-3">
+
+        <button
+          onClick={() => setOpenIpModal(false)}
+          className="px-4 py-2 cursor-pointer border border-red-500 text-red-400 rounded-md hover:bg-red-500/10 transition"
+        >
+          ✕ Cancel
+        </button>
+
+        <button
+          onClick={() => {
+            console.log(ipList);
+            setOpenIpModal(false);
+            addBlacklistedIps(ipAddress)
+          }}
+          className="px-4 py-2 cursor-pointer  bg-blue-600 hover:bg-blue-700 rounded-md text-white transition flex items-center gap-1"
+        >
+          + Add
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
 
-BlacklistedIPsPage.propTypes = {
-  ips: PropTypes.arrayOf(
-    PropTypes.shape({
-      sn: PropTypes.number.isRequired,
-      ip: PropTypes.string.isRequired,
-      addedOn: PropTypes.string.isRequired,
-      actions: PropTypes.node,
-    })
-  ),
-  totalItems: PropTypes.number.isRequired,
-  currentPage: PropTypes.number.isRequired,
-  itemsPerPage: PropTypes.number.isRequired,
-  onViewAll: PropTypes.func.isRequired,
-  onPrevious: PropTypes.func.isRequired,
-  onNext: PropTypes.func.isRequired,
-  onAddIp: PropTypes.func.isRequired,
-  onRefresh: PropTypes.func.isRequired,
-};
+
 
 export default BlacklistedIPsPage;

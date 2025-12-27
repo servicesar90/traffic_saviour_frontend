@@ -826,7 +826,7 @@ const addUrlCamp = async () => {
 
       {/* CODE MODAL */}
       {openCodeModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-[750px] shadow-2xl">
             <div className="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
               <h2 className="text-xl text-white font-semibold ">
@@ -901,7 +901,7 @@ const addUrlCamp = async () => {
       )}
 
       {open1 && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           {/* MODAL BOX */}
           <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-[650px] shadow-2xl">
             {/* Title */}

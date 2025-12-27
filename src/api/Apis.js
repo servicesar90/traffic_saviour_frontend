@@ -39,3 +39,5 @@ export const addUrlCampData = `${base_url}/api/v2/analyticsCamp`;
 
 export const getAllAnalyticsCamp=`${base_url}/api/v2/webanalytics`;
 
+export const blacklistIpApi = `${base_url}/api/v2/blacklisted-ip`;
+

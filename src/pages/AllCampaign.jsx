@@ -6,7 +6,7 @@ import {
   campdata,
   updateCampaignStatus,
 } from "../api/Apis";
-import { apiFunction, createApiFunction } from "../api/ApiFunction";
+import { apiFunction } from "../api/ApiFunction";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast, showInfoToast, showSuccessToast } from "../components/toast/toast";
 
@@ -14,7 +14,7 @@ import { showErrorToast, showInfoToast, showSuccessToast } from "../components/t
 
 function AllCampaignsDashboard() {
   // --- Existing State ---
-  const [activeStatusTab, setActiveStatusTab] = useState("All");
+  
   const [dateRange, setDateRange] = useState("d/m/y to d/m/y");
   const [searchTerm, setSearchTerm] = useState("");
   const [chartData, setChartData] = useState([]);
@@ -29,12 +29,12 @@ function AllCampaignsDashboard() {
     moneyClicks: 0,
   });
 
-  const [statusTabs, setStatusTabs] = useState([
-    { name: "All", count: 0 },
-    { name: "Active", count: 0 },
-    { name: "Allow All", count: 0 },
-    { name: "Block All", count: 0 },
-  ]);
+  const [stats, setStats] = useState({
+     total_campaigns: 0,
+     active_campaigns: 0,
+     blocked_campaigns: 0,
+     allowed_campaigns: 0,
+   });
 
   // ⭐ NEW STATE for Dropdown
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -111,41 +111,46 @@ function AllCampaignsDashboard() {
   };
 
   const fetchStats = async () => {
-    try {
-      const res = await apiFunction("get", campdata, null, null);
-      console.log(res);
-
-      const data = res?.data || {};
-
-      setStatusTabs([
-        { name: "All", count: data?.data?.total_campaigns || 0 },
-        { name: "Active", count: data?.data?.active_campaigns || 0 },
-        { name: "Allow All", count: data?.data?.blocked_campaigns || 0 },
-        { name: "Block All", count: data?.data?.allowed_campaigns || 0 },
-      ]);
-    } catch (error) {
-      console.error("Stats API Error:", error);
-    }
-  };
+      try {
+        const res = await apiFunction("get", campdata, null, null);
+        console.log(res);
+        
+  
+        setStats({
+          total_campaigns: res?.data?.data?.total_campaigns || 0,
+          active_campaigns: res?.data?.data?.active_campaigns || 0,
+          blocked_campaigns: res?.data?.data?.blocked_campaigns || 0,
+          allowed_campaigns: res?.data?.data?.allowed_campaigns || 0,
+        });
+      } catch (error) {
+        console.error("Stats API Error:", error);
+      }
+    };
 
 
   const handleStatusChange = async (uid, newStatus) => {
   try {
-    // loading UI
+    // 🔎 current campaign find karo
+    const currentItem = campaigns.find(item => item.uid === uid);
+    const oldStatus = currentItem?.status;
+
+    // agar same status pe click hua to kuch mat karo
+    if (!currentItem || oldStatus === newStatus) return;
+
+    // ⏳ loading UI
     setCampaigns(prev =>
       prev.map(item =>
         item.uid === uid ? { ...item, statusLoading: true } : item
       )
     );
 
-    const data ={
-      status:newStatus
-    }
-    // backend API call
+    const data = { status: newStatus };
+
+    // 🔗 PATCH API
     const res = await apiFunction(
       "patch",
-      createCampaignApi, 
-      uid,       // change route according to backend
+      createCampaignApi,
+      uid,
       data
     );
 
@@ -154,7 +159,7 @@ function AllCampaignsDashboard() {
       return;
     }
 
-    // update UI instantly
+    // ✅ update campaigns list
     setCampaigns(prev =>
       prev.map(item =>
         item.uid === uid
@@ -163,13 +168,30 @@ function AllCampaignsDashboard() {
       )
     );
 
+    // 🔥 UPDATE STATS WITHOUT RELOAD
+    setStats(prev => {
+      const updated = { ...prev };
+
+      // old status decrement
+      if (oldStatus === "Active") updated.active_campaigns--;
+      if (oldStatus === "Allow") updated.allowed_campaigns--;
+      if (oldStatus === "Block") updated.blocked_campaigns--;
+
+      // new status increment
+      if (newStatus === "Active") updated.active_campaigns++;
+      if (newStatus === "Allow") updated.allowed_campaigns++;
+      if (newStatus === "Block") updated.blocked_campaigns++;
+
+      return updated;
+    });
+
     showSuccessToast(`Status updated ✔ : ${newStatus}`);
 
   } catch (err) {
     console.error("Status update error:", err);
     showErrorToast("Something went wrong!");
 
-    // remove loading state
+    // ❌ loading hatao
     setCampaigns(prev =>
       prev.map(item =>
         item.uid === uid ? { ...item, statusLoading: false } : item
@@ -177,6 +199,7 @@ function AllCampaignsDashboard() {
     );
   }
 };
+
 
 
   useEffect(() => {
@@ -251,6 +274,7 @@ function AllCampaignsDashboard() {
   const handleRefresh = () => {
     // alert("Refreshing campaign list...");
     fetchCampaigns();
+    fetchStats();
   };
 
   const handleApplyFilter = () => {
@@ -259,31 +283,13 @@ function AllCampaignsDashboard() {
     );
   };
 
-  const handleStatusTabChange = (tab) => setActiveStatusTab(tab);
+  
   const handleAddNewCampaign = () => {
     showInfoToast("Redirecting to Creating New Campaign");
     navigate("/Dashboard/create-campaign");
   };
 
-  // --- Render Functions ---
 
-  const renderStatusTabs = () => (
-    <div className="flex space-x-6 text-sm">
-      {statusTabs.map((tab) => (
-        <button
-          key={tab.name}
-          onClick={() => handleStatusTabChange(tab.name)}
-          className={`font-medium py-1 transition duration-150 ${
-            activeStatusTab === tab.name
-              ? "text-blue-500 border-b-2 border-blue-500"
-              : "text-gray-400 hover:text-gray-300"
-          }`}
-        >
-          {tab.name} ({tab.count})
-        </button>
-      ))}
-    </div>
-  );
 
   // ⭐ NEW Render Function: Action Dropdown Menu
   const renderActionDropdown = (campaignId, row) => (
@@ -392,10 +398,10 @@ function AllCampaignsDashboard() {
     {/* ⚡ Boost */}
     <button
       disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Allow All")}
+      onClick={() => handleStatusChange(item.uid, "Allow")}
       className={`p-1 rounded transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Allow All"
+        ${item.status === "Allow"
           ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
           : "text-gray-500 hover:text-gray-300"
         }`}
@@ -626,8 +632,29 @@ function AllCampaignsDashboard() {
       {/* Filter and Control Bar (Unchanged) */}
       <div className="bg-gray-800 p-4 rounded-lg shadow-xl mb-6">
         <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
-          {renderStatusTabs()}
-        </div>
+
+  <div className="flex space-x-6 text-sm">
+
+    <div className="font-medium py-1 text-blue-500 border-b-2 border-blue-500 cursor-default">
+      All ({stats.total_campaigns || '0'})
+    </div>
+
+    <div className="font-medium py-1 text-gray-400">
+      Active({stats.active_campaigns || '0'})
+    </div>
+
+    <div className="font-medium py-1 text-gray-400">
+      Allow All({stats.allowed_campaigns || '0'})
+    </div>
+
+    <div className="font-medium py-1 text-gray-400">
+      Block All({stats.blocked_campaigns || '0'})
+    </div>
+
+  </div>
+
+</div>
+
 
         <div className="flex items-center space-x-4">
           <div className="relative flex-grow max-w-sm">

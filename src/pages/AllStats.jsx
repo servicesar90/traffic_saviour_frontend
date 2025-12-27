@@ -15,7 +15,7 @@ import axios from "axios";
 // import {ipClicks} from "../api/Apis.js";
 import { apiFunction } from "../api/ApiFunction.js";
 import { ipClicks, campdata, getAllCampaign,signOutApi, createCampaignApi } from "../api/Apis.js";
-import { showInfoToast } from "../components/toast/toast.jsx";
+import { showErrorToast, showInfoToast, showSuccessToast } from "../components/toast/toast.jsx";
 
 const Dashboard = () => {
   const [page, setPage] = useState(1);
@@ -130,6 +130,8 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const res = await apiFunction("get", campdata, null, null);
+      console.log(res);
+      
 
       setStats({
         total_campaigns: res?.data?.data?.total_campaigns || 0,
@@ -226,54 +228,77 @@ const Dashboard = () => {
   };
 
 
-    const handleStatusChange = async (uid, newStatus) => {
-    try {
-      // loading UI
-      setCampaigns(prev =>
-        prev.map(item =>
-          item.uid === uid ? { ...item, statusLoading: true } : item
-        )
-      );
-  
-      const data ={
-        status:newStatus
-      }
-      // backend API call
-      const res = await apiFunction(
-        "patch",
-        createCampaignApi, 
-        uid,       // change route according to backend
-        data
-      );
-  
-      if (!res?.data?.success) {
-        showErrorToast("Failed updating status");
-        return;
-      }
-  
-      // update UI instantly
-      setCampaigns(prev =>
-        prev.map(item =>
-          item.uid === uid
-            ? { ...item, status: newStatus, statusLoading: false }
-            : item
-        )
-      );
-  
-      showSuccessToast(`Status updated ✔ : ${newStatus}`);
-  
-    } catch (err) {
-      console.error("Status update error:", err);
-      showErrorToast("Something went wrong!");
-  
-      // remove loading state
-      setCampaigns(prev =>
-        prev.map(item =>
-          item.uid === uid ? { ...item, statusLoading: false } : item
-        )
-      );
-    }
-  };
+   const handleStatusChange = async (uid, newStatus) => {
+     try {
+       // 🔎 current campaign find karo
+       const currentItem = campaigns.find(item => item.uid === uid);
+       const oldStatus = currentItem?.status;
+   
+       // agar same status pe click hua to kuch mat karo
+       if (!currentItem || oldStatus === newStatus) return;
+   
+       // ⏳ loading UI
+       setCampaigns(prev =>
+         prev.map(item =>
+           item.uid === uid ? { ...item, statusLoading: true } : item
+         )
+       );
+   
+       const data = { status: newStatus };
+   
+       // 🔗 PATCH API
+       const res = await apiFunction(
+         "patch",
+         createCampaignApi,
+         uid,
+         data
+       );
+   
+       if (!res?.data?.success) {
+         showErrorToast("Failed updating status");
+         return;
+       }
+   
+       // ✅ update campaigns list
+       setCampaigns(prev =>
+         prev.map(item =>
+           item.uid === uid
+             ? { ...item, status: newStatus, statusLoading: false }
+             : item
+         )
+       );
+   
+       // 🔥 UPDATE STATS WITHOUT RELOAD
+       setStats(prev => {
+         const updated = { ...prev };
+   
+         // old status decrement
+         if (oldStatus === "Active") updated.active_campaigns--;
+         if (oldStatus === "Allow") updated.allowed_campaigns--;
+         if (oldStatus === "Block") updated.blocked_campaigns--;
+   
+         // new status increment
+         if (newStatus === "Active") updated.active_campaigns++;
+         if (newStatus === "Allow") updated.allowed_campaigns++;
+         if (newStatus === "Block") updated.blocked_campaigns++;
+   
+         return updated;
+       });
+   
+       showSuccessToast(`Status updated ✔ : ${newStatus}`);
+   
+     } catch (err) {
+       console.error("Status update error:", err);
+       showErrorToast("Something went wrong!");
+   
+       // ❌ loading hatao
+       setCampaigns(prev =>
+         prev.map(item =>
+           item.uid === uid ? { ...item, statusLoading: false } : item
+         )
+       );
+     }
+   };
 
   useEffect(() => {
       const token = localStorage.getItem("token");
@@ -361,7 +386,7 @@ const Dashboard = () => {
     </div>
   );
 
-  const renderTableContent = () => {
+   const renderTableContent = () => {
     // ... (Loading/Error/Empty Data checks)
     if (isLoading) {
       /* ... loading JSX ... */ return (
@@ -398,7 +423,6 @@ const Dashboard = () => {
         {campaigns.map((item, index) => {
           const campaignId = item.campaign_info?.campaign_id || index;
           const isDropdownOpen = openDropdownId === item?.uid;
-          console.log(openDropdownId, campaignId);
 
           return (
             <tr key={campaignId}>
@@ -411,10 +435,11 @@ const Dashboard = () => {
               <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-left w-24">
                 {item.campaign_info?.trafficSource || "Not Provided"}
               </td>
-             <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-32">
-  <div className="flex items-center text-left ">
-    <div>
-        {/* ▶ Play / Activate */}
+             <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-28">
+ <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-32">
+  <div className="flex items-center ">
+
+    {/* ▶ Play / Activate */}
     <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Active")}
@@ -434,10 +459,10 @@ const Dashboard = () => {
     {/* ⚡ Boost */}
     <button
       disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Allow All")}
+      onClick={() => handleStatusChange(item.uid, "Allow")}
       className={`p-1 rounded transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Allow All"
+        ${item.status === "Allow"
           ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
           : "text-gray-500 hover:text-gray-300"
         }`}
@@ -451,7 +476,7 @@ const Dashboard = () => {
     {/* 🚫 Block */}
     <button
       disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Block All")}
+      onClick={() => handleStatusChange(item.uid, "Block")}
       className={`p-1 rounded transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
         ${item.status === "Block"
@@ -470,13 +495,12 @@ const Dashboard = () => {
       </svg>
     </button>
 
-
-    </div>
-
-  
-
   </div>
 </td>
+
+</td>
+
+
               <td className="px-3 py-3 whitespace-nowrap text-sm text-center w-32">
                 {item.integration ? (
                   <div className="relative group flex justify-center">
@@ -539,7 +563,7 @@ const Dashboard = () => {
                   </svg>
 
                   {/* Value */}
-                  <span>{item?.campclicks?.total_s_clicks|| 0}</span>
+                  <span>{item?.campclicks?.total_s_clicks || 0}</span>
 
                   {/* Tooltip */}
                   <div
@@ -597,7 +621,7 @@ const Dashboard = () => {
                 className="px-3 py-3 whitespace-nowrap text-sm text-gray-400 w-20 text-left relative"
               >
                 <button
-                  onClick={(e) => handleActionClick(e,item?.uid)}
+                  onClick={(e) => handleActionClick(e, item?.uid)}
                   className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
                     isDropdownOpen
                       ? "bg-gray-600 text-white"
