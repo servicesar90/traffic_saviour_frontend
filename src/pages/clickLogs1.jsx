@@ -40,7 +40,7 @@ const DateRangePicker = ({
         isClearable
         dateFormat="dd/MM/yyyy"
         placeholderText="dd/MM/yyyy to dd/MM/yyyy"
-        className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded"
+        className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded cursor-pointer "
       />
     </div>
   );
@@ -58,7 +58,7 @@ const CampaignDropdown = ({ campId, setCampId, campaigns }) => {
           id="campaign"
           value={campId || ""} // controlled component
           onChange={(e) => setCampId(e.target.value)} // update parent
-          className="w-full text-sm py-2 px-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white appearance-none pr-8"
+          className="w-full text-sm py-2 px-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white appearance-none pr-8 cursor-pointer"
           style={dropdownStyle}
         >
           <option value="" disabled>
@@ -82,6 +82,8 @@ const Clicklogs = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [campId, setCampId] = useState(null);
+  const [isResetting, setIsResetting] = useState(false);
+
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -140,6 +142,18 @@ const Clicklogs = () => {
       setLoading(false);
     }
   };
+  const handleReset = () => {
+  setIsResetting(true);
+
+  // thoda sa delay taaki animation dikhe
+  setTimeout(() => {
+    setDateRange([null, null]);
+    setCampId(null);
+    setTableData([]);
+    setIsResetting(false);
+  }, 600); // 600ms smooth lagta hai
+};
+
 
   return (
     <>
@@ -156,16 +170,25 @@ const Clicklogs = () => {
 
           {/* action button area */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                setDateRange([null, null]);
-                setCampId(null);
-                setTableData([]);
-              }}
-              className="px-3 py-2 text-sm text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700"
-            >
-              Reset
-            </button>
+           <button
+  onClick={handleReset}
+  disabled={isResetting}
+  className={`px-3 py-2 text-sm flex items-center justify-center gap-2
+    text-gray-300 border border-gray-700 rounded-md
+    transition-all duration-200 cursor-pointer
+    ${
+      isResetting
+        ? "bg-gray-700 cursor-not-allowed"
+        : "bg-gray-800 hover:bg-gray-700"
+    }
+  `}
+>
+  {isResetting && (
+    <span className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  )}
+  Reset
+</button>
+
 
             <button
               onClick={() => {
@@ -228,7 +251,7 @@ const Clicklogs = () => {
 
             <button
               onClick={fetchData}
-              className="bg-blue-600 text-white px-4 py-1  ml-4 rounded h-[40px] mt-5"
+              className="bg-blue-600 text-white px-4 py-1  ml-4 rounded h-[40px] mt-5 cursor-pointer"
             >
               Search
             </button>

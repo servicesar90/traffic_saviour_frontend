@@ -21,7 +21,7 @@ const Analytics = lazy(() => import("../pages/Analytics"));
 const SignupPage = lazy(() => import("../auth/SignUpForm"));
 const LoginPage = lazy(() => import("../auth/SignInForm"));
 const Test = lazy(() => import("../pages/test"));
-const ClickLogs = lazy(() => import("../pages/clickLogs"));
+// const ClickLogs = lazy(() => import("../pages/clickLogs"));
 const AllCampaignsDashboard = lazy(() => import("../pages/AllCampaign"));
 const AllStats = lazy(() => import("../pages/AllStats"));
 const Pricing = lazy(() => import("../pages/Pricing"));
@@ -108,7 +108,7 @@ export default function Routess() {
             <Route path="ipListings" element={<IpListings />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="test" element={<Test />} />
-            <Route path="clickLogs" element={<ClickLogs />} />
+            {/* <Route path="clickLogs" element={<ClickLogs />} /> */}
            
             <Route path="reports" element={<Clicklog />} />
             <Route path="real-time-analytics/:id" element={<RealtimeAnalytics/>}/>
