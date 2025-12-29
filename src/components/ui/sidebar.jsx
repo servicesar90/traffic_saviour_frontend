@@ -96,7 +96,7 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
 
   const handleNavigate = (route) => {
     navigate(route);
-    if (mobileVisible) onCloseMobile(); // auto-close sidebar on mobile
+    if (mobileVisible) onCloseMobile(); // auto-close sidebar on mobile 
   };
 
   const logout = () => {

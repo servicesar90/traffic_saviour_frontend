@@ -16,7 +16,7 @@ export function PaymentForm() {
 
          <button
         onClick={() => navigate("/Dashboard/allStats")}
-        className="absolute top-4 left-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow hover:bg-slate-700 transition"
+        className="absolute top-4 left-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow hover:bg-slate-700 transition cursor-pointer"
       >
         ← Go to Dashboard
       </button>
@@ -81,7 +81,7 @@ export function PaymentForm() {
         {/* ---------------- BOTTOM LEFT BUTTON ---------------- */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute bottom-4 left-4 bg-gray-200 text-black px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition"
+          className="absolute bottom-4 left-4 bg-gray-200 text-black px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition cursor-pointer"
         >
           ← Previous
         </button>

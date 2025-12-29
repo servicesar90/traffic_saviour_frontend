@@ -63,13 +63,13 @@ export const OrdersView = () => {
                   <td className="p-3">{o.status}</td>
                   <td className="p-3 text-purple-400">{o.total}</td>
                   <td className="p-3 flex gap-2">
-                    <button className="bg-orange-600 px-4 py-1 text-sm rounded hover:bg-orange-700">
+                    <button className="bg-orange-600 px-4 py-1 text-sm rounded hover:bg-orange-700 cursor-pointer">
                       VIEW 👁
                     </button>
-                    <button className="bg-orange-600 px-4 py-1 text-sm rounded hover:bg-orange-700">
+                    <button className="bg-orange-600 px-4 py-1 text-sm rounded hover:bg-orange-700 cursor-pointer">
                       PRINT INVOICE
                     </button>
-                    <button className="bg-orange-600 px-4 py-1 text-sm rounded hover:bg-orange-700">
+                    <button className="bg-orange-600 px-4 py-1 text-sm rounded hover:bg-orange-700 cursor-pointer">
                       DOWNLOAD INVOICE
                     </button>
                   </td>

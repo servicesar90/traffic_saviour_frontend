@@ -8,6 +8,7 @@ import { createCampaignApi } from "../api/Apis";
 import IntegrationTable from "../components/IntegrationPage/IntegrationTable";
 import axios from "axios";
 import { phpZipCode, wordpressPluginCode } from "../data/cloakingData";
+import { showErrorToast, showSuccessToast } from "../components/toast/toast";
 
 // Assuming the Tab component is defined or imported here
 
@@ -308,7 +309,7 @@ if ($data && isset($data['action'])) {
                   },
                 });
               }}
-              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-150"
+              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition duration-150 cursor-pointer"
             >
               Edit Campaign
             </button>
@@ -341,7 +342,7 @@ if ($data && isset($data['action'])) {
 const Tab = ({ t, tab, setTab }) => (
   <button
     className={`
-          flex-1 text-sm font-medium py-2 px-3 rounded-lg flex items-center justify-center transition duration-200
+          flex-1 text-sm font-medium py-2 px-3 rounded-lg flex items-center justify-center transition duration-200 cursor-pointer
           ${
             tab === t.id
               ? "bg-blue-600 text-white shadow-md" // Adjusted active color for better consistency
@@ -366,7 +367,7 @@ const handleCopy = (text) => {
   navigator.clipboard
     .writeText(formatted)
     .then(() => {
-      alert("Copied to clipboard!");
+      showSuccessToast("Copied to clipboard!");
     })
     .catch((err) => {
       console.error("Failed to copy text: ", err);
@@ -420,9 +421,9 @@ const javascriptIntegration = async (camp, url) => {
       camp?.uid,
       data
     );
-    alert("✅ Integration Successful");
+    showSuccessToast("✅ Integration Successful");
   } else {
-    alert("❌ Integration Failed");
+    showErrorToast("❌ Integration Failed");
   }
 };
 
@@ -435,7 +436,7 @@ async function checkIntegration(camp, url, setShowIntegrationTable) {
   let status = "failed";
   if (text.trim() != camp?.cid) {
     status = "false";
-    alert("Integration Error try again " + status);
+    showErrorToast("Integration Error try again " + status);
 
     return;
   }
@@ -454,12 +455,12 @@ async function checkIntegration(camp, url, setShowIntegrationTable) {
     data
   );
   if (integrate.status === 200) {
-    alert("Integration Status: " + status);
+    showSuccessToast("Integration Status: " + status);
       setShowIntegrationTable(false);
     return;
   }
   setShowIntegrationTable(true);
-  alert("Integration fail Error try again" + status);
+  showErrorToast("Integration fail Error try again" + status);
 }
 
 const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTable }) => (
@@ -486,7 +487,7 @@ const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
       onClick={() => {
         generatePhpZip(phpCode);
       }}
-      className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
+      className="flex items-center cursor-pointer justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
     >
       <svg
         class="svg-inline--fa fa-angle-down me-2"
@@ -548,7 +549,7 @@ const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
       {/* Test URL Button */}
       <button
         onClick={() => checkIntegration(camp, pastedUrl,setShowIntegrationTable)}
-        className="flex items-center px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
+        className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
       >
         <svg
           /* ... (Play/Test Icon) */ className="h-5 w-5 mr-2"
@@ -605,7 +606,7 @@ const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTab
     {/* === 5. Copy to Clipboard Button (Placed right after the code block) === */}
     <button
       onClick={() => handleCopy(phpCode)}
-      className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
+      className="flex items-center cursor-pointer justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
     >
       <svg
         /* ... (Copy Icon) */ className="h-5 w-5 mr-2"
@@ -663,7 +664,7 @@ const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTab
       {/* Test URL Button */}
       <button
         onClick={() => checkIntegration(camp, pastedUrl)}
-        className="flex items-center px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
+        className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
       >
         <svg
           /* ... (Play/Test Icon) */ className="h-5 w-5 mr-2"
@@ -700,7 +701,7 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
 
       <button
         onClick={generateZip}
-        className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
+        className="flex items-center cursor-pointer justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
       >
         <svg
           class="svg-inline--fa fa-angle-down me-2"
@@ -740,7 +741,7 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
     {/* === 5. Copy to Clipboard Button (Placed right after the code block) === */}
     <button
       onClick={handleCopy}
-      className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
+      className="flex items-center cursor-pointer justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
     >
       <svg
         /* ... (Copy Icon) */ className="h-5 w-5 mr-2"
@@ -798,7 +799,7 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
       {/* Test URL Button */}
       <button
         onClick={() => checkIntegration(camp, pastedUrl)}
-        className="flex items-center px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
+        className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
       >
         <svg
           /* ... (Play/Test Icon) */ className="h-5 w-5 mr-2"
@@ -857,7 +858,7 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl,setShowIntegrationTable }) =
           }.js"></script>`
         )
       }
-      className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
+      className="flex  items-center justify-center cursor-pointer px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
     >
       {" "}
       <svg
@@ -907,7 +908,7 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl,setShowIntegrationTable }) =
       {/* Test URL Button */}
       <button
         onClick={() => javascriptIntegration(camp, pastedUrl)}
-        className="flex items-center px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
+        className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
       >
         <svg
           /* ... (Play/Test Icon) */ className="h-5 w-5 mr-2"
