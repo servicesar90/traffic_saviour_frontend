@@ -19,11 +19,7 @@ const getDeviceIcon = (deviceName) => {
   return match?.icon || null;
 };
 
-const DateRangePicker = ({
-  dateRange,
-  setDateRange,
-  customRequired = false,
-}) => {
+const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
   const [startDate, endDate] = dateRange;
 
   return (
@@ -36,15 +32,24 @@ const DateRangePicker = ({
         selectsRange
         startDate={startDate}
         endDate={endDate}
-        onChange={(update) => setDateRange(update)}
+        onChange={(update) => {
+          const normalize = (d) =>
+            d ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12) : null;
+
+          setDateRange([
+            normalize(update?.[0]),
+            normalize(update?.[1]),
+          ]);
+        }}
         isClearable
         dateFormat="dd/MM/yyyy"
         placeholderText="dd/MM/yyyy to dd/MM/yyyy"
-        className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded cursor-pointer "
+        className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded cursor-pointer"
       />
     </div>
   );
 };
+
 
 const CampaignDropdown = ({ campId, setCampId, campaigns }) => {
   return (
