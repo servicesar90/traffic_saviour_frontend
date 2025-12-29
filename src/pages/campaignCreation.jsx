@@ -2385,7 +2385,7 @@ export default function CampaignBuilder() {
     { name: "Active", icon: Play },
     { name: "Allow All", icon: Zap },
     { name: "Block All", icon: CircleSlash },
-    { name: "Schedule", icon: CalendarDays },
+    // { name: "Schedule", icon: CalendarDays },
   ];
 
   /* ---------------------------
@@ -2913,7 +2913,7 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
                     >
                       Next ›
                     </button>
@@ -3257,7 +3257,7 @@ export default function CampaignBuilder() {
                       <button
                         type="button"
                         onClick={nextStep}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                        className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-md"
                       >
                         Next ›
                       </button>
