@@ -103,25 +103,115 @@ function user_redirection_code() {
 export const phpZipCode = `
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0;url=" <?php echo $url; ?>"" />
-    <title>You are being redirected to <?php echo $url; ?> your destination</title>
-    <script type="text/javascript">
-    window.location.replace("<?php echo $url; ?>");
-    </script>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Auto redirect after 3 seconds -->
+    <meta http-equiv="refresh" content="3" />
+
+    <title>Redirecting…</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a, #020617);
+            color: #e5e7eb;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 40px 32px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loader {
+            width: 54px;
+            height: 54px;
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            border-top-color: #38bdf8;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #9ca3af;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .brand {
+            margin-top: 24px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            color: #475569;
+        }
+    </style>
 </head>
 
 <body>
-    You are being redirected to <a href="<?php echo $url; ?>">your destination</a>.
-    <script type="text/javascript">
-    window.location.replace("<?php echo $url; ?>");
-    </script>
-</body>
+    <div class="card">
+        <div class="loader"></div>
+        <h1>Redirecting you safely</h1>
+        <p>
+            Please wait while we verify your connection and take you to your destination.
+        </p>
+        <p class="small">
+            This will only take a moment.
+        </p>
 
+        <div class="brand">
+            Secure redirect service
+        </div>
+    </div>
+</body>
 </html>
 `
 
