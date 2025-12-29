@@ -66,9 +66,9 @@ const Dashboard = () => {
 };
 
 
-  const goToCampaign = (id) => alert("Open campaign: " + id);
-  const prevPage = () => setPage((p) => Math.max(1, p - 1));
-  const nextPage = () => setPage((p) => p + 1);
+  // const goToCampaign = (id) => alert("Open campaign: " + id);
+  // const prevPage = () => setPage((p) => Math.max(1, p - 1));
+  // const nextPage = () => setPage((p) => p + 1);
 
  const fetchIpClicks = async () => {
   try {

@@ -123,7 +123,7 @@ const TableRow = ({ label, value }) => (
 
 // Button Component
 const ActionButton = ({ title }) => (
-  <button className="bg-orange-600 px-4 py-1 text-sm rounded hover:bg-orange-700">
+  <button className="bg-orange-600 px-4 py-1 text-sm rounded hover:bg-orange-700 cursor-pointer">
     {title}
   </button>
 );

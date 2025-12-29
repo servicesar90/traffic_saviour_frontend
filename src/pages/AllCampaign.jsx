@@ -292,7 +292,7 @@ function AllCampaignsDashboard() {
 
 
   const handleApplyFilter = () => {
-    alert(
+    showInfoToast(
       `Applying filter: Search='${searchTerm}', Date='${dateRange}'. Refetching data...`
     );
   };

@@ -436,7 +436,7 @@ export default function LoginPage() {
           <button
             disabled={isSubmitting}
             onClick={!isSubmitting ? onSubmit : undefined}
-            className={`w-full py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2
+            className={`w-full py-2.5 rounded-lg font-medium cursor-pointer transition flex items-center justify-center gap-2
               ${
                 isSubmitting
                   ? "bg-indigo-400 text-white cursor-not-allowed opacity-70"

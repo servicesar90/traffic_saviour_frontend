@@ -612,7 +612,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
 const addUrlCamp = async () => {
   // basic validation
   if (!urlName.trim() || !urlValue.trim()) {
-    alert("Name and URL are required");
+    showErrorToast("Name and URL are required");
     return;
   }
 

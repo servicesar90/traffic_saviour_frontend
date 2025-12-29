@@ -1817,6 +1817,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { apiFunction } from "../api/ApiFunction";
 import { createCampaignApi } from "../api/Apis";
 import { BROWSER_LIST, COUNTRY_LIST, DEVICE_LIST } from "../data/dataList";
+import { showSuccessToast } from "../components/toast/toast";
 
 /* ===========================
    Icon components (inline SVG)
@@ -2149,7 +2150,7 @@ const StatusButton = ({ label, Icon, isActive, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-200 h-20 w-full ${isActive
+    className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-200 h-20 w-full cursor-pointer ${isActive
         ? "border-blue-500 bg-blue-500/10"
         : "border-slate-700 bg-slate-800 hover:bg-slate-700/50"
       }`}
@@ -2384,7 +2385,7 @@ export default function CampaignBuilder() {
     { name: "Active", icon: Play },
     { name: "Allow All", icon: Zap },
     { name: "Block All", icon: CircleSlash },
-    { name: "Schedule", icon: CalendarDays },
+    // { name: "Schedule", icon: CalendarDays },
   ];
 
   /* ---------------------------
@@ -2501,7 +2502,7 @@ export default function CampaignBuilder() {
         const uid = location?.state?.data?.uid;
 
         // const res = await apiFunction("patch", createCampaignApi, uid, data);
-        showCustomAlert("Campaign updated successfully!");
+        showSuccessToast("Campaign updated successfully!");
         navigate("/Dashboard/campaign-integration", {
           state: {
             mode: "edit",
@@ -2519,7 +2520,7 @@ export default function CampaignBuilder() {
         console.log(response?.data?.status);
 
         // use response to show success
-        showCustomAlert(
+        showSuccessToast(
           "Campaign created successfully! you are going to route to Integration page"
         );
         navigate("/Dashboard/campaign-integration", {
@@ -2579,7 +2580,7 @@ export default function CampaignBuilder() {
                       }`}
                   >
                     <s.icon
-                      className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"
+                      className={`w-5 h-5 cursor-pointer ${active ? "text-white" : "text-slate-400"
                         }`}
                     />
                   </div>
@@ -2702,7 +2703,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -2713,7 +2714,7 @@ export default function CampaignBuilder() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition cursor-pointer"
                 >
                   Proceed <span className="ml-2">&rarr;</span>
                 </button>
@@ -2806,7 +2807,7 @@ export default function CampaignBuilder() {
                             <button
                               type="button"
                               onClick={addMoneyPage}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 transition"
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 transition cursor-pointer"
                             >
                               <Plus className="w-4 h-4" /> Add
                             </button>
@@ -2822,7 +2823,7 @@ export default function CampaignBuilder() {
                       <button
                         type="button"
                         onClick={addMoneyPage}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 transition"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 transition cursor-pointer"
                       >
                         <Plus className="w-4 h-4" /> Add
                       </button>
@@ -2866,7 +2867,7 @@ export default function CampaignBuilder() {
                         <button
                           type="button"
                           onClick={() => removeDynamicVariable(idx)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md"
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md cursor-pointer"
                         >
                           <XIcon className="w-4 h-4" />
                         </button>
@@ -2877,7 +2878,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={addDynamicVariable}
-                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2"
+                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" /> Add variable
                   </button>
@@ -2887,7 +2888,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md"
+                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
                   >
                     ‹ Previous
                   </button>
@@ -2912,7 +2913,7 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
                     >
                       Next ›
                     </button>
@@ -2987,7 +2988,7 @@ export default function CampaignBuilder() {
                         <button
                           type="button"
                           onClick={() => removeDynamicVariable(idx)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md"
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md cursor-pointer"
                         >
                           <XIcon className="w-4 h-4" />
                         </button>
@@ -2998,7 +2999,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={addDynamicVariable}
-                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2"
+                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" /> Add variable
                   </button>
@@ -3008,7 +3009,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md"
+                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
                   >
                     ‹ Previous
                   </button>
@@ -3021,7 +3022,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -3033,7 +3034,7 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
                     >
                       Next ›
                     </button>
@@ -3102,7 +3103,7 @@ export default function CampaignBuilder() {
                           <button
                             type="button"
                             onClick={() => remove(idx)}
-                            className="text-sm text-slate-400 hover:text-red-500"
+                            className="text-sm text-slate-400 hover:text-red-500 cursor-pointer"
                           >
                             Remove
                           </button>
@@ -3119,7 +3120,7 @@ export default function CampaignBuilder() {
                                   key={mode}
                                   type="button"
                                   onClick={() => field.onChange(mode)}
-                                  className={`px-3 py-1.5 text-sm rounded-md border ${field.value === mode
+                                  className={`px-3 py-1.5 text-sm rounded-md border cursor-pointer ${field.value === mode
                                       ? mode === "allow"
                                         ? "bg-blue-600 text-white border-blue-600"
                                         : "bg-red-600 text-white border-red-600"
@@ -3156,7 +3157,7 @@ export default function CampaignBuilder() {
                                           )
                                         )
                                       }
-                                      className="ml-1 text-slate-400 hover:text-slate-200"
+                                      className="ml-1 text-slate-400 hover:text-slate-200 cursor-pointer"
                                     >
                                       ×
                                     </button>
@@ -3230,7 +3231,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md"
+                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
                   >
                     ‹ Previous
                   </button>
@@ -3243,7 +3244,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -3256,7 +3257,7 @@ export default function CampaignBuilder() {
                       <button
                         type="button"
                         onClick={nextStep}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                        className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-md"
                       >
                         Next ›
                       </button>
@@ -3518,7 +3519,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md "
+                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer "
                   >
                     ‹ Previous
                   </button>
@@ -3531,7 +3532,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md  cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -3543,7 +3544,7 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={nextStep}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
                     >
                       Next ›
                     </button>
@@ -3742,13 +3743,13 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md"
+                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
                   >
                     ‹ Previous
                   </button>
                   <button
                     type="submit"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-md shadow"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-md shadow cursor-pointer"
                   >
                     {location?.state?.mode === "edit" ? "Update" : "Create"}{" "}
                     Campaign

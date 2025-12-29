@@ -123,7 +123,7 @@ export function SupportTicketsView() {
                   <td>{ticket.createdAt}</td>
 
                   <td>
-                    <button className="text-orange-500 hover:text-orange-400 font-medium">
+                    <button className="text-orange-500 hover:text-orange-400 font-medium cursor-pointer">
                       View
                     </button>
                   </td>

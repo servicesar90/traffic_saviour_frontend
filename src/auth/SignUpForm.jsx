@@ -413,7 +413,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2.5 rounded-lg font-medium text-white flex items-center justify-center gap-2 transition ${
+            className={`w-full py-2.5 cursor-pointer rounded-lg font-medium text-white flex items-center justify-center gap-2 transition ${
               loading
                 ? "bg-indigo-400 cursor-not-allowed"
                 : "bg-indigo-600 hover:bg-indigo-700 cursor-pointer"

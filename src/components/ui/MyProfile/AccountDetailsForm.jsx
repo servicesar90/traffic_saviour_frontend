@@ -97,7 +97,7 @@ export function AccountDetailsForm() {
               {/* SAVE */}
               <button
                 type="submit"
-                className="bg-orange-600 hover:bg-orange-700 px-6 py-2 rounded-md font-semibold"
+                className="bg-orange-600 hover:bg-orange-700 px-6 py-2 rounded-md font-semibold cursor-pointer"
               >
                 SAVE CHANGES
               </button>

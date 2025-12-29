@@ -218,7 +218,7 @@ try {
               <button
                 disabled={isSubmitting}
                 type="submit"
-                className={`w-full py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2
+                className={`w-full py-2.5 cursor-pointer rounded-lg font-medium transition flex items-center justify-center gap-2
                 ${
                   isSubmitting
                     ? "bg-indigo-400 text-white cursor-not-allowed opacity-70"

@@ -249,14 +249,14 @@ export function BillingForm({ onNext }) {
       <div className="flex justify-between pt-6">
         <button
           onClick={() => navigate("/Dashboard/allStats")}
-          className="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700"
+          className="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 cursor-pointer"
         >
           ← Dashboard
         </button>
 
         <button
           onClick={handleNext}
-          className="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700"
+          className="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 cursor-pointer"
         >
           Continue to Shipping →
         </button>
