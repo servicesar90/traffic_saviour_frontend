@@ -460,6 +460,7 @@ import { useNavigate } from "react-router-dom";
 
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
 
+
 const WebAnalyticsPage = ({
   analyticsData = [],
   currentPage,
@@ -626,7 +627,7 @@ const addUrlCamp = async () => {
 
     const res = await apiFunction(
       "post",
-      addUrlCampData,
+      getAllAnalyticsCamp,
       null,
       payload
     );
@@ -684,6 +685,41 @@ const addUrlCamp = async () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // integration check
+  const javascriptIntegration = async (camp) => {
+    // console.log("ghfdu", camp?.selectedCdnCode?.item);
+    const item = camp?.selectedCdnCode?.item;
+    const url = item?.integrationUrl
+    const data = {
+      url: url,        // client site URL
+      campId: item?.id           // expected camp id
+    }
+    const res = await apiFunction(
+      "post",
+      "https://api.webservices.press/api/v2/trafficfilter/check", null, data
+    );
+    console.log(res);
+  
+    if (res.status === 200) {
+      const data = {
+        integration: true,
+      }
+      try {
+        console.log("guhsuhuahu");
+        
+        const integrate = await apiFunction("patch", getAllAnalyticsCamp, item?.id, data)
+        console.log(integrate);
+      } catch (error) {
+        console.log("error",error);
+        
+      }
+      
+      showSuccessToast("✅ Integration Successful");
+    } else {
+      showErrorToast("❌ Integration Failed");
+    }
   };
 
   return (
@@ -796,6 +832,7 @@ const addUrlCamp = async () => {
                 <button
                   onClick={() => {
                     setSelectedCdnCode({
+                      item:item,
                       cdn: item?.integrationCode || "",
                       link: item?.integrationUrl || "",
                     });
@@ -892,7 +929,10 @@ const addUrlCamp = async () => {
                 Cancel
               </button>
 
-              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg  cursor-pointer">
+              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg  cursor-pointer"
+              onClick={()=>{javascriptIntegration({selectedCdnCode})
+              }}
+              >
                 TEST URL
               </button>
             </div>
