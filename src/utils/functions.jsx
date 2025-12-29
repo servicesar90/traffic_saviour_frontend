@@ -58,7 +58,7 @@ export async function checkIntegration(camp) {
     const data = {
       integration: true,
       integrationUrl: url,
-      integrationType: "Php paste"
+      integrationType: "php"
     }
     console.log("cyc",camp.id);
     const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data)
