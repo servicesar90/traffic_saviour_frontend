@@ -7,13 +7,13 @@ import { checkIntegration, javascriptIntegration } from "../../utils/functions";
 import { useEffect, useState } from "react";
 
 
-export default function Campaign({ camp, pastedUrl  }) {
+export default function Campaign({ camp, setShowIntegrationTable  }) {
   // -----------------------------
   // Derived values from backend
   // -----------------------------
   const [campaign,setCampaign] = useState(camp)
 
-  console.log(camp);
+
   
   const campaignName =
     camp?.campaign_info?.campaignName || "NA";
@@ -56,11 +56,10 @@ export default function Campaign({ camp, pastedUrl  }) {
   };
 
   const handleEditCampaign=(camp)=>{
-    console.log(camp);
-    
     navigate("/Dashboard/create-campaign", {
     state: {
       data: camp,
+      id:camp.uid,
       mode: "edit", // optional but useful
     },
   });
@@ -70,28 +69,38 @@ export default function Campaign({ camp, pastedUrl  }) {
  const handleDelete = async (id) => {
   if (!id) return;
 
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this campaign?"
-  );
-  if (!confirmDelete) return;
+  
 
   try {
+    const payload={
+      integration:false,
+      integrationUrl:null,
+      integrationType:null
+    };
+
     const res = await apiFunction(
-      "delete",
-      createCampaignApi, id , null// 👈 same API, DELETE method
+      "patch",
+      createCampaignApi, id , payload// 👈 same API, DELETE method
     );
-    console.log("ghfg",res);
+
     
 
-    showSuccessToast("Campaign deleted successfully");
-    navigate('/Dashboard/allCampaign')
+    showSuccessToast("Cloaking Activity Closed");
+    setShowIntegrationTable(true)
+    // navigate('/Dashboard/create-campaign',{
+    //   state: {
+    //   data: camp,
+    //   id:camp.uid,
+    //   mode: "edit", // optional but useful
+    // },
+    // })
 
     // OPTIONAL: UI se remove karna ho to
     // refetchCampaigns();
     // ya parent state update
 
 
-    console.log("Delete response:", res);
+  
   } catch (error) {
     console.error("Delete campaign error:", error);
     showErrorToast(
@@ -101,7 +110,7 @@ export default function Campaign({ camp, pastedUrl  }) {
 };
 
   const handleRefresh = (id) => {
-    console.log("Refresh campaign:", id);
+
   };
 
   const handleTestUrl = (url) => {
@@ -125,8 +134,7 @@ export default function Campaign({ camp, pastedUrl  }) {
   const fetchdata = async()=>{
     const res = await apiFunction("get",createCampaignApi,camp.uid,null);
     if(res.status === 200) setCampaign(res.data.data)
-    console.log("bfbdsh",res.data.data);
-    
+
   }
 
   useEffect(()=>{

@@ -51,7 +51,8 @@ const MyProfile = () => {
         navigate("/");
       }
     } catch (error) {
-      console.log("Logout error:", error);
+ console.log(error);
+ 
     }
   };
 

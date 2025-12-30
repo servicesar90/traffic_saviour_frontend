@@ -52,7 +52,7 @@ function AllCampaignsDashboard() {
     setError(null);
     try {
       const response = await apiFunction("get", getAllCampaign, null, null);
-      console.log(response.data);
+   
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
@@ -115,7 +115,7 @@ function AllCampaignsDashboard() {
   const fetchStats = async () => {
       try {
         const res = await apiFunction("get", campdata, null, null);
-        console.log(res);
+  
         
   
         setStats({
@@ -239,9 +239,12 @@ function AllCampaignsDashboard() {
     switch (action) {
       case "edit":
          showInfoToast(`Editing campaign ID: ${campaignId}`);
+    
+         
         navigate("/Dashboard/create-campaign", {
           state: {
             mode: "edit",
+            id: row.uid,
             data: row, // campaign data from db
           },
         });

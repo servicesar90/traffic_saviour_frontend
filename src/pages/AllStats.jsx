@@ -121,7 +121,7 @@ const Dashboard = () => {
     setError(null);
     try {
       const response = await apiFunction("get", getAllCampaign, null, null);
-      console.log(response.data);
+
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
@@ -145,7 +145,7 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const res = await apiFunction("get", campdata, null, null);
-      console.log(res);
+  
       
 
       setStats({
@@ -207,6 +207,7 @@ const Dashboard = () => {
         navigate("/Dashboard/create-campaign", {
           state: {
             mode: "edit",
+            id: row.uid,
             data: row, // campaign data from db
           },
         });

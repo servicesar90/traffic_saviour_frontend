@@ -2203,39 +2203,93 @@ export default function CampaignBuilder() {
     zeroRedirect: false,
     pageGuard: false,
   });
+  const [editCampaignId, setEditCampaignId] = useState(null);
+
   const [activeStatus, setActiveStatus] = useState("Active");
 
   const navigate = useNavigate();
   const location = useLocation();
 
+  // useEffect(() => {
+  //   if (location?.state?.mode === "edit") {
+  //     const c = location.state.data; // jo campaign data aya wo
+  //     // set form default
+  //     reset({
+  //       campaignName: c?.campaign_info?.campaignName,
+  //       comment: c?.campaign_info?.comment,
+  //       epc: c?.campaign_info?.epc,
+  //       cpc: c?.campaign_info?.cpc,
+  //       trafficSource: c?.campaign_info?.trafficSource,
+  //       money_page: c?.campaign_info?.money_page,
+  //       safe_page: c?.campaign_info?.safe_page,
+  //       conditions: c?.campaign_info?.conditions,
+  //       filters: c?.campaign_info?.filters,
+  //       automate: c?.campaign_info?.automate,
+  //       page_guard: c?.campaign_info?.page_guard,
+  //       http_code: c?.campaign_info?.http_code,
+  //     });
+
+  //     // local states as well
+
+  //     setMoneyPages(
+  //       c?.money_page || [{ description: "", url: "", weight: 100 }]
+  //     );
+  //     setDynamicVariables(c?.dynamicVariables || []);
+  //     setActiveStatus(c?.status);
+  //   }
+  // }, []);
+
+  const fetchCampaignById = async (id) => {
+  try {
+    const res = await apiFunction("get", `${createCampaignApi}/${id}`, null, null);
+   
+    
+    const c = res.data.data;
+
+    
+
+    reset({
+      campaignName: c?.campaign_info?.campaignName,
+      comment: c?.campaign_info?.comment,
+      epc: c?.campaign_info?.epc,
+      cpc: c?.campaign_info?.cpc,
+      trafficSource: c?.campaign_info?.trafficSource,
+      money_page: c?.money_page,
+      safe_page: c?.safe_page,
+      conditions: c?.conditions,
+      filters: c?.filters,
+      automate: c?.automate,
+      page_guard: c?.page_guard,
+      http_code: c?.http_code,
+    });
+
+    setMoneyPages(
+      c?.money_page || [
+        { description: "", url: "", weight: 100 },
+      ]
+    );
+
+    setDynamicVariables(c?.dynamicVariables || []);
+    setActiveStatus(c?.status);
+  } catch (err) {
+    console.error("Failed to fetch campaign", err);
+  }
+};
+
+
   useEffect(() => {
-    if (location?.state?.mode === "edit") {
-      const c = location.state.data; // jo campaign data aya wo
-      // set form default
-      reset({
-        campaignName: c?.campaign_info?.campaignName,
-        comment: c?.campaign_info?.comment,
-        epc: c?.campaign_info?.epc,
-        cpc: c?.campaign_info?.cpc,
-        trafficSource: c?.campaign_info?.trafficSource,
-        money_page: c?.campaign_info?.money_page,
-        safe_page: c?.campaign_info?.safe_page,
-        conditions: c?.campaign_info?.conditions,
-        filters: c?.campaign_info?.filters,
-        automate: c?.campaign_info?.automate,
-        page_guard: c?.campaign_info?.page_guard,
-        http_code: c?.campaign_info?.http_code,
-      });
+  if (location?.state?.mode === "edit" && location.state.id) {
+    setEditCampaignId(location.state.id);
+  }
+}, [location.state]);
+useEffect(() => {
+  if (editCampaignId) {
+    fetchCampaignById(editCampaignId);
+  }
+}, [editCampaignId]);
 
-      // local states as well
 
-      setMoneyPages(
-        c?.money_page || [{ description: "", url: "", weight: 100 }]
-      );
-      setDynamicVariables(c?.dynamicVariables || []);
-      setActiveStatus(c?.status);
-    }
-  }, []);
+
 
   // options copied from parts
   const adPlatforms = [
@@ -2496,20 +2550,34 @@ export default function CampaignBuilder() {
       // merge moneyPages from local state into data (to ensure latest)
       // data.money_page = moneyPages;
       data.status = activeStatus;
-      console.log("cmpdata", data);
+   
 
       if (location?.state?.mode === "edit") {
-        const uid = location?.state?.data?.uid;
+        const uid = location?.state?.id;
+      
+        const payload ={...data,campaign_info:{
+          campaignName:data?.campaignName,
+          trafficSource:data?.trafficSource,
+          epc:data?.epc,
+          cpc:data?.cpc,
+          comment:data?.comment,
+        }};
+        
 
-        // const res = await apiFunction("patch", createCampaignApi, uid, data);
+        const res = await apiFunction("patch", `${createCampaignApi}/${uid}`, null, payload);
+    
+        
         showSuccessToast("Campaign updated successfully!");
         navigate("/Dashboard/campaign-integration", {
           state: {
             mode: "edit",
+            id:uid,
             data: location.state.data,
           },
         });
       } else {
+  
+        
         const response = await apiFunction(
           "post",
           createCampaignApi,
@@ -2517,7 +2585,9 @@ export default function CampaignBuilder() {
           data
         );
 
-        console.log(response?.data?.status);
+
+
+
 
         // use response to show success
         showSuccessToast(
