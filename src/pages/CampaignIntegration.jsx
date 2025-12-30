@@ -663,7 +663,7 @@ const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTab
 
       {/* Test URL Button */}
       <button
-        onClick={() => checkIntegration(camp, pastedUrl)}
+        onClick={() => checkIntegration(camp, pastedUrl,setShowIntegrationTable)}
         className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
       >
         <svg
