@@ -2437,8 +2437,8 @@ useEffect(() => {
 
   const statusOptions = [
     { name: "Active", icon: Play },
-    { name: "Allow All", icon: Zap },
-    { name: "Block All", icon: CircleSlash },
+    { name: "Allow", icon: Zap },
+    { name: "Block", icon: CircleSlash },
     // { name: "Schedule", icon: CalendarDays },
   ];
 
