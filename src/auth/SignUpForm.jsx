@@ -225,7 +225,7 @@ export default function SignupPage() {
 
     try {
       const response = await createApiFunction("post", signupApi, null, payload);
-      console.log(response);
+      
       
 
       if (response?.status === 201 || response?.success) {

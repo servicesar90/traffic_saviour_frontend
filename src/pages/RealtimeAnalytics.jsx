@@ -18,7 +18,7 @@ export default function RealtimeAnalytics({ pageId }) {
   const [loadingGraph, setLoadingGraph] = useState(true);
   const [loadingLogs, setLoadingLogs] = useState(true);
   const { id } = useParams();
-  console.log(pageId);
+  
 
   useEffect(() => {
     fetchGraph();

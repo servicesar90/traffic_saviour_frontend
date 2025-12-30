@@ -34,7 +34,7 @@ export default function RuleBuilder() {
   };
 
   const onSubmit = (data) => {
-    console.log("Submitted Data:", data);
+ 
     // backend ko bhejne layak JSON:
     // [
     //   { type: "country", mode: "allow", values: ["India","US"] },

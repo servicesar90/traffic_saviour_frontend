@@ -4,7 +4,7 @@ import { clicksbycampaign, getAllCampNames } from "../api/Apis";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { DEVICE_LIST } from "../data/dataList";
-import { showErrorToast } from "../components/toast/toast";
+import {showErrorToast} from "../components/toast/toast"; 
 
 const dropdownStyle = {
   backgroundImage:
@@ -121,7 +121,7 @@ const Clicklogs = () => {
     const startDate = start.toISOString().split("T")[0];
     const endDate = end.toISOString().split("T")[0];
 
-    console.log(startDate, endDate, campId);
+   
 
     setLoading(true);
 
@@ -138,7 +138,7 @@ const Clicklogs = () => {
         null,
         null
       );
-      console.log(res.data);
+
 
       setTableData(res?.data?.data || []);
     } catch (err) {

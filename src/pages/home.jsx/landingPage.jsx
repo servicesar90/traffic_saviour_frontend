@@ -23,7 +23,7 @@ export default function CloakingLandingPage() {
     // e.g., clear tokens from localStorage, Redux, etc.
     const response = await apiFunction("get", signOutApi, null, null);
     if (response) {
-      console.log(response);
+     
       showSuccessToast("Show Success Toast");
       localStorage.removeItem("user");
       localStorage.removeItem("token");

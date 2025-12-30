@@ -18,12 +18,12 @@ const Dashboard = () => {
 
   const handleMenuClick = () => {
     if (window.innerWidth < 768) {
-      console.log("mobile");
+     
 
       setMobileVisible(!mobileVisible);
       setIsCollapsed(!isCollapsed);
     } else {
-      console.log("big screen");
+  
 
       setIsCollapsed(!isCollapsed);
     }
