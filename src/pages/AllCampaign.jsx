@@ -149,7 +149,7 @@ function AllCampaignsDashboard() {
     const data = { status: newStatus };
 
     // 🔗 PATCH API
-    const res = await apiFunction(
+    const res = await apiFunction( 
       "patch",
       createCampaignApi,
       uid,
@@ -726,75 +726,59 @@ function AllCampaignsDashboard() {
       </div>
 
       {/* Campaign Table Container (Unchanged) */}
-      <div className="mt-4 border border-gray-700 rounded-lg overflow-hidden">
-        {/* TABLE SCROLL AREA */}
-        <div className="overflow-y-auto max-h-[70vh]">
-          <table className="min-w-full divide-y divide-gray-700 table-fixed">
-            <thead className="bg-gray-800">
-              <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-12">
-                  Sn <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-40">
-                  Campaign Name <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">
-                  Source <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">
-                  Status <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-32">
-                  Intergration <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">
-                  Clicks <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-16">
-                  Safe <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">
-                  Money <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-48">
-                  Created on <span className="text-sm">⇅</span>
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            {/* Dynamic Table Body (Handles Loading/Error/Data) */}
-            {renderTableContent()}
-          </table>
-        </div>
+     <div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
+  
+  {/* 1. FIXED HEADER */}
+  <div className="flex-none overflow-x-auto bg-gray-800">
+    <table className="min-w-full table-fixed">
+      <thead className="bg-gray-800">
+        <tr>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-12">Sn</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-40">Campaign Name</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">Source</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">Status</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-32">Integration</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Clicks</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-16">Safe</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Money</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-48">Created on</th>
+          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Action</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
 
-        {/* FOOTER STRIP */}
-        <div className="bg-gray-800 border-t border-gray-700 px-4 py-3 flex items-center justify-between">
-          <span className="text-sm text-gray-400">
-            Showing 1–10 of 120 campaigns
-          </span>
+  {/* 2. SCROLLABLE CONTENT (This fills the remaining space) */}
+  <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
+    <table className="min-w-full divide-y divide-gray-800 table-fixed border-t border-gray-700 ">
+      {/* Hum tbody ko yahan render karenge */}
+      {renderTableContent()}
+    </table>
+  </div>
 
-          {/* PAGINATION */}
-          <div className="flex items-center gap-2">
-            <button className="px-3 py-1 text-sm bg-gray-700 text-gray-300 rounded hover:bg-gray-600">
-              Prev
-            </button>
+  {/* 3. FIXED FOOTER STRIP */}
+  <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between z-10">
+    <span className="text-sm text-gray-400">
+      Showing <span className="text-gray-200 font-medium">1–10</span> of <span className="text-gray-200 font-medium">120</span> campaigns
+    </span>
 
-            <button className="px-3 py-1 text-sm bg-indigo-600 text-white rounded">
-              1
-            </button>
-
-            <button className="px-3 py-1 text-sm bg-gray-700 text-gray-300 rounded hover:bg-gray-600">
-              2
-            </button>
-
-            <button className="px-3 py-1 text-sm bg-gray-700 text-gray-300 rounded hover:bg-gray-600">
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
+    {/* PAGINATION */}
+    <div className="flex items-center gap-2">
+      <button className="p-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50">
+        &lt;
+      </button>
+      <button className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg font-bold shadow-lg shadow-indigo-500/20">
+        1
+      </button>
+      <button className="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
+        2
+      </button>
+      <button className="p-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
+        &gt;
+      </button>
+    </div>
+  </div>
+</div>
 
       {/* Pagination/Summary Section (Unchanged) */}
       {/* <div className="mt-4 flex justify-between items-center text-sm text-gray-400">
