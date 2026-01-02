@@ -410,6 +410,8 @@ const javascriptIntegration = async (camp, url) => {
     null,
     data
   );
+ 
+  
 
 
   if (res.data.success) {
@@ -522,6 +524,11 @@ const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
       >
         Enter the URL of the pasted PHP file:
       </label>
+         {!pastedUrl && (
+  <p className="text-sm text-red-400 mb-2 text-left">
+    Please enter a valid URL to enable testing
+  </p>
+)}
 
       {/* URL Input Field */}
       <input
@@ -532,6 +539,8 @@ const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
         placeholder="Please put URL of your pasted script here, for example https://domain.com/scriptname.php"
         className="w-full px-4 py-3 mb-6 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500 outline-none"
       />
+
+   
 
       {/* Redirection Guidance */}
       <div className="mb-6">
@@ -550,23 +559,36 @@ const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
       </div>
 
       {/* Test URL Button */}
-      <button
-        onClick={() => checkIntegration(camp, pastedUrl,setShowIntegrationTable)}
-        className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
-      >
-        <svg
-          /* ... (Play/Test Icon) */ className="h-5 w-5 mr-2"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="5 3 19 12 5 21 5 3" />
-        </svg>
-        TEST URL
-      </button>
+     <button
+  disabled={!pastedUrl.trim()}
+  onClick={() => checkIntegration(camp, pastedUrl, setShowIntegrationTable)}
+  className={`flex items-center  px-6 py-3 text-base font-semibold rounded-lg transition duration-150 shadow-md
+    ${
+      pastedUrl.trim()
+        ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+        : "bg-gray-600 text-gray-300 cursor-not-allowed"
+    }
+  `}
+>
+  <svg
+    className="h-5 w-5 mr-2"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+  TEST URL
+</button>
+
+
+
+
+
+
     </div>
   </div>
 );
@@ -637,6 +659,11 @@ const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTab
       >
         Enter the URL of the pasted PHP file:
       </label>
+       {!pastedUrl && (
+  <p className="text-sm text-red-400 mb-2 text-left">
+    Please enter a valid URL to enable testing
+  </p>
+)}
 
       {/* URL Input Field */}
       <input
@@ -666,22 +693,30 @@ const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTab
 
       {/* Test URL Button */}
       <button
-        onClick={() => checkIntegration(camp, pastedUrl,setShowIntegrationTable)}
-        className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
-      >
-        <svg
-          /* ... (Play/Test Icon) */ className="h-5 w-5 mr-2"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="5 3 19 12 5 21 5 3" />
-        </svg>
-        TEST URL
-      </button>
+  disabled={!pastedUrl.trim()}
+  onClick={() => checkIntegration(camp, pastedUrl, setShowIntegrationTable)}
+  className={`flex items-center px-6 py-3 text-base font-semibold rounded-lg transition duration-150 shadow-md
+    ${
+      pastedUrl.trim()
+        ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+        : "bg-gray-600 text-gray-300 cursor-not-allowed"
+    }
+  `}
+>
+  <svg
+    className="h-5 w-5 mr-2"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+  TEST URL
+</button>
+
     </div>
   </div>
 );
@@ -772,6 +807,11 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
       >
         Enter the URL of the pasted PHP file:
       </label>
+       {!pastedUrl && (
+  <p className="text-sm text-red-400 mb-2 text-left">
+    Please enter a valid URL to enable testing
+  </p>
+)}
 
       {/* URL Input Field */}
       <input
@@ -801,22 +841,30 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
 
       {/* Test URL Button */}
       <button
-        onClick={() => checkIntegration(camp, pastedUrl)}
-        className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
-      >
-        <svg
-          /* ... (Play/Test Icon) */ className="h-5 w-5 mr-2"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="5 3 19 12 5 21 5 3" />
-        </svg>
-        TEST URL
-      </button>
+  disabled={!pastedUrl.trim()}
+  onClick={() => checkIntegration(camp, pastedUrl)}
+  className={`flex items-center px-6 py-3 text-base font-semibold rounded-lg transition duration-150 shadow-md
+    ${
+      pastedUrl.trim()
+        ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+        : "bg-gray-600 text-gray-300 cursor-not-allowed"
+    }
+  `}
+>
+  <svg
+    className="h-5 w-5 mr-2"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+  TEST URL
+</button>
+
     </div>
   </div>
 );
@@ -890,6 +938,11 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl,setShowIntegrationTable }) =
       >
         Enter the URL:
       </label>
+      {!pastedUrl && (
+  <p className="text-sm text-red-400 mb-2 text-left">
+    Please enter a valid URL to enable testing
+  </p>
+)}
 
       {/* URL Input Field */}
       <input
@@ -910,22 +963,30 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl,setShowIntegrationTable }) =
 
       {/* Test URL Button */}
       <button
-        onClick={() => javascriptIntegration(camp, pastedUrl)}
-        className="flex items-center cursor-pointer px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg hover:bg-green-700 transition duration-150 shadow-md"
-      >
-        <svg
-          /* ... (Play/Test Icon) */ className="h-5 w-5 mr-2"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="5 3 19 12 5 21 5 3" />
-        </svg>
-        TEST URL
-      </button>
+  disabled={!pastedUrl.trim()}
+  onClick={() => javascriptIntegration(camp, pastedUrl)}
+  className={`flex items-center px-6 py-3 text-base font-semibold rounded-lg transition duration-150 shadow-md
+    ${
+      pastedUrl.trim()
+        ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+        : "bg-gray-600 text-gray-300 cursor-not-allowed"
+    }
+  `}
+>
+  <svg
+    className="h-5 w-5 mr-2"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+  TEST URL
+</button>
+
     </div>
   </div>
 );
