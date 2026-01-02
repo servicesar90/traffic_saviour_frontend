@@ -254,20 +254,20 @@ function AllCampaignsDashboard() {
         // alert(`Duplicating campaign ID: ${campaignId}`);
         // TODO: Call API to duplicate campaign
         break;
-      case "delete":
-        if (
-          window.confirm(
-            `Are you sure you want to delete campaign ID: ${campaignId}?`
-          )
-        ) {
-          // TODO: Call API to delete campaign and then fetchCampaigns() to refresh
+       case "delete":
+        if (window.confirm(`Are you sure you want to delete this campaign?`)) {
           const res = await apiFunction(
             "delete",
             createCampaignApi,
             campaignId,
             null
           );
-          if (res) return alert(`Deleting campaign ID: ${campaignId}`);
+      
+          if (res) {
+            setCampaigns((prev) =>
+              prev.filter((item) => item.uid !== campaignId)
+            );
+          }
         }
         break;
       default:

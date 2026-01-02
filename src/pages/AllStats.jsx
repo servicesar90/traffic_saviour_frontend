@@ -14,8 +14,18 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 // import {ipClicks} from "../api/Apis.js";
 import { apiFunction } from "../api/ApiFunction.js";
-import { ipClicks, campdata, getAllCampaign,signOutApi, createCampaignApi } from "../api/Apis.js";
-import { showErrorToast, showInfoToast, showSuccessToast } from "../components/toast/toast.jsx";
+import {
+  ipClicks,
+  campdata,
+  getAllCampaign,
+  signOutApi,
+  createCampaignApi,
+} from "../api/Apis.js";
+import {
+  showErrorToast,
+  showInfoToast,
+  showSuccessToast,
+} from "../components/toast/toast.jsx";
 
 const Dashboard = () => {
   const [page, setPage] = useState(1);
@@ -36,8 +46,8 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
   const [openDropdownId, setOpenDropdownId] = useState(null);
-   const [dropdownPos, setDropdownPos] = useState(null);
-   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [clickSummary, setClickSummary] = useState({
     totalClicks: 0,
@@ -48,80 +58,72 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleRefresh = async () => {
-  if (isRefreshing) return;
+    if (isRefreshing) return;
 
-  try {
-    setIsRefreshing(true);
+    try {
+      setIsRefreshing(true);
 
-    await Promise.all([
-      fetchIpClicks(),
-      fetchStats(),
-      fetchCampaigns(),
-    ]);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setTimeout(() => setIsRefreshing(false), 600); // smooth UX
-  }
-};
-
+      await Promise.all([fetchIpClicks(), fetchStats(), fetchCampaigns()]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 600); // smooth UX
+    }
+  };
 
   // const goToCampaign = (id) => alert("Open campaign: " + id);
   // const prevPage = () => setPage((p) => Math.max(1, p - 1));
   // const nextPage = () => setPage((p) => p + 1);
 
- const fetchIpClicks = async () => {
-  try {
-    setLoading(true);
+  const fetchIpClicks = async () => {
+    try {
+      setLoading(true);
 
-    const res = await apiFunction("get", ipClicks);
-    const rawData = res?.data?.data || [];
+      const res = await apiFunction("get", ipClicks);
+      const rawData = res?.data?.data || [];
 
-    // 👉 Only latest 10 days
-    const last10DaysData = rawData.slice(-10);
+      // 👉 Only latest 10 days
+      const last10DaysData = rawData.slice(-10);
 
-    // Chart data
-    const formattedData = last10DaysData.map((item) => ({
-      date: new Date(item.date).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-      }),
-      Safe: Number(item.total_s_clicks || 0),
-      Money: Number(item.total_m_clicks || 0),
-      Total: Number(item.total_t_clicks || 0),
-    }));
+      // Chart data
+      const formattedData = last10DaysData.map((item) => ({
+        date: new Date(item.date).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+        }),
+        Safe: Number(item.total_s_clicks || 0),
+        Money: Number(item.total_m_clicks || 0),
+        Total: Number(item.total_t_clicks || 0),
+      }));
 
-    setChartData(formattedData);
+      setChartData(formattedData);
 
-    // Summary totals (only last 10 days)
-    const totals = last10DaysData.reduce(
-      (acc, item) => {
-        acc.totalClicks += Number(item.total_t_clicks || 0);
-        acc.safeClicks += Number(item.total_s_clicks || 0);
-        acc.moneyClicks += Number(item.total_m_clicks || 0);
-        return acc;
-      },
-      { totalClicks: 0, safeClicks: 0, moneyClicks: 0 }
-    );
+      // Summary totals (only last 10 days)
+      const totals = last10DaysData.reduce(
+        (acc, item) => {
+          acc.totalClicks += Number(item.total_t_clicks || 0);
+          acc.safeClicks += Number(item.total_s_clicks || 0);
+          acc.moneyClicks += Number(item.total_m_clicks || 0);
+          return acc;
+        },
+        { totalClicks: 0, safeClicks: 0, moneyClicks: 0 }
+      );
 
-    setClickSummary(totals);
-  } catch (err) {
-    console.error("IP Click API Error:", err);
-    setChartData([]);
-    setClickSummary({ totalClicks: 0, safeClicks: 0, moneyClicks: 0 });
-  } finally {
-    setLoading(false);
-  }
-};
+      setClickSummary(totals);
+    } catch (err) {
+      console.error("IP Click API Error:", err);
+      setChartData([]);
+      setClickSummary({ totalClicks: 0, safeClicks: 0, moneyClicks: 0 });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  
-
-  const fetchCampaigns = useCallback(async () => { 
+  const fetchCampaigns = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await apiFunction("get", getAllCampaign, null, null);
-
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
@@ -145,8 +147,6 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const res = await apiFunction("get", campdata, null, null);
-  
-      
 
       setStats({
         total_campaigns: res?.data?.data?.total_campaigns || 0,
@@ -189,12 +189,12 @@ const Dashboard = () => {
     task.text.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleActionClick = (e,campaignId) => {
+  const handleActionClick = (e, campaignId) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    
+
     setDropdownPos({
       top: rect.bottom + 2, // below button
-      left: rect.right -150, // align right (w-48 = 192px)
+      left: rect.right - 150, // align right (w-48 = 192px)
     });
     setOpenDropdownId(openDropdownId === campaignId ? null : campaignId);
   };
@@ -217,21 +217,40 @@ const Dashboard = () => {
         // alert(`Duplicating campaign ID: ${campaignId}`);
         // TODO: Call API to duplicate campaign
         break;
+      // case "delete":
+      //   if (
+      //     window.confirm(
+      //       `Are you sure you want to delete campaign ID: ${campaignId}?`
+      //     )
+      //   ) {
+      //     // TODO: Call API to delete campaign and then fetchCampaigns() to refresh
+      //     const res = await apiFunction(
+      //       "delete",
+      //       createCampaignApi,
+      //       campaignId,
+      //       null
+      //     );
+      //     if (res)
+      //       await fetchCampaigns();
+      //        return alert(`Deleting campaign ID: ${campaignId}`);
+      //   }
+
+
       case "delete":
-        if (
-          window.confirm(
-            `Are you sure you want to delete campaign ID: ${campaignId}?`
-          )
-        ) {
-          // TODO: Call API to delete campaign and then fetchCampaigns() to refresh
-          const res = await apiFunction(
-            "delete",
-            createCampaignApi,
-            campaignId,
-            null
-          );
-          if (res) return alert(`Deleting campaign ID: ${campaignId}`);
-        }
+  if (window.confirm(`Are you sure you want to delete this campaign?`)) {
+    const res = await apiFunction(
+      "delete",
+      createCampaignApi,
+      campaignId,
+      null
+    );
+
+    if (res) {
+      setCampaigns((prev) =>
+        prev.filter((item) => item.uid !== campaignId)
+      );
+    }
+  }
         break;
       default:
         break;
@@ -243,86 +262,78 @@ const Dashboard = () => {
     navigate("/Dashboard/create-campaign");
   };
 
+  const handleStatusChange = async (uid, newStatus) => {
+    try {
+      // 🔎 current campaign find karo
+      const currentItem = campaigns.find((item) => item.uid === uid);
+      const oldStatus = currentItem?.status;
 
-   const handleStatusChange = async (uid, newStatus) => {
-     try {
-       // 🔎 current campaign find karo
-       const currentItem = campaigns.find(item => item.uid === uid);
-       const oldStatus = currentItem?.status;
-   
-       // agar same status pe click hua to kuch mat karo
-       if (!currentItem || oldStatus === newStatus) return;
-   
-       // ⏳ loading UI
-       setCampaigns(prev =>
-         prev.map(item =>
-           item.uid === uid ? { ...item, statusLoading: true } : item
-         )
-       );
-   
-       const data = { status: newStatus };
-   
-       // 🔗 PATCH API
-       const res = await apiFunction(
-         "patch",
-         createCampaignApi,
-         uid,
-         data
-       );
-   
-       if (!res?.data?.success) {
-         showErrorToast("Failed updating status");
-         return;
-       }
-   
-       // ✅ update campaigns list
-       setCampaigns(prev =>
-         prev.map(item =>
-           item.uid === uid
-             ? { ...item, status: newStatus, statusLoading: false }
-             : item
-         )
-       );
-   
-       // 🔥 UPDATE STATS WITHOUT RELOAD
-       setStats(prev => {
-         const updated = { ...prev };
-   
-         // old status decrement
-         if (oldStatus === "Active") updated.active_campaigns--;
-         if (oldStatus === "Allow") updated.allowed_campaigns--;
-         if (oldStatus === "Block") updated.blocked_campaigns--;
-   
-         // new status increment
-         if (newStatus === "Active") updated.active_campaigns++;
-         if (newStatus === "Allow") updated.allowed_campaigns++;
-         if (newStatus === "Block") updated.blocked_campaigns++;
-   
-         return updated;
-       });
-   
-       showSuccessToast(`Status updated ✔ : ${newStatus}`);
-   
-     } catch (err) {
-       console.error("Status update error:", err);
-       showErrorToast("Something went wrong!");
-   
-       // ❌ loading hatao
-       setCampaigns(prev =>
-         prev.map(item =>
-           item.uid === uid ? { ...item, statusLoading: false } : item
-         )
-       );
-     }
-   };
+      // agar same status pe click hua to kuch mat karo
+      if (!currentItem || oldStatus === newStatus) return;
+
+      // ⏳ loading UI
+      setCampaigns((prev) =>
+        prev.map((item) =>
+          item.uid === uid ? { ...item, statusLoading: true } : item
+        )
+      );
+
+      const data = { status: newStatus };
+
+      // 🔗 PATCH API
+      const res = await apiFunction("patch", createCampaignApi, uid, data);
+
+      if (!res?.data?.success) {
+        showErrorToast("Failed updating status");
+        return;
+      }
+
+      // ✅ update campaigns list
+      setCampaigns((prev) =>
+        prev.map((item) =>
+          item.uid === uid
+            ? { ...item, status: newStatus, statusLoading: false }
+            : item
+        )
+      );
+
+      // 🔥 UPDATE STATS WITHOUT RELOAD
+      setStats((prev) => {
+        const updated = { ...prev };
+
+        // old status decrement
+        if (oldStatus === "Active") updated.active_campaigns--;
+        if (oldStatus === "Allow") updated.allowed_campaigns--;
+        if (oldStatus === "Block") updated.blocked_campaigns--;
+
+        // new status increment
+        if (newStatus === "Active") updated.active_campaigns++;
+        if (newStatus === "Allow") updated.allowed_campaigns++;
+        if (newStatus === "Block") updated.blocked_campaigns++;
+
+        return updated;
+      });
+
+      showSuccessToast(`Status updated ✔ : ${newStatus}`);
+    } catch (err) {
+      console.error("Status update error:", err);
+      showErrorToast("Something went wrong!");
+
+      // ❌ loading hatao
+      setCampaigns((prev) =>
+        prev.map((item) =>
+          item.uid === uid ? { ...item, statusLoading: false } : item
+        )
+      );
+    }
+  };
 
   useEffect(() => {
-      const token = localStorage.getItem("token");
-  if (!token) {
-    signOut();
-    navigate('/signin')
-  }
-
+    const token = localStorage.getItem("token");
+    if (!token) {
+      signOut();
+      navigate("/signin");
+    }
 
     fetchIpClicks();
     fetchStats();
@@ -372,12 +383,13 @@ const Dashboard = () => {
 
   const renderActionDropdown = (campaignId, row) => (
     // ref को सीधे dropdownRef के बजाय किसी wrapper div को दें ताकि click outside काम करे
-    <div className="fixed right-0 top-full mt-2 w-48 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-20"
-    style={{
-      zIndex: 9999999, // over ALL elements
-      left: dropdownPos.left,
-      top: dropdownPos.top, // adjust dynamically if needed
-    }}
+    <div
+      className="fixed right-0 top-full mt-2 w-48 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-20"
+      style={{
+        zIndex: 9999999, // over ALL elements
+        left: dropdownPos.left,
+        top: dropdownPos.top, // adjust dynamically if needed
+      }}
     >
       <div className="py-1">
         <button
@@ -402,7 +414,7 @@ const Dashboard = () => {
     </div>
   );
 
-   const renderTableContent = () => {
+  const renderTableContent = () => {
     // ... (Loading/Error/Empty Data checks)
     if (isLoading) {
       /* ... loading JSX ... */ return (
@@ -451,71 +463,92 @@ const Dashboard = () => {
               <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-left w-24">
                 {item.campaign_info?.trafficSource || "Not Provided"}
               </td>
-             <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-28">
- <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-32">
-  <div className="flex items-center ">
-
-    {/* ▶ Play / Activate */}
-    <button
-      disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Active")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
-        ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Active"
-          ? "text-green-500 drop-shadow-[0_0_6px_rgba(16,185,129,.8)]"
-          : "text-gray-500 hover:text-gray-300"
+              <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-28">
+                <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-32">
+                  <div className="flex items-center ">
+                    {/* ▶ Play / Activate */}
+                    <button
+                      disabled={item.statusLoading}
+                      onClick={() => handleStatusChange(item.uid, "Active")}
+                      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+        ${
+          item.statusLoading
+            ? "opacity-30 cursor-not-allowed"
+            : "cursor-pointer"
+        }
+        ${
+          item.status === "Active"
+            ? "text-green-500 drop-shadow-[0_0_6px_rgba(16,185,129,.8)]"
+            : "text-gray-500 hover:text-gray-300"
         }`}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M7 4v16l13-8L7 4z"/>
-      </svg>
-    </button>
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        className="w-5 h-5"
+                        fill="currentColor"
+                      >
+                        <path d="M7 4v16l13-8L7 4z" />
+                      </svg>
+                    </button>
 
-    {/* ⚡ Boost */}
-    <button
-      disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Allow")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
-        ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Allow"
-          ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
-          : "text-gray-500 hover:text-gray-300"
+                    {/* ⚡ Boost */}
+                    <button
+                      disabled={item.statusLoading}
+                      onClick={() => handleStatusChange(item.uid, "Allow")}
+                      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+        ${
+          item.statusLoading
+            ? "opacity-30 cursor-not-allowed"
+            : "cursor-pointer"
+        }
+        ${
+          item.status === "Allow"
+            ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
+            : "text-gray-500 hover:text-gray-300"
         }`}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M13 2L3 14h7v8l10-12h-7z"/>
-      </svg>
-    </button>
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        className="w-5 h-5"
+                        fill="currentColor"
+                      >
+                        <path d="M13 2L3 14h7v8l10-12h-7z" />
+                      </svg>
+                    </button>
 
-    {/* 🚫 Block */}
-    <button
-      disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Block")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
-        ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Block"
-          ? "text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,.8)]"
-          : "text-gray-500 hover:text-gray-300"
+                    {/* 🚫 Block */}
+                    <button
+                      disabled={item.statusLoading}
+                      onClick={() => handleStatusChange(item.uid, "Block")}
+                      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+        ${
+          item.statusLoading
+            ? "opacity-30 cursor-not-allowed"
+            : "cursor-pointer"
+        }
+        ${
+          item.status === "Block"
+            ? "text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,.8)]"
+            : "text-gray-500 hover:text-gray-300"
         }`}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24"
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="5" y1="19" x2="19" y2="5"/>
-      </svg>
-    </button>
-
-  </div>
-</td>
-
-</td>
-
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="5" y1="19" x2="19" y2="5" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </td>
 
               <td className="px-3 py-3 whitespace-nowrap text-sm text-center w-32">
                 {item.integration ? (
@@ -683,38 +716,35 @@ const Dashboard = () => {
             </svg>
             Add New Campaign
           </button>
-         <button
-  onClick={handleRefresh}
-  disabled={isRefreshing}
-  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm shadow-lg transition-all duration-200 cursor-pointer
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm shadow-lg transition-all duration-200 cursor-pointer
     ${
       isRefreshing
         ? "bg-gray-600 cursor-not-allowed opacity-80"
         : "bg-gray-700 hover:bg-gray-600 cursor-pointer"
     }
   `}
->
-  <svg
-    className={`h-5 w-5 ${
-      isRefreshing ? "animate-spin" : ""
-    }`}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-    />
-  </svg>
+          >
+            <svg
+              className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
 
-  <span className="whitespace-nowrap">
-    {isRefreshing ? "Refreshing data..." : "Refresh"}
-  </span>
-</button>
-
+            <span className="whitespace-nowrap">
+              {isRefreshing ? "Refreshing data..." : "Refresh"}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -830,64 +860,82 @@ const Dashboard = () => {
       </div>
 
       <div className="mt-4 border border-gray-700 rounded-lg overflow-hidden">
-  
-  {/* TABLE SCROLL AREA */}
-  {/* --- MAIN WRAPPER (Full Height Container) --- */}
-<div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
-  
-  {/* 1. FIXED HEADER */}
-  <div className="flex-none overflow-x-auto bg-gray-800">
-    <table className="min-w-full table-fixed">
-      <thead className="bg-gray-800">
-        <tr>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-12">Sn</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-40">Campaign Name</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">Source</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">Status</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-32">Integration</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Clicks</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-16">Safe</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Money</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-48">Created on</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Action</th>
-        </tr>
-      </thead>
-    </table>
-  </div>
+        {/* TABLE SCROLL AREA */}
+        {/* --- MAIN WRAPPER (Full Height Container) --- */}
+        <div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
+          {/* 1. FIXED HEADER */}
+          <div className="flex-none overflow-x-auto bg-gray-800">
+            <table className="min-w-full table-fixed">
+              <thead className="bg-gray-800">
+                <tr>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-12">
+                    Sn
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-40">
+                    Campaign Name
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">
+                    Source
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">
+                    Status
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-32">
+                    Integration
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">
+                    Clicks
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-16">
+                    Safe
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">
+                    Money
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-48">
+                    Created on
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+            </table>
+          </div>
 
-  {/* 2. SCROLLABLE CONTENT (This fills the remaining space) */}
-  <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
-    <table className="min-w-full divide-y divide-gray-800 table-fixed border-t border-gray-700 ">
-      {/* Hum tbody ko yahan render karenge */}
-      {renderTableContent()}
-    </table>
-  </div>
+          {/* 2. SCROLLABLE CONTENT (This fills the remaining space) */}
+          <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
+            <table className="min-w-full divide-y divide-gray-800 table-fixed border-t border-gray-700 ">
+              {/* Hum tbody ko yahan render karenge */}
+              {renderTableContent()}
+            </table>
+          </div>
 
-  {/* 3. FIXED FOOTER STRIP */}
-  <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between z-10">
-    <span className="text-sm text-gray-400">
-      Showing <span className="text-gray-200 font-medium">1–10</span> of <span className="text-gray-200 font-medium">120</span> campaigns
-    </span>
+          {/* 3. FIXED FOOTER STRIP */}
+          <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between z-10">
+            <span className="text-sm text-gray-400">
+              Showing <span className="text-gray-200 font-medium">1–10</span> of{" "}
+              <span className="text-gray-200 font-medium">120</span> campaigns
+            </span>
 
-    {/* PAGINATION */}
-    <div className="flex items-center gap-2">
-      <button className="p-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50">
-        &lt;
-      </button>
-      <button className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg font-bold shadow-lg shadow-indigo-500/20">
-        1
-      </button>
-      <button className="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
-        2
-      </button>
-      <button className="p-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
-        &gt;
-      </button>
-    </div>
-  </div>
-</div>
-</div>
-
+            {/* PAGINATION */}
+            <div className="flex items-center gap-2">
+              <button className="p-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50">
+                &lt;
+              </button>
+              <button className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg font-bold shadow-lg shadow-indigo-500/20">
+                1
+              </button>
+              <button className="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
+                2
+              </button>
+              <button className="p-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
+                &gt;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Bottom Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
