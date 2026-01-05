@@ -2207,6 +2207,8 @@ export default function CampaignBuilder() {
 
   const [activeStatus, setActiveStatus] = useState("Active");
 
+
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -2258,6 +2260,7 @@ export default function CampaignBuilder() {
       safe_page: c?.safe_page,
       conditions: c?.conditions,
       filters: c?.filters,
+      afterX:c?.afterX,
       automate: c?.automate,
       page_guard: c?.page_guard,
       http_code: c?.http_code,
@@ -2468,8 +2471,9 @@ useEffect(() => {
       safe_page: null,
       conditions: [],
       filters: [],
+       afterX: null,
       automate: {
-        activateAfterX: { value: "" },
+       
         frequencyCap: { value: "" },
         zeroRedirect: { curl: false, iframe: false },
         gclid: false,
@@ -2479,12 +2483,20 @@ useEffect(() => {
       http_code: "301",
     },
   });
+    const afterXValue = watch("afterX");
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "conditions",
   });
   const selectedTypes = watch("conditions").map((c) => c.type);
+
+  useEffect(() => {
+  if (Number(afterXValue) > 0) {
+    setShowInputs((p) => ({ ...p, afterX: true }));
+  }
+}, [afterXValue]);
+
 
   /* ---------------------------
      helper handlers
@@ -3631,31 +3643,33 @@ useEffect(() => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-slate-800 p-4 rounded border border-slate-700">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={showInputs.activateAfterX}
-                        onChange={() =>
-                          setShowInputs((p) => ({
-                            ...p,
-                            activateAfterX: !p.activateAfterX,
-                          }))
-                        }
-                      />
-                      <span className="text-white">
-                        Activate after X unique real visitors
-                      </span>
-                    </label>
-                    {showInputs.activateAfterX && (
-                      <InputField
-                        label="Enter value"
-                        name="automate.activateAfterX.value"
-                        register={register}
-                        type="number"
-                        placeholder="Enter number of visitors"
-                      />
-                    )}
-                  </div>
+  <label className="flex items-center gap-2">
+    <input
+      type="checkbox"
+      checked={showInputs.afterX>0 ? true:false}
+      onChange={() =>
+        setShowInputs((p) => ({
+          ...p,
+          afterX: !p.afterX,
+        }))
+      }
+    />
+    <span className="text-white">
+      Activate after X unique real visitors
+    </span>
+  </label>
+
+  {showInputs.afterX && (
+    <InputField
+      label="Enter value"
+      name="afterX"
+      register={register}
+      type="number"
+      placeholder="Enter number of visitors"
+    />
+  )}
+</div>
+
 
                   <div className="bg-slate-800 p-4 rounded border border-slate-700">
                     <label className="flex items-center gap-2">
