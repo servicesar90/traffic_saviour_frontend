@@ -109,7 +109,6 @@ export const phpZipCode = `
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Auto redirect after 3 seconds -->
-    <meta http-equiv="refresh" content="3" />
 
     <title>Redirecting…</title>
 

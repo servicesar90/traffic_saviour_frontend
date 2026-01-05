@@ -434,7 +434,8 @@ const javascriptIntegration = async (camp, url,setShowIntegrationTable) => {
 };
 
 async function checkIntegration(camp, url, setShowIntegrationTable) {
-  const res = await fetch(`${url}/?TS-BHDNR-84848=1`);
+  const URL = url.trim().replace(/\/+$/, "");
+  const res = await fetch(`${URL}/?TS-BHDNR-84848=1`);
 
   const text = await res.text();
 
