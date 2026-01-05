@@ -1,9 +1,8 @@
 import { apiFunction } from "../api/ApiFunction";
-import { createCampaignApi } from "../api/Apis";
+import { createCampaignApi, javascriptIntegrationCheckApi } from "../api/Apis";
 import { showSuccessToast } from "../components/toast/toast";
 
 export const javascriptIntegration = async (camp) => {
-  console.log("ghfdu", camp);
   const url = camp?.url
   const data = {
     url: url,        // client site URL
@@ -11,7 +10,7 @@ export const javascriptIntegration = async (camp) => {
   }
   const res = await apiFunction(
     "post",
-    "https://api.webservices.press/api/v2/trafficfilter/check", null, data
+    javascriptIntegrationCheckApi, null, data
   );
   console.log(res);
 
