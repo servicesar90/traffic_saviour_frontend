@@ -342,61 +342,60 @@ function AllCampaignsDashboard() {
     </div>
   );
 
+ const TableColGroup = () => (
+  <colgroup>
+    <col className="w-12" />
+    <col className="w-30" />
+    <col className="w-30" />
+    <col className="w-25" />
+    <col className="w-32" />
+    <col className="w-20" />
+    <col className="w-16" />
+    <col className="w-20" />
+    <col className="w-48" />
+    <col className="w-20" />
+  </colgroup>
+);
+
+
   const renderTableContent = () => {
-    // ... (Loading/Error/Empty Data checks)
-    if (isLoading) {
-      /* ... loading JSX ... */ return (
-        <tr>
-          <td colSpan="10" className="text-center py-10 text-blue-400 text-xl">
-            <div className="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent rounded-full"></div>
-            <p className="mt-4">Loading Campaigns...</p>
-          </td>
-        </tr>
-      );
-    }
-    if (error) {
-      /* ... error JSX ... */ return (
-        <tr>
-          <td colSpan="10" className="text-center py-10 text-gray-400">
-            No campaigns found.
-          </td>
-        </tr>
-      );
-    }
-    if (campaigns.length === 0) {
-      /* ... empty JSX ... */ return (
-        <span className="flex justify-center items-center">
-          <div className=" py-10 text-gray-500 text-md">
-            No campaigns found.
-          </div>
-        </span>
-      );
-    }
-
-    // --- Actual Table Body Rendering ---
+  if (isLoading) {
     return (
-      <tbody className="bg-gray-900 divide-y divide-gray-800">
-        {campaigns.map((item, index) => {
-          const campaignId = item.campaign_info?.campaign_id || index;
-          const isDropdownOpen = openDropdownId === item?.uid;
+      <tbody>
+        <tr>
+          <td colSpan="10" className="text-center py-10 text-blue-400">
+            Loading Campaigns...
+          </td>
+        </tr>
+      </tbody>
+    );
+  }
 
-          return (
-            <tr key={campaignId}>
-              <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-left w-12">
-                {index + 1}
-              </td>
-              <td className="px-3 py-3 whitespace-nowrap text-sm text-blue-400 text-left hover:text-blue-300 cursor-pointer w-40">
-                {item.campaign_info?.campaignName || "Not Provided"}
-              </td>
-              <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-left w-24">
-                {item.campaign_info?.trafficSource || "Not Provided"}
-              </td>
-             <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-28">
- <td className="px-3 py-3 whitespace-nowrap text-sm text-left w-32">
-  <div className="flex items-center ">
+  if (error || campaigns.length === 0) {
+    return (
+      <tbody>
+        <tr>
+          <td colSpan="10" className="text-center py-10 text-gray-500">
+            No campaigns found.
+          </td>
+        </tr>
+      </tbody>
+    );
+  }
 
-    {/* ▶ Play / Activate */}
-    <button
+  return (
+    <tbody className="bg-gray-900 divide-y divide-gray-800">
+      {campaigns.map((item, index) => {
+        const campaignId = item.campaign_info?.campaign_id || index;
+        const isDropdownOpen = openDropdownId === item?.uid;
+        return(
+          <>
+          <tr key={item.campaignId}>
+          <td className="px-3 py-3 text-sm  text-left text-gray-300">{index + 1}</td>
+          <td className="px-3 py-3 text-sm text-left text-blue-400">{item.campaign_info?.campaignName}</td>
+          <td className="px-3 py-3 text-sm text-left text-gray-300">{item.campaign_info?.trafficSource}</td>
+          <td className="px-3 py-3 text-left">
+             <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Active")}
       className={`p-1 rounded transition-all duration-300 transform hover:scale-110
@@ -449,16 +448,9 @@ function AllCampaignsDashboard() {
         <circle cx="12" cy="12" r="10"/>
         <line x1="5" y1="19" x2="19" y2="5"/>
       </svg>
-    </button>
-
-  </div>
-</td>
-
-</td>
-
-
-              <td className="px-3 py-3 whitespace-nowrap text-sm text-center w-32">
-                {item.integration ? (
+    </button></td>
+          <td className="px-3 py-3 text-left "> {item.integration ? (
+            
                   <div className="relative group flex justify-center">
                     <svg
                       className="h-5 w-5 text-green-500"
@@ -475,7 +467,7 @@ function AllCampaignsDashboard() {
                     </svg>
 
                     {/* ⭐ Tooltip container */}
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50">
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 ">
                       {item.integrationUrl || "No URL Found"}
                     </div>
                   </div>
@@ -495,88 +487,72 @@ function AllCampaignsDashboard() {
                       />
                     </svg>
                   </div>
-                )}
-              </td>
+                )}</td>
+          <td className="px-3 py-3 text-gray-300 text-center">{item?.campclicks?.total_t_clicks || 0}</td>
+          <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-16">
+  <div className="flex items-center gap-1 relative group">
+    {/* i Icon */}
+    <svg
+      className="h-4 w-4 text-blue-400 cursor-pointer"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
+      />
+    </svg>
 
-              <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-left w-20">
-                {item?.campclicks?.total_t_clicks || "No Clicks"}
-              </td>
-              <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-left w-16">
-                <div className="flex items-center space-x-1 relative group">
-                  {/* i Icon */}
-                  <svg
-                    className="h-4 w-4 text-blue-400 cursor-pointer"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
-                    />
-                  </svg>
+    {/* Value */}
+    <span>{item?.campclicks?.total_s_clicks || 0}</span>
 
-                  {/* Value */}
-                  <span>{item?.campclicks?.total_s_clicks || 0}</span>
+    {/* Tooltip */}
+    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
+      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
+      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50">
+      {item?.safe_page || "No URL Found"}
+    </div>
+  </div>
+</td>
 
-                  {/* Tooltip */}
-                  <div
-                    className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block 
-        bg-gray-800 text-gray-200 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50"
-                  >
-                    {item?.safe_page || "No URL Found"}
-                  </div>
-                </div>
-              </td>
+        <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-20">
+  <div className="flex items-center gap-1 relative group">
+    {/* i Icon */}
+    <svg
+      className="h-4 w-4 text-blue-400 cursor-pointer"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
+      />
+    </svg>
 
-              <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-left w-20">
-                <div className="flex items-center space-x-1 relative group">
-                  {/* i Icon */}
-                  <svg
-                    className="h-4 w-4 text-blue-400 cursor-pointer"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
-                    />
-                  </svg>
+    {/* Value */}
+    <span>{item?.campclicks?.total_m_clicks || 0}</span>
 
-                  {/* Value */}
-                  <span>{item?.campclicks?.total_m_clicks || 0}</span>
+    {/* Tooltip */}
+    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
+      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
+      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50">
+      {item?.money_page?.[0]?.url || "No URL Found"}
+    </div>
+  </div>
+</td>
 
-                  {/* Tooltip */}
-                  <div
-                    className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block 
-        bg-gray-800 text-gray-200 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50"
-                  >
-                    {item?.money_page[0]?.url || "No URL Found"}
-                  </div>
-                </div>
-              </td>
-
-              <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-left w-48">
-                {new Date(item.date_time).toLocaleString("en-GB", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
-              </td>
-              {/* ⭐ UPDATED ACTION COLUMN */}
-              <td
-                ref={isDropdownOpen ? dropdownRef : null}
-                className="px-3 py-3 whitespace-nowrap text-sm text-gray-400 w-20 text-left relative"
-              >
-                <button
+          <td className="px-3 py-3 text-gray-300 text-left">
+            {new Date(item.date_time).toLocaleString()}
+          </td>
+          <td
+           ref={isDropdownOpen ? dropdownRef : null}
+           className="px-3 py-3"><button
                   onClick={(e) => handleActionClick(e, item?.uid)}
                   className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
                     isDropdownOpen
@@ -586,14 +562,14 @@ function AllCampaignsDashboard() {
                 >
                   ⋯ {/* Vertical three dots */}
                 </button>
-                {isDropdownOpen && renderActionDropdown(item?.uid, item)}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    );
-  };
+                 {isDropdownOpen && renderActionDropdown(item?.uid, item)}</td>
+        </tr>
+          </>
+        )
+      })}
+    </tbody>
+  );
+};
 
   return (
     <div className="min-h-screen bg-[#0b0d14] text-white p-6">
@@ -726,56 +702,45 @@ function AllCampaignsDashboard() {
       </div>
 
       {/* Campaign Table Container (Unchanged) */}
-     <div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
-  
-  {/* 1. FIXED HEADER */}
-  <div className="flex-none overflow-x-auto bg-gray-800">
-    <table className="min-w-full table-fixed">
-      <thead className="bg-gray-800">
-        <tr>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-12">Sn</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-40">Campaign Name</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">Source</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-24">Status</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-32">Integration</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Clicks</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-16">Safe</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Money</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-48">Created on</th>
-          <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-20">Action</th>
-        </tr>
-      </thead>
-    </table>
-  </div>
+           <div className="mt-4 border border-gray-700 rounded-lg overflow-hidden">
+  <div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
 
-  {/* 2. SCROLLABLE CONTENT (This fills the remaining space) */}
-  <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
-    <table className="min-w-full divide-y divide-gray-800 table-fixed border-t border-gray-700 ">
-      {/* Hum tbody ko yahan render karenge */}
-      {renderTableContent()}
-    </table>
-  </div>
+    {/* ===== FIXED HEADER ===== */}
+    <div className="flex-none overflow-x-auto bg-gray-800">
+      <table className="min-w-full table-fixed">
+        <TableColGroup />
 
-  {/* 3. FIXED FOOTER STRIP */}
-  <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between z-10">
-    <span className="text-sm text-gray-400">
-      Showing <span className="text-gray-200 font-medium">1–10</span> of <span className="text-gray-200 font-medium">120</span> campaigns
-    </span>
+        <thead className="bg-gray-800">
+          <tr>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Sn</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Campaign Name</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Source</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Integration</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Clicks</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Safe</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Money</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Created on</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Action</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
 
-    {/* PAGINATION */}
-    <div className="flex items-center gap-2">
-      <button className="p-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50">
-        &lt;
-      </button>
-      <button className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg font-bold shadow-lg shadow-indigo-500/20">
-        1
-      </button>
-      <button className="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
-        2
-      </button>
-      <button className="p-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
-        &gt;
-      </button>
+    {/* ===== SCROLLABLE BODY ===== */}
+    <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
+      <table className="min-w-full table-fixed divide-y divide-gray-800 border-t border-gray-700">
+        <TableColGroup />
+        {renderTableContent()}
+      </table>
+    </div>
+
+    {/* ===== FIXED FOOTER ===== */}
+    <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between">
+      <span className="text-sm text-gray-400">
+        Showing <span className="text-gray-200 font-medium">1–10</span> of{" "}
+        <span className="text-gray-200 font-medium">120</span> campaigns
+      </span>
     </div>
   </div>
 </div>
