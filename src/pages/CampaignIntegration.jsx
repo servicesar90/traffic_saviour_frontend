@@ -4,7 +4,7 @@ import ZipGeneratorButton from "../utils/zipgenerator";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { apiFunction } from "../api/ApiFunction";
-import { createCampaignApi } from "../api/Apis";
+import { createCampaignApi, javascriptIntegrationCheckApi } from "../api/Apis";
 import IntegrationTable from "../components/IntegrationPage/IntegrationTable";
 import axios from "axios";
 import { phpZipCode, wordpressPluginCode } from "../data/cloakingData";
@@ -398,7 +398,7 @@ const generatePhpZip = async (phpCode) => {
   saveAs(zipBlob, "index.zip");
 };
 
-const javascriptIntegration = async (camp, url) => {
+const javascriptIntegration = async (camp, url,setShowIntegrationTable) => {
  
   const data = {
     url: url, // client site URL
@@ -406,7 +406,7 @@ const javascriptIntegration = async (camp, url) => {
   };
   const res = await apiFunction(
     "post",
-    "https://api.webservices.press/api/v2/trafficfilter/check",
+    javascriptIntegrationCheckApi,
     null,
     data
   );
@@ -427,13 +427,15 @@ const javascriptIntegration = async (camp, url) => {
       data
     );
     showSuccessToast("✅ Integration Successful");
+    setShowIntegrationTable(false);
   } else {
     showErrorToast("❌ Integration Failed");
   }
 };
 
 async function checkIntegration(camp, url, setShowIntegrationTable) {
-  const res = await fetch(`${url}/?TS-BHDNR-84848=1`);
+  const URL = url.trim().replace(/\/+$/, "");
+  const res = await fetch(`${URL}/?TS-BHDNR-84848=1`);
 
   const text = await res.text();
 
@@ -964,7 +966,7 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl,setShowIntegrationTable }) =
       {/* Test URL Button */}
       <button
   disabled={!pastedUrl.trim()}
-  onClick={() => javascriptIntegration(camp, pastedUrl)}
+  onClick={() => javascriptIntegration(camp, pastedUrl,setShowIntegrationTable)}
   className={`flex items-center px-6 py-3 text-base font-semibold rounded-lg transition duration-150 shadow-md
     ${
       pastedUrl.trim()
