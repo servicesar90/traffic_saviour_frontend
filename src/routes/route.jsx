@@ -10,7 +10,6 @@ import { Toaster } from "react-hot-toast";
 import { LoginProtector, RoutesProtector } from "./routesProtector";
 import UpdatePassword from "../auth/updatePassword";
 
-
 // ✅ Lazy imports
 const LandingPage = lazy(() => import("../pages/home.jsx/landingPage"));
 const Dashboard = lazy(() => import("../pages/dashboard"));
@@ -28,7 +27,7 @@ const Pricing = lazy(() => import("../pages/Pricing"));
 const MyProfile = lazy(() => import("../pages/MyProfile"));
 const Clicklog = lazy(() => import("../pages/clickLogs1"));
 const CheckoutFlow = lazy(() => import("../components/ui/checkOutFlow"));
-const ResetPassword = lazy(()=> import("../auth/ResetPassword"));
+const ResetPassword = lazy(() => import("../auth/ResetPassword"));
 // const UpdatePassword = lazy(() => import("../auth/updatePassword"));
 const RealtimeAnalytics = lazy(()=> import("../pages/RealtimeAnalytics"))
 const Socket = lazy(()=> import("../pages/socket"));
@@ -91,7 +90,6 @@ export default function Routess() {
             }
           />
 
-
           {/* Protected Routes */}
           <Route
             path="/Dashboard"
@@ -112,9 +110,12 @@ export default function Routess() {
             <Route path="analytics" element={<Analytics />} />
             <Route path="test" element={<Test />} />
             {/* <Route path="clickLogs" element={<ClickLogs />} /> */}
-           
+
             <Route path="reports" element={<Clicklog />} />
-            <Route path="real-time-analytics/:id" element={<RealtimeAnalytics/>}/>
+            <Route
+              path="real-time-analytics/:id"
+              element={<RealtimeAnalytics />}
+            />
           </Route>
 
           <Route

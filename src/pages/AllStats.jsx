@@ -36,7 +36,7 @@ const Dashboard = () => {
     allowed_campaigns: 0,
   });
 
-  const [tasks, setTasks] = useState([]);
+  
   const [newTask, setNewTask] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [chartData, setChartData] = useState([]);
@@ -48,6 +48,16 @@ const Dashboard = () => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [dropdownPos, setDropdownPos] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [tasks, setTasks] = useState(() => {
+  const saved = localStorage.getItem("todo_tasks");
+  return saved ? JSON.parse(saved) : [];
+});
+const [currentPage, setCurrentPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
+const [totalRecords, setTotalRecords] = useState(0);
+
+const ITEMS_PER_PAGE = 5;
+
 
   const [clickSummary, setClickSummary] = useState({
     totalClicks: 0,
@@ -119,16 +129,22 @@ const Dashboard = () => {
     }
   };
 
-  const fetchCampaigns = useCallback(async () => {
+  const fetchCampaigns = useCallback(async (page=1) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await apiFunction("get", getAllCampaign, null, null);
+      const response = await apiFunction("get", `${getAllCampaign}?page=${page}&limit=${ITEMS_PER_PAGE}` , null, null);
+      console.log(response);
+      
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
 
       setCampaigns(dataRows);
+      setCurrentPage(response.data.currentPage)
+      setTotalPages(response.data.totalPages);
+    setTotalRecords(response.data.totalRecords);
+
       setTotalItems(response.data.total || dataRows.length);
       setIsLoading(false);
     } catch (err) {
@@ -160,34 +176,36 @@ const Dashboard = () => {
   };
 
   const handleAddTask = () => {
-    if (!newTask.trim()) return;
-    const task = {
-      id: Date.now(),
-      text: newTask,
-      completed: false,
-    };
-    setTasks([task, ...tasks]);
-    setNewTask("");
+  if (!newTask.trim()) return;
+
+  const task = {
+    id: Date.now(),
+    text: newTask,
+    completed: false,
   };
 
+  setTasks((prev) => [task, ...prev]);
+  setNewTask("");
+};
+
   // ✅ Toggle complete/incomplete
-  const handleToggleComplete = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
-  };
+ const handleToggleComplete = (id) => {
+  setTasks((prev) =>
+    prev.map((task) =>
+      task.id === id ? { ...task, completed: !task.completed } : task
+    )
+  );
+};
 
   // ✅ Delete task
   const handleDeleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
-  };
+  setTasks((prev) => prev.filter((task) => task.id !== id));
+};
 
   // ✅ Filtered tasks by search
-  const filteredTasks = tasks.filter((task) =>
-    task.text.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+ const filteredTasks = tasks.filter((task) =>
+  task.text.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   const handleActionClick = (e, campaignId) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -328,6 +346,19 @@ const Dashboard = () => {
     }
   };
 
+  const handlePageChange = (page) => {
+  if (page < 1 || page > totalPages) return;
+  fetchCampaigns(page);
+};
+
+const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+const endItem = Math.min(
+  currentPage * ITEMS_PER_PAGE,
+  totalRecords
+);
+
+
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -354,7 +385,7 @@ const Dashboard = () => {
 
   // ✅ Load Todos from LocalStorage on page load
   useEffect(() => {
-    const savedTasks = localStorage.getItem("dashboard_todos");
+    const savedTasks = localStorage.getItem("todo_tasks");
     if (savedTasks) {
       setTasks(JSON.parse(savedTasks));
     }
@@ -362,8 +393,8 @@ const Dashboard = () => {
 
   // ✅ Auto Save Todos to LocalStorage
   useEffect(() => {
-    localStorage.setItem("dashboard_todos", JSON.stringify(tasks));
-  }, [tasks]);
+  localStorage.setItem("todo_tasks", JSON.stringify(tasks));
+}, [tasks]);
 
   // Small reusable StatCard
   const StatCard = ({ icon, value, title, subtitle }) => (
@@ -850,11 +881,65 @@ const Dashboard = () => {
 
     {/* ===== FIXED FOOTER ===== */}
     <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between">
-      <span className="text-sm text-gray-400">
-        Showing <span className="text-gray-200 font-medium">1–10</span> of{" "}
-        <span className="text-gray-200 font-medium">120</span> campaigns
-      </span>
-    </div>
+  {/* LEFT */}
+  <span className="text-sm text-gray-400">
+    Showing{" "}
+    <span className="text-gray-200 font-medium">
+      {startItem}–{endItem}
+    </span>{" "}
+    of{" "}
+    <span className="text-gray-200 font-medium">
+      {totalRecords}
+    </span>{" "}
+    campaigns
+  </span>
+
+  {/* RIGHT – Numbered Pagination */}
+  <div className="flex items-center gap-1">
+    {/* Prev */}
+    <button
+      disabled={currentPage === 1}
+      onClick={() => handlePageChange(currentPage - 1)}
+      className={`px-3 py-1 text-sm rounded border ${
+        currentPage === 1
+          ? "text-gray-500 border-gray-600 cursor-not-allowed"
+          : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
+      }`}
+    >
+      Prev
+    </button>
+
+    {/* Page Numbers */}
+    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      <button
+        key={page}
+        onClick={() => handlePageChange(page)}
+        className={`px-3 py-1 text-sm rounded border cursor-pointer ${
+          page === currentPage
+            ? "bg-blue-600 text-white border-blue-600"
+            : "text-gray-300 border-gray-600 hover:bg-gray-700"
+        }`}
+      >
+        {page}
+      </button>
+    ))}
+
+    {/* Next */}
+    <button
+      disabled={currentPage === totalPages}
+      onClick={() => handlePageChange(currentPage + 1)}
+      className={`px-3 py-1 text-sm rounded border ${
+        currentPage === totalPages
+          ? "text-gray-500 border-gray-600 cursor-not-allowed"
+          : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
+      }`}
+    >
+      Next
+    </button>
+  </div>
+</div>
+
+
   </div>
 </div>
 
