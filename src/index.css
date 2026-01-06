@@ -16,4 +16,37 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+
+@keyframes rowIn {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+
+  60% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-rowIn {
+  animation: rowIn 0.35s ease-out forwards;
+}
+
+
+@keyframes pulse-fast {
+  0%, 100% { background-color: #0f172a; }
+  50% { background-color: #1f2937; }
+}
+
+.animate-pulse-fast {
+  animation: pulse-fast 1.2s ease-in-out;
+}
+
+
+
  

@@ -559,17 +559,21 @@ const WebAnalyticsPage = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [urlName, setUrlName] = useState("");
-const [urlValue, setUrlValue] = useState("");
-const [isSubmitting, setIsSubmitting] = useState(false);
+  const [urlValue, setUrlValue] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+ 
 
 
   const fetchCampaigns = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await apiFunction("get", getAllAnalyticsCamp, null, null);
+      console.log(response);
+      
      
       
       const dataRows = response.data.data || [];
+      
       setCampaigns(dataRows);
       setTotalItems(dataRows.length);
     } catch (err) {
@@ -823,7 +827,7 @@ const addUrlCamp = async () => {
                   variant="icon"
                   icon={ChartBarIcon}
                   className="cursor-pointer"
-                  onClick={() => navigate(`/Dashboard/real-time-analytics/${item.uid}`)}
+                  onClick={() => navigate(`/Dashboard/real-time-analytics/${item.id}`)}
                 />
               </div>
 

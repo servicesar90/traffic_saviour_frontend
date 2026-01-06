@@ -4,7 +4,7 @@ import { clicksbycampaign, getAllCampNames } from "../api/Apis";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { DEVICE_LIST } from "../data/dataList";
-import {showErrorToast} from "../components/toast/toast"; 
+import { showErrorToast } from "../components/toast/toast";
 
 const dropdownStyle = {
   backgroundImage:
@@ -14,10 +14,10 @@ const dropdownStyle = {
   backgroundSize: "1em 1em",
 };
 
-const getDeviceIcon = (deviceName) => {
-  const match = DEVICE_LIST.find((d) => d.device === deviceName);
-  return match?.icon || null;
-};
+// const getDeviceIcon = (deviceName) => {
+//   const match = DEVICE_LIST.find((d) => d.device === deviceName);
+//   return match?.icon || null;
+// };
 
 const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
   const [startDate, endDate] = dateRange;
@@ -36,10 +36,7 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
           const normalize = (d) =>
             d ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12) : null;
 
-          setDateRange([
-            normalize(update?.[0]),
-            normalize(update?.[1]),
-          ]);
+          setDateRange([normalize(update?.[0]), normalize(update?.[1])]);
         }}
         isClearable
         dateFormat="dd/MM/yyyy"
@@ -49,7 +46,6 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
     </div>
   );
 };
-
 
 const CampaignDropdown = ({ campId, setCampId, campaigns }) => {
   return (
@@ -89,7 +85,6 @@ const Clicklogs = () => {
   const [campId, setCampId] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
 
-
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
@@ -121,8 +116,6 @@ const Clicklogs = () => {
     const startDate = start.toISOString().split("T")[0];
     const endDate = end.toISOString().split("T")[0];
 
-   
-
     setLoading(true);
 
     try {
@@ -139,7 +132,6 @@ const Clicklogs = () => {
         null
       );
 
-
       setTableData(res?.data?.data || []);
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -148,17 +140,16 @@ const Clicklogs = () => {
     }
   };
   const handleReset = () => {
-  setIsResetting(true);
+    setIsResetting(true);
 
-  // thoda sa delay taaki animation dikhe
-  setTimeout(() => {
-    setDateRange([null, null]);
-    setCampId(null);
-    setTableData([]);
-    setIsResetting(false);
-  }, 600); // 600ms smooth lagta hai
-};
-
+    // thoda sa delay taaki animation dikhe
+    setTimeout(() => {
+      setDateRange([null, null]);
+      setCampId(null);
+      setTableData([]);
+      setIsResetting(false);
+    }, 600); // 600ms smooth lagta hai
+  };
 
   return (
     <>
@@ -175,10 +166,10 @@ const Clicklogs = () => {
 
           {/* action button area */}
           <div className="flex items-center gap-3">
-           <button
-  onClick={handleReset}
-  disabled={isResetting}
-  className={`px-3 py-2 text-sm flex items-center justify-center gap-2
+            <button
+              onClick={handleReset}
+              disabled={isResetting}
+              className={`px-3 py-2 text-sm flex items-center justify-center gap-2
     text-gray-300 border border-gray-700 rounded-md
     transition-all duration-200 cursor-pointer
     ${
@@ -187,13 +178,12 @@ const Clicklogs = () => {
         : "bg-gray-800 hover:bg-gray-700"
     }
   `}
->
-  {isResetting && (
-    <span className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
-  )}
-  Reset
-</button>
-
+            >
+              {isResetting && (
+                <span className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+              )}
+              Reset
+            </button>
 
             <button
               onClick={() => {
@@ -282,7 +272,7 @@ const Clicklogs = () => {
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
                           Result
                         </th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-32">
+                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-35">
                           Log
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-24">
@@ -351,7 +341,9 @@ const Clicklogs = () => {
                             {/* Result Icon – if missing show Unknown */}
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-300">
                               {item.status ? (
-                                <span className="text-gray-500">Money Page</span>
+                                <span className="text-gray-500">
+                                  Money Page
+                                </span>
                               ) : (
                                 <span className="text-gray-500">Save Page</span>
                               )}
@@ -359,80 +351,91 @@ const Clicklogs = () => {
 
                             {/* Country + Browser + OS + Device icons */}
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 w-32 flex items-center gap-2">
-                               {/* COUNTRY FLAG */}
-                            {item?.isocode ? (
-                              <img
-                                title={item?.country}
-                                data-tooltip-id={`tooltip-${item?.isocode?.toLowerCase()}`}
-                                data-tooltip-content={item?.country}
-                                src={`https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/${
-                                  item?.isocode?.toLowerCase() || "in"
-                                }.svg`}
-                                style={{
-                                  width: "18px",
-                                  height: "18px",
-                                  borderRadius: "2px",
-                                  objectFit: "cover",
-                                }}
-                              />
-                            ) : (
-                               <img className="size-4"
-                                alt={item?.os}
-                                data-tooltip-id={`tooltip-${item.os}`}
-                                data-tooltip-content={item.os}
-                                src={`/icons/fallback-que.jpg`}/>
-                            )}
+                              {/* COUNTRY FLAG */}
+                              {item?.isocode ? (
+                                <img
+                                  title={item?.country}
+                                  data-tooltip-id={`tooltip-${item?.isocode?.toLowerCase()}`}
+                                  data-tooltip-content={item?.country}
+                                  src={`https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/${
+                                    item?.isocode?.toLowerCase() || "in"
+                                  }.svg`}
+                                  style={{
+                                    width: "18px",
+                                    height: "18px",
+                                    borderRadius: "2px",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  className="size-4"
+                                  alt={item?.os}
+                                  data-tooltip-id={`tooltip-${item.os}`}
+                                  data-tooltip-content={item.os}
+                                  src={`/icons/fallback-que.jpg`}
+                                />
+                              )}
 
-                            {/* BROWSER ICON */}
-                            {item?.browser ? (
-                              <img
-                                className="size-4"
-                                alt={item?.browser}
-                                data-tooltip-id={`tooltip-${item.browser}`}
-                                data-tooltip-content={item?.browser}
-                                src={`/icons/browsers/${item?.browser}.png`}
-                              />
-                            ) : (
-                              <img className="size-4"
-                                alt={item?.os}
-                                data-tooltip-id={`tooltip-${item.os}`}
-                                data-tooltip-content={item.os}
-                                src={`/icons/fallback-que.jpg`}/>
-                            )}
+                              {/* BROWSER ICON */}
+                              {item?.browser ? (
+                                <img
+                                  className="size-4"
+                                  alt={item?.browser}
+                                  data-tooltip-id={`tooltip-${item.browser}`}
+                                  data-tooltip-content={item?.browser}
+                                  src={`/icons/browsers/${item?.browser}.png`}
+                                />
+                              ) : (
+                                <img
+                                  className="size-4"
+                                  alt={item?.os}
+                                  data-tooltip-id={`tooltip-${item.os}`}
+                                  data-tooltip-content={item.os}
+                                  src={`/icons/fallback-que.jpg`}
+                                />
+                              )}
 
-                            {/* OS ICON */}
-                            {item?.os ? (
-                              <img
-                                className="size-4"
-                                alt={item?.os}
-                                data-tooltip-id={`tooltip-${item.os}`}
-                                data-tooltip-content={item.os}
-                                src={`/icons/os/${item.os}.png`}
-                              />
-                            ) : (
-                               <img className="size-4"
-                                alt={item?.os}
-                                data-tooltip-id={`tooltip-${item.os}`}
-                                data-tooltip-content={item.os}
-                                src={`/icons/fallback-que.jpg`}/>
-                            )}
+                              {/* OS ICON */}
+                              {item?.os ? (
+                                <img
+                                  className="size-4"
+                                  alt={item?.os}
+                                  data-tooltip-id={`tooltip-${item.os}`}
+                                  data-tooltip-content={item.os}
+                                  src={`/icons/os/${item.os}.png`}
+                                />
+                              ) : (
+                                <img
+                                  className="size-4"
+                                  alt={item?.os}
+                                  data-tooltip-id={`tooltip-${item.os}`}
+                                  data-tooltip-content={item.os}
+                                  src={`/icons/fallback-que.jpg`}
+                                />
+                              )}
 
-                            {/* DEVICE ICON */}
-                            {item?.device ? (
-                              <span
-                                data-tooltip-id={`tooltip-${item.device}`}
-                                data-tooltip-content={item.device}
-                              >
-                                {getDeviceIcon(item.device)}
-                              </span>
-                            ) : (
-                              <img className="size-4"
-                                alt={item?.os}
-                                data-tooltip-id={`tooltip-${item.os}`}
-                                data-tooltip-content={item.os}
-                                src={`/icons/fallback-que.jpg`}/>
-                            )}
-
+                              {/* DEVICE ICON */}
+                              {/* DEVICE ICON */}
+                              {item?.device ? (
+                                <div
+                                  className="w-6 h-6 relative" // parent controls size
+                                  data-tooltip-id={`tooltip-${item.device}`}
+                                  data-tooltip-content={item.device}
+                                >
+                                  {getDeviceIcon(item.device)}
+                                </div>
+                              ) : (
+                                <img
+                                  className="w-6 h-6"
+                                  alt={item?.device || "Unknown Device"}
+                                  data-tooltip-id={`tooltip-${item.device}`}
+                                  data-tooltip-content={
+                                    item.device || "Unknown Device"
+                                  }
+                                  src={`/icons/fallback-que.jpg`}
+                                />
+                              )}
                             </td>
 
                             {/* City */}

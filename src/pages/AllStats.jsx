@@ -1026,7 +1026,7 @@ const endItem = Math.min(
               Click Metrics - Realtime Logs
             </h4>
             <div className="text-slate-400 text-sm">
-              Recent activity across all campaigns
+              Recent activity in 10 days
             </div>
           </div>
 

@@ -280,3 +280,64 @@ export const DEVICE_LIST=[
   }
 ];
 
+export const DEVICE_LIST2=[
+  {id:1,device:"Desktop",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-full h-full"
+      >
+        <path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z" />
+        <path d="M20.054 15.987H3.946" />
+      </svg>
+    ),
+  },
+  {id:2,device:"Mobile",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-full h-full"
+      >
+        <rect x="7" y="2" width="10" height="20" rx="2" ry="2" />
+        <line x1="12" y1="18" x2="12.01" y2="18" />
+      </svg>
+    ),
+  },
+  {id:3, device:"Tablet",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-full h-full"
+      >
+        <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+        <line x1="12" y1="18" x2="12.01" y2="18" />
+      </svg>
+    ),
+  }
+];
+
+
