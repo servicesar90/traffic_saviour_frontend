@@ -16,6 +16,7 @@ import { getBrowserIcon } from "../utils/getBrowserIcon";
 import { getCountryIcon } from "../utils/getCountryIcon";
 import { getDeviceIcon } from "../utils/getDeviceIcon";
 import { getOSIcon } from "../utils/getOsIcon";
+import socket from "../utils/socket";
 
 export default function RealtimeAnalytics({}) {
   const [refreshing, setRefreshing] = useState(false);
@@ -74,6 +75,23 @@ export default function RealtimeAnalytics({}) {
       setTimeout(() => setRefreshing(false), 1200);
     });
   };
+  // for socket io real-time updates, later
+   const user = JSON.parse(localStorage.getItem("user"));
+  
+  useEffect(() => {
+    socket.emit("join", `${user.id}`);
+
+    socket.on("new_click", (data) => {
+        handleRefresh();
+        console.log("fdhjs",data);
+        setLogs(prev => [data, ...prev]);
+    //   setClicks(prev => [data.click, ...prev]);
+    });
+
+    return () => {
+      socket.off("new_click");
+    };
+  }, [logs]);
 
   return (
     <div className="min-h-screen bg-[#0b1120] text-white px-10 py-6 space-y-8">

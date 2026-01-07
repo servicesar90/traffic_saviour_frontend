@@ -453,7 +453,7 @@
 
 import React, { useEffect, useCallback, useState } from "react";
 
-import { addUrlCampData, getAllCampaign,getAllAnalyticsCamp } from "../api/Apis";
+import { addUrlCampData, getAllCampaign,getAllAnalyticsCamp, javascriptIntegrationCheckApi } from "../api/Apis";
 import { apiFunction } from "../api/ApiFunction";
 import { useNavigate } from "react-router-dom";
 
@@ -702,7 +702,7 @@ const addUrlCamp = async () => {
     }
     const res = await apiFunction(
       "post",
-      "https://api.webservices.press/api/v2/trafficfilter/check", null, data
+      javascriptIntegrationCheckApi, null, data
     );
     console.log(res);
   
