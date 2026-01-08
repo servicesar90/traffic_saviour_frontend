@@ -32,8 +32,7 @@ export default function RealtimeAnalytics({}) {
       const response = await apiFunction("get", getAllAnalyticsCamp, id, null);
       const analyticsData = response.data.data;
 
-      console.log("FULL DATA", analyticsData);
-
+ 
       const analytics = analyticsData?.[0];
 
       // update view with highlight

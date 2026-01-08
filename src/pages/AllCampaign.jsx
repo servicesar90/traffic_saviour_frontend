@@ -305,6 +305,28 @@ function AllCampaignsDashboard() {
   fetchCampaigns(page);
 };
 
+const MAX_VISIBLE_PAGES = 5;
+
+const getVisiblePages = () => {
+  let start = Math.max(
+    1,
+    currentPage - Math.floor(MAX_VISIBLE_PAGES / 2)
+  );
+
+  let end = start + MAX_VISIBLE_PAGES - 1;
+
+  if (end > totalPages) {
+    end = totalPages;
+    start = Math.max(1, end - MAX_VISIBLE_PAGES + 1);
+  }
+
+  return Array.from(
+    { length: end - start + 1 },
+    (_, i) => start + i
+  );
+};
+
+
 const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1;
 const endItem = Math.min(
   currentPage * ITEMS_PER_PAGE,
@@ -784,19 +806,21 @@ const endItem = Math.min(
     </button>
 
     {/* Page Numbers */}
-    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-      <button
-        key={page}
-        onClick={() => handlePageChange(page)}
-        className={`px-3 py-1 text-sm rounded border cursor-pointer ${
-          page === currentPage
-            ? "bg-blue-600 text-white border-blue-600"
-            : "text-gray-300 border-gray-600 hover:bg-gray-700"
-        }`}
-      >
-        {page}
-      </button>
-    ))}
+    {/* Page Numbers */}
+{getVisiblePages().map((page) => (
+  <button
+    key={page}
+    onClick={() => handlePageChange(page)}
+    className={`px-3 py-1 text-sm rounded border cursor-pointer ${
+      page === currentPage
+        ? "bg-blue-600 text-white border-blue-600"
+        : "text-gray-300 border-gray-600 hover:bg-gray-700"
+    }`}
+  >
+    {page}
+  </button>
+))}
+
 
     {/* Next */}
     <button
