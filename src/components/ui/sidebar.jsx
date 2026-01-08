@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList, faBan, faChartPie, faChartSimple, faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import { CreditCard, Layers } from "lucide-react";
+import { Layer } from "recharts";
 
 
 // import { useSelector } from "react-redux";
@@ -56,11 +58,16 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
       label: "Report",
       icon: <NotepadText size={24} />,
     },
-    // {
-    //   label: "Pricing",
-    //   icon: <FontAwesomeIcon icon={faDollarSign} size='lg' />,
-    //   route: "/Dashboard/pricing",
-    // },
+    {
+      label: "Pricing",
+      icon: <CreditCard  size={24} />,
+      route: "/Dashboard/pricing",
+    },
+     {
+      label: "Billing",
+      icon: <Layers  size={24} />,
+      route: "/Dashboard/billing",
+    },
   ];
 
   const databaseSubItems = [

@@ -116,6 +116,10 @@ export default function Routess() {
               path="real-time-analytics/:id"
               element={<RealtimeAnalytics />}
             />
+            <Route
+              path="pricing"
+              element={<Pricing />}
+            />
           </Route>
 
           <Route
