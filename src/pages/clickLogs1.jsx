@@ -14,10 +14,10 @@ const dropdownStyle = {
   backgroundSize: "1em 1em",
 };
 
-// const getDeviceIcon = (deviceName) => {
-//   const match = DEVICE_LIST.find((d) => d.device === deviceName);
-//   return match?.icon || null;
-// };
+const getDeviceIcon = (deviceName) => {
+  const match = DEVICE_LIST.find((d) => d.device === deviceName);
+  return match?.icon || null;
+};
 
 const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
   const [startDate, endDate] = dateRange;
@@ -419,7 +419,7 @@ const Clicklogs = () => {
                               {/* DEVICE ICON */}
                               {item?.device ? (
                                 <div
-                                  className="w-6 h-6 relative" // parent controls size
+                                  className="w-6 h-6 " // parent controls size
                                   data-tooltip-id={`tooltip-${item.device}`}
                                   data-tooltip-content={item.device}
                                 >

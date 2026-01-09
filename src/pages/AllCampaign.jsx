@@ -61,6 +61,7 @@ function AllCampaignsDashboard() {
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
+      console.log(dataRows )
 
       setCampaigns(dataRows);
        setCurrentPage(response.data.currentPage)

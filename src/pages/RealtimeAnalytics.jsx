@@ -83,7 +83,7 @@ export default function RealtimeAnalytics({}) {
     socket.on("new_click", (data) => {
         handleRefresh();
         console.log("fdhjs",data);
-        setLogs(prev => [data, ...prev]);
+        // setLogs(prev => [data, ...prev]);
     //   setClicks(prev => [data.click, ...prev]);
     });
 

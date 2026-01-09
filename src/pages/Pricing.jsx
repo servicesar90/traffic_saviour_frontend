@@ -141,7 +141,7 @@ const totalAmount = monthlyPrice * getBillingMultiplier();
               <button
                 key={type}
                 onClick={() => setBilling(type)}
-                className={`px-6 py-2 rounded-lg text-sm font-medium transition ${
+                className={`px-6 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
                   billing === type
                     ? "bg-blue-600 text-white"
                     : "text-gray-300 hover:bg-gray-700"
@@ -203,7 +203,7 @@ const totalAmount = monthlyPrice * getBillingMultiplier();
                   setSelectedPlan(plan);
                   setModalStep(1);
                 }}
-                className={`mt-8 w-full py-3 rounded-xl ${
+                className={`mt-8 w-full py-3 rounded-xl cursor-pointer ${
                   plan.popular
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-gray-700 hover:bg-gray-600"
@@ -224,7 +224,7 @@ const totalAmount = monthlyPrice * getBillingMultiplier();
             {/* CLOSE */}
             <button
               onClick={() => setModalStep(0)}
-              className="absolute top-3 right-4 text-gray-400 hover:text-white"
+              className="absolute top-3 right-4 text-gray-400 hover:text-white cursor-pointer"
             >
               ✕
             </button>
@@ -255,11 +255,11 @@ const totalAmount = monthlyPrice * getBillingMultiplier();
                 </div>
 
                 <div className="flex justify-between mt-6">
-                  <button onClick={() => setModalStep(0)}>Close</button>
+                  <button className="cursor-pointer" onClick={() => setModalStep(0)}>Close</button>
                   <button
                     disabled={!paymentMethod}
                     onClick={() => setModalStep(2)}
-                    className="bg-blue-600 px-4 py-2 rounded"
+                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
                   >
                     Continue
                   </button>
@@ -286,11 +286,11 @@ const totalAmount = monthlyPrice * getBillingMultiplier();
                 </div>
 
                 <div className="flex justify-between mt-6">
-                  <button onClick={() => setModalStep(1)}>Back</button>
+                  <button className="cursor-pointer" onClick={() => setModalStep(1)}>Back</button>
                   <button
                     disabled={!network}
                     onClick={() => setModalStep(3)}
-                    className="bg-blue-600 px-4 py-2 rounded"
+                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
                   >
                     Continue
                   </button>
@@ -349,8 +349,8 @@ modalStep === 3 &&
     </div>
 
     <div className="flex justify-between mt-6">
-      <button onClick={() => setModalStep(2)}>Back</button>
-      <button className="bg-green-600 px-4 py-2 rounded">
+      <button className="cursor-pointer" onClick={() => setModalStep(2)}>Back</button>
+      <button className="bg-green-600 px-4 py-2 rounded cursor-pointer">
         Confirm Payment
       </button>
     </div>
