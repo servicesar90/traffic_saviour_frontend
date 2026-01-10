@@ -43,3 +43,5 @@ export const blacklistIpApi = `${base_url}/api/v2/blacklisted-ip`;
 
 export const javascriptIntegrationCheckApi = `${base_url}/api/v2/trafficfilter/check`;
 
+
+export const cryptoPayment = `${base_url}/api/v2/payment`

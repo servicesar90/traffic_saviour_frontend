@@ -33,8 +33,7 @@ export default function RealtimeAnalytics({}) {
       const response = await apiFunction("get", getAllAnalyticsCamp, id, null);
       const analyticsData = response.data.data;
 
-      console.log("FULL DATA", analyticsData);
-
+ 
       const analytics = analyticsData?.[0];
 
       // update view with highlight
@@ -84,7 +83,7 @@ export default function RealtimeAnalytics({}) {
     socket.on("new_click", (data) => {
         handleRefresh();
         console.log("fdhjs",data);
-        setLogs(prev => [data, ...prev]);
+        // setLogs(prev => [data, ...prev]);
     //   setClicks(prev => [data.click, ...prev]);
     });
 
