@@ -4,15 +4,15 @@ import { useState } from "react";
 function PayPalIntegration() {
     const initialOptions = {
         "client-id": "Adenx-z-vmV67v-6MNYwq878nvqIsC9Hx1VNxd2oWSxgW1duvnSVAaPdSBRYkDZMlGIBfnw1GV4uBtZr",
-        currency: "INR",
+        currency: "USD",
         intent: "capture",
     };
 
     const [message, setMessage] = useState("");
 
     return (
-        <div>
-            <h1>PayPal Integration</h1>
+        <div className="paypal-integration mt-6">
+           
             <PayPalScriptProvider options={initialOptions}>
                 <PayPalButtons
                    style={{

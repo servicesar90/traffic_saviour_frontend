@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { apiFunction } from "../api/ApiFunction";
 import { cryptoPayment } from "../api/Apis";
+import PayPalIntegration from "./paypalIntegration";
 
 /* ===================== DATA ===================== */
 
@@ -285,7 +286,7 @@ export default function Pricing() {
                     <span>USDT</span>
                   </label>
 
-                  <label className="flex items-center gap-3 opacity-50">
+                  <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="radio"
                       checked={paymentMethod === "card"}
@@ -345,6 +346,31 @@ export default function Pricing() {
                   >
                     Continue
                   </button>
+                </div>
+              </>
+            )}
+
+             {modalStep === 2 && paymentMethod === "card" && (
+              <>
+                
+                <div className="mt-12">
+                    <PayPalIntegration />
+                </div>
+
+                <div className="flex justify-between mt-6">
+                  <button
+                    className="cursor-pointer"
+                    onClick={() => setModalStep(1)}
+                  >
+                    Back
+                  </button>
+                  {/* <button
+                    disabled={!network}
+                    onClick={() => setModalStep(3)}
+                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
+                  >
+                    Continue
+                  </button> */}
                 </div>
               </>
             )}
