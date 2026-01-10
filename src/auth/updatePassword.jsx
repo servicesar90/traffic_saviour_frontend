@@ -242,7 +242,7 @@ try {
         <div className="hidden xl:flex w-1/2 bg-[#0B0E2A] text-white items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05)_1px,_transparent_1px)] bg-[length:40px_40px]" />
           <div className="relative text-center px-10">
-            <h2 className="text-2xl font-semibold mb-4">CloakShield</h2>
+            <h2 className="text-2xl font-semibold mb-4">Click Stopper</h2>
             <p className="text-gray-300 text-sm max-w-sm mx-auto">
               Protect your campaigns with advanced cloaking and smart traffic
               controls.

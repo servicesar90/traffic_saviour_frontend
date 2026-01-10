@@ -28,7 +28,7 @@
     "axios": "^1.11.0",
     "file-saver": "^2.0.5",
     "flag-icons": "^7.5.0",
-    "framer-motion": "^12.23.11",
+    "framer-motion": "^12.25.0",
     "intro.js-react": "^1.0.0",
     "jszip": "^3.10.1",
     "lucide-react": "^0.533.0",
