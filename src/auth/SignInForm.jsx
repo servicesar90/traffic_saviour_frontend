@@ -246,7 +246,7 @@
 //                 />
 //               </svg>
 //             </div>
-//             <h2 className="ml-3 text-2xl font-semibold">CloakShield</h2>
+//             <h2 className="ml-3 text-2xl font-semibold">Click Stopper</h2>
 //           </div>
 //           <p className="text-gray-300 text-sm max-w-sm mx-auto">
 //             Shield your campaigns. Boost your performance. Experience smart

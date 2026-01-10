@@ -488,7 +488,7 @@ export default function SignupPage() {
                 <rect x="14" y="14" width="7" height="7" rx="1" />
               </svg>
             </div>
-            <h2 className="ml-3 text-2xl font-semibold">CloakShield</h2>
+            <h2 className="ml-3 text-2xl font-semibold">Click Stopper</h2>
           </div>
           <p className="text-gray-300 text-sm max-w-md mx-auto">
             Shield your campaigns. Boost your performance. Experience smart traffic cloaking — secure, optimized, effortless.

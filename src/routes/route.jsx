@@ -31,6 +31,7 @@ const ResetPassword = lazy(() => import("../auth/ResetPassword"));
 // const UpdatePassword = lazy(() => import("../auth/updatePassword"));
 const RealtimeAnalytics = lazy(()=> import("../pages/RealtimeAnalytics"))
 const Socket = lazy(()=> import("../pages/socket"));
+const Billing = lazy(()=>import("../pages/Billing"));
 
 const Layout = () => (
   <div className="w-[100vw] h-[100vh] bg-[#0b0d14]">
@@ -120,7 +121,12 @@ export default function Routess() {
               path="pricing"
               element={<Pricing />}
             />
+             <Route
+              path="billing"
+              element={<Billing />}
+            />
           </Route>
+          
 
           <Route
             path="/myProfile"

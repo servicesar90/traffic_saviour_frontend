@@ -52,7 +52,7 @@ const Header = ({ onMenuClick }) => {
           className="w-6 h-6 text-white cursor-pointer"
           onClick={onMenuClick}
         />
-        <span className="text-white font-semibold text-xl">CloakShield</span>
+        <span className="text-white font-semibold text-xl">Click Stopper</span>
       </div>
 
       {/* Right: Plan Info + Avatar */}

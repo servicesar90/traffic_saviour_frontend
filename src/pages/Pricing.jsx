@@ -449,7 +449,7 @@ export default function Pricing() {
                       if (res?.success || res?.status === 201) {
                         
                         resetPaymentState();
-                        setModalStep(0);
+                        setModalStep(0 );
                       }
                     } catch {
                       alert("Payment failed");
