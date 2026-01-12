@@ -204,13 +204,13 @@ if ($data && isset($data['action'])) {
 
    // Redirect to target if safe
     if ($data['action'] === true && !empty($data['target'])) {
-        header("Location: " . $data['target'], true, 302);
+        header("Location: " . $data['target'], true, $data['http_code'] ?? 301);
         exit;
     }
 
     // Block visitor
-    if ($data['action'] === false) {
-        header("Location: " . $data['target'], true, 302);
+    if ($data['action'] === false && !empty($data['target'])) {
+        header("Location: " . $data['target'], true, $data['http_code'] ?? 301);
         exit;
         // http_response_code(403);
         // exit("Access Denied");
