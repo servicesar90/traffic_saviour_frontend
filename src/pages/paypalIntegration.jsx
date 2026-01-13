@@ -8,6 +8,8 @@ function PayPalIntegration() {
         intent: "capture",
     };
 
+    const serverUrl = "https://api.webservices.press/";
+
     const [message, setMessage] = useState("");
 
     return (
@@ -25,11 +27,11 @@ function PayPalIntegration() {
                     console.log(localStorage.getItem("token"));
                     
                         try {
-                            const response = await fetch("http://localhost:2000/api/v2/payment/create-order", {
+                            const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
-                                    "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6eyJpZCI6MTAwMDAxLCJlbWFpbCI6ImNvZGVAZ21haWwuY29tIn0sImlhdCI6MTc2ODAzMTM0MywiZXhwIjoxNzY4MjA0MTQzfQ.hvI8FMt_qPg0TTReaqpiQtjA_VUwb9hR6-qypqL-4hE`,
+                                    "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6eyJpZCI6MTAwMDAxLCJlbWFpbCI6ImNvZGVAZ21haWwuY29tIn0sImlhdCI6MTc2ODIwNDQwOCwiZXhwIjoxNzY4Mzc3MjA4fQ.PdszGduHDDAtteyI2DxfdtsSYJtDBjhHUIUqLIbfZ84`,
                                 },
                                 // use the "body" param to optionally pass additional order information
                                 // like product ids and quantities
@@ -66,7 +68,7 @@ function PayPalIntegration() {
                    onApprove={async (data, actions) => {
                         try {
                             const response = await fetch(
-                                `/api/orders/${data.orderID}/capture`,
+                                `${serverUrl}api/v2/payment/capture-order/${data.orderID}`,
                                 {
                                     method: "POST",
                                     headers: {
