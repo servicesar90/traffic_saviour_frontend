@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from "react";
+import React,{useState,useEffect, useRef} from "react";
 import PropTypes from "prop-types";
 import { apiFunction } from "../api/ApiFunction";
 import { blacklistIpApi } from "../api/Apis";
@@ -64,6 +64,8 @@ const [ipList, setIpList] = useState("");
 const [ips, setIps] = useState([]);
 const [loadingIps, setLoadingIps] = useState(false);
 const [isRefreshing, setIsRefreshing] = useState(false);
+const abortRef = useRef(null);
+
 
 
 
@@ -158,6 +160,12 @@ const addBlacklistedIps = async (rawText) => {
 
 
 const fetchBlacklistedIps = async () => {
+  if (abortRef.current) {
+      abortRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortRef.current = controller;
   try {
     setLoadingIps(true);
 
@@ -173,8 +181,10 @@ const fetchBlacklistedIps = async () => {
   "get",
   `${blacklistIpApi}?userId=${userId}`,
   null,
-  null
+  null, 
+  controller.signal
 );
+if(!res) return;
  
 
 
@@ -196,6 +206,7 @@ const fetchBlacklistedIps = async () => {
 
     setIps(formatted);
   } catch (error) {
+        if (error?.code === "ERR_CANCELED") return; 
     console.error(error);
     showErrorToast("Failed to fetch IPs");
   } finally {
@@ -244,7 +255,12 @@ const handleRefresh = async () => {
 
 useEffect(() => {
   fetchBlacklistedIps();
+   return () => {
+    abortRef.current?.abort(); // 🧹 cleanup
+  };
 }, []);
+
+
 
 
 

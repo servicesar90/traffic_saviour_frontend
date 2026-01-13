@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { apiFunction } from "../api/ApiFunction";
 import { clicksbycampaign, getAllCampNames } from "../api/Apis";
 import DatePicker from "react-datepicker";
@@ -84,18 +84,28 @@ const Clicklogs = () => {
   const [loading, setLoading] = useState(false);
   const [campId, setCampId] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
+  const campaignControllerRef = useRef(null);
+const tableControllerRef = useRef(null);
+
 
   useEffect(() => {
+    campaignControllerRef.current = new AbortController();
+
     const fetchCampaigns = async () => {
       try {
-        const res = await apiFunction("get", getAllCampNames, null, null);
+        const res = await apiFunction("get", getAllCampNames, null, null,campaignControllerRef.current.signal );
         setCampaigns(res?.data?.data || []); // store campaigns
       } catch (err) {
+          if (err.name !== "CanceledError") {
         console.error("Error fetching campaigns:", err);
+      }
       }
     };
 
     fetchCampaigns();
+     return () => {
+    campaignControllerRef.current.abort(); // 🔥 unmount par cancel
+  };
   }, []);
 
   //   FETCHING TABLE CONTENT
@@ -113,6 +123,12 @@ const Clicklogs = () => {
       return;
     }
 
+    if (tableControllerRef.current) {
+    tableControllerRef.current.abort();
+  }
+
+  tableControllerRef.current = new AbortController();
+
     const startDate = start.toISOString().split("T")[0];
     const endDate = end.toISOString().split("T")[0];
 
@@ -129,16 +145,28 @@ const Clicklogs = () => {
         "get",
         `${clicksbycampaign}?startdate=${startDate}&enddate=${endDate}&campId=${campId}`,
         null,
-        null
+        null,
+        tableControllerRef.current.signal
       );
 
       setTableData(res?.data?.data || []);
     } catch (err) {
+       if (err.name !== "CanceledError") {
       console.error("Error fetching data:", err);
+    }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+  return () => {
+    if (tableControllerRef.current) {
+      tableControllerRef.current.abort();
+    }
+  };
+}, []);
+
   const handleReset = () => {
     setIsResetting(true);
 
