@@ -27,8 +27,7 @@ export default function RealtimeAnalytics({}) {
   const [loadingLogs, setLoadingLogs] = useState(true);
   const { id } = useParams();
   const [highlight, setHighlight] = useState(false);
-  const [uniqueVisitors, setUniqueVistors]= useState(0)
-
+  const [uniqueVisitors, setUniqueVistors] = useState(0);
 
   const fetchAnalytics = useCallback(async (id) => {
     try {
@@ -36,11 +35,8 @@ export default function RealtimeAnalytics({}) {
       const analyticsData = response.data.data;
       console.log(analyticsData);
       setUniqueVistors(analyticsData?.[2]?.uniquecount);
-     
-      
- 
+
       const analytics = analyticsData?.[0];
-     
 
       // update view with highlight
       setView(analytics?.clickCount ?? 0);
@@ -48,14 +44,13 @@ export default function RealtimeAnalytics({}) {
       setTimeout(() => setHighlight(false), 1200);
 
       // format logs with unique key for re-render animation
-     const formattedLogs = (analytics?.weblogs ?? []).map((log, index) => ({
-  ...log,
-  uniqueKey: log.created_at
-    ? `${log.created_at}-${index}`
-    : `${Date.now()}-${index}`,
-  isNew: false,
-}));
-
+      const formattedLogs = (analytics?.weblogs ?? []).map((log, index) => ({
+        ...log,
+        uniqueKey: log.created_at
+          ? `${log.created_at}-${index}`
+          : `${Date.now()}-${index}`,
+        isNew: false,
+      }));
 
       console.log("logs", formattedLogs);
 
@@ -85,37 +80,34 @@ export default function RealtimeAnalytics({}) {
     });
   };
   // for socket io real-time updates, later
-   const user = JSON.parse(localStorage.getItem("user"));
-  
- useEffect(() => {
-  if (!user?.id) return;
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  socket.emit("join", `${user.id}`);
+  useEffect(() => {
+    if (!user?.id) return;
 
-  socket.on("new_click", (data) => {
-  const newLog = {
-    ...data,
-    created_at: new Date().toISOString(),
+    socket.emit("join", `${user.id}`);
+
+    socket.on("new_click", (data) => {
+      const newLog = {
+    ...data.data,
     uniqueKey: `${Date.now()}-${Math.random()}`,
     isNew: true,
   };
-  console.log("fuf",data);
-  
+  console.log("newLog", newLog);
+      console.log("fuf", data);
 
-  setLogs(prev => {
-    const updated = [newLog, ...prev]
-      .slice(0, 5)
-      .map(log => ({ ...log, isNew: false }));
+      setLogs((prev) => {
+        const updated = [newLog, ...prev]
+          .slice(0, 5)
+          .map((log) => ({ ...log, isNew: false }));
 
-    updated[0].isNew = true; // sirf top card animate
-    return updated;
-  });
-});
+        updated[0].isNew = true; // sirf top card animate
+        return updated;
+      });
+    });
 
-
-  return () => socket.off("new_click");
-}, [user?.id]);
-
+    return () => socket.off("new_click");
+  }, [user?.id]);
 
   return (
     <div className="min-h-screen bg-[#0b1120] text-white px-10 py-6 space-y-8">
@@ -142,9 +134,13 @@ export default function RealtimeAnalytics({}) {
         {/* Card 2 */}
         <div className="bg-[#111829] p-5 rounded-lg border border-slate-700 flex flex-col items-center">
           <p className="text-slate-300 text-sm">Unique visitors</p>
-          <p  className={`text-3xl font-bold mt-1 transition-all ${
+          <p
+            className={`text-3xl font-bold mt-1 transition-all ${
               highlight ? "text-green-400 scale-110" : ""
-            }`}>{uniqueVisitors  || 0}</p>
+            }`}
+          >
+            {uniqueVisitors || 0}
+          </p>
           <div className="flex items-center gap-2 mt-2">
             <span className="h-3 w-3 rounded-full bg-green-500 animate-pulse"></span>
             <p className="text-slate-300 text-sm">Real-time</p>
@@ -267,10 +263,10 @@ export default function RealtimeAnalytics({}) {
             ) : (
               <div className="rounded-lg">
                 <div className="flex flex-col gap-3">
-                  {logs.slice(0,5).map((log) => (
-  <div
-    key={log.uniqueKey}
-    className={`
+                  {logs.slice(0, 5).map((log) => (
+                    <div
+                      key={log.uniqueKey}
+                      className={`
       bg-[#0f172a] border border-gray-700 rounded-lg px-4 py-3
       flex items-center justify-between
       ${log.isNew ? "opacity-0 animate-rowIn" : "opacity-100"}
@@ -280,17 +276,23 @@ export default function RealtimeAnalytics({}) {
                       {/* LEFT : DATE */}
                       <div className="text-slate-400 text-xs w-24">
                         <p>
-                          {new Date(log.created_at).toLocaleDateString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })}
+                          {new Date(log.created_at).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )}
                         </p>
                         <p className="opacity-70">
-                          {new Date(log.created_at).toLocaleTimeString("en-IN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {new Date(log.created_at).toLocaleTimeString(
+                            "en-IN",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
                         </p>
                       </div>
 
@@ -307,20 +309,24 @@ export default function RealtimeAnalytics({}) {
                             alt={log.browser}
                             className="w-6 h-6"
                           />
-                          <span className="absolute -top-6 left-1/2 -translate-x-1/2
+                          <span
+                            className="absolute -top-6 left-1/2 -translate-x-1/2
                                            bg-gray-800 text-white text-xs px-2 py-1 rounded-md
                                            opacity-0 group-hover:opacity-100
-                                           pointer-events-none whitespace-nowrap z-50">
+                                           pointer-events-none whitespace-nowrap z-50"
+                          >
                             {log.browser}
                           </span>
                         </div>
 
                         <div className="relative group w-6 h-6 text-gray-200">
                           {getDeviceIcon(log.device)}
-                          <span className="absolute -top-6 left-1/2 -translate-x-1/2
+                          <span
+                            className="absolute -top-6 left-1/2 -translate-x-1/2
                                            bg-gray-800 text-white text-xs px-2 py-1 rounded-md
                                            opacity-0 group-hover:opacity-100
-                                           pointer-events-none whitespace-nowrap z-50">
+                                           pointer-events-none whitespace-nowrap z-50"
+                          >
                             {log.device}
                           </span>
                         </div>
@@ -331,20 +337,28 @@ export default function RealtimeAnalytics({}) {
                             className="w-6 h-5 object-cover"
                             alt={log.country}
                           />
-                          <span className="absolute -top-6 left-1/2 -translate-x-1/2
+                          <span
+                            className="absolute -top-6 left-1/2 -translate-x-1/2
                                            bg-gray-800 text-white text-xs px-2 py-1 rounded-md
                                            opacity-0 group-hover:opacity-100
-                                           pointer-events-none whitespace-nowrap z-50">
+                                           pointer-events-none whitespace-nowrap z-50"
+                          >
                             {log.country}
                           </span>
                         </div>
 
                         <div className="relative group">
-                          <img src={getOSIcon(log.os)} alt={log.os} className="w-6 h-6" />
-                          <span className="absolute -top-6 left-1/2 -translate-x-1/2
+                          <img
+                            src={getOSIcon(log.os)}
+                            alt={log.os}
+                            className="w-6 h-6"
+                          />
+                          <span
+                            className="absolute -top-6 left-1/2 -translate-x-1/2
                                            bg-gray-800 text-white text-xs px-2 py-1 rounded-md
                                            opacity-0 group-hover:opacity-100
-                                           pointer-events-none whitespace-nowrap z-50">
+                                           pointer-events-none whitespace-nowrap z-50"
+                          >
                             {log.os}
                           </span>
                         </div>
