@@ -27,6 +27,10 @@ function AllCampaignsDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  const campaignAbortRef = useRef(null);
+const ipClickAbortRef = useRef(null);
+const statsAbortRef = useRef(null);
+
   
   const ITEMS_PER_PAGE = 5;
 
@@ -53,11 +57,19 @@ function AllCampaignsDashboard() {
 
   // --- API Fetch Function (Unchanged, except for the console.log) ---
   const fetchCampaigns = useCallback(async (page=1) => {
+     if (campaignAbortRef.current) {
+    campaignAbortRef.current.abort();
+  }
+
+  const controller = new AbortController();
+  campaignAbortRef.current = controller;
+
+ 
     setIsLoading(true);
     setError(null);
     try {
-      const response = await apiFunction("get",`${getAllCampaign}?page=${page}&limit=${ITEMS_PER_PAGE}`, null, null);
-   
+      const response = await apiFunction("get",`${getAllCampaign}?page=${page}&limit=${ITEMS_PER_PAGE}`, null, null, controller.signal);
+   if(!response) return;
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
@@ -83,10 +95,17 @@ function AllCampaignsDashboard() {
   }, []);
 
   const fetchIpClicks = async () => {
+     if (ipClickAbortRef.current) {
+    ipClickAbortRef.current.abort();
+  }
+
+  const controller = new AbortController();
+  ipClickAbortRef.current = controller;
     try {
       setLoading(true);
 
-      const res = await apiFunction("get", ipClicks, null, null);
+      const res = await apiFunction("get", ipClicks, null, null,controller.signal);
+      if(!res) return;
       const rawData = res?.data?.data || [];
 
       const formattedData = rawData.map((item) => ({
@@ -113,6 +132,7 @@ function AllCampaignsDashboard() {
 
       setClickSummary(totals);
     } catch (err) {
+       if (err?.code === "ERR_CANCELED") return;
       console.error("IP Click API Error:", err);
       setChartData([]);
       setClickSummary({ totalClicks: 0, safeClicks: 0, moneyClicks: 0 });
@@ -122,9 +142,15 @@ function AllCampaignsDashboard() {
   };
 
   const fetchStats = async () => {
+      if (statsAbortRef.current) {
+    statsAbortRef.current.abort();
+  }
+
+  const controller = new AbortController();
+  statsAbortRef.current = controller;
       try {
-        const res = await apiFunction("get", campdata, null, null);
-  
+        const res = await apiFunction("get", campdata, null, null, controller.signal);
+   if (!res) return;
         
   
         setStats({
@@ -134,6 +160,8 @@ function AllCampaignsDashboard() {
           allowed_campaigns: res?.data?.data?.allowed_campaigns || 0,
         });
       } catch (error) {
+        if (error?.code === "ERR_CANCELED") return;
+    console.error("Stats API Error:", error);
         console.error("Stats API Error:", error);
       }
     };
@@ -218,6 +246,16 @@ function AllCampaignsDashboard() {
     fetchIpClicks();
     fetchStats();
   }, [fetchCampaigns]);
+  
+
+  useEffect(() => {
+  return () => {
+    campaignAbortRef.current?.abort();
+    ipClickAbortRef.current?.abort();
+    statsAbortRef.current?.abort();
+  };
+}, []);
+
 
   useEffect(() => {
     function handleClickOutside(event) {

@@ -456,6 +456,10 @@ import React, { useEffect, useCallback, useState } from "react";
 import { addUrlCampData, getAllCampaign,getAllAnalyticsCamp, javascriptIntegrationCheckApi } from "../api/Apis";
 import { apiFunction } from "../api/ApiFunction";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
+
+
+
 
 
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
@@ -479,6 +483,7 @@ const WebAnalyticsPage = ({
   const [openCodeModal, setOpenCodeModal] = useState(false);
   const [selectedCdnCode, setSelectedCdnCode] = useState({});
   const navigate = useNavigate();
+  const abortControllerRef = useRef(null);
 
   const Button = ({
     children,
@@ -564,10 +569,10 @@ const WebAnalyticsPage = ({
  
 
 
-  const fetchCampaigns = useCallback(async () => {
+  const fetchCampaigns = useCallback(async (signal) => {
     setIsLoading(true);
     try {
-      const response = await apiFunction("get", getAllAnalyticsCamp, null, null);
+      const response = await apiFunction("get", getAllAnalyticsCamp, null, null,signal);
       console.log(response);
       
      
@@ -614,7 +619,7 @@ const WebAnalyticsPage = ({
 };
 
 
-const addUrlCamp = async () => {
+const addUrlCamp = async (signal) => {
   // basic validation
   if (!urlName.trim() || !urlValue.trim()) {
     showErrorToast("Name and URL are required");
@@ -633,7 +638,7 @@ const addUrlCamp = async () => {
       "post",
       getAllAnalyticsCamp,
       null,
-      payload
+      payload, signal
     );
 
     if (res?.data?.success) {
@@ -658,9 +663,17 @@ const addUrlCamp = async () => {
 
 
 
-  useEffect(() => {
-    fetchCampaigns();
-  }, []);
+ useEffect(() => {
+  const controller = new AbortController();
+  abortControllerRef.current = controller;
+
+  fetchCampaigns(controller.signal);
+
+  return () => {
+    controller.abort(); // 💣 screen leave
+  };
+}, [fetchCampaigns]);
+
 
   const handleRefresh = () => {
     fetchCampaigns();

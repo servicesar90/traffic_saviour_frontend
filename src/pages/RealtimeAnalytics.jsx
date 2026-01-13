@@ -17,6 +17,8 @@ import { getCountryIcon } from "../utils/getCountryIcon";
 import { getDeviceIcon } from "../utils/getDeviceIcon";
 import { getOSIcon } from "../utils/getOsIcon";
 import socket from "../utils/socket";
+import { useRef } from "react";
+
 
 export default function RealtimeAnalytics({}) {
   const [refreshing, setRefreshing] = useState(false);
@@ -28,13 +30,73 @@ export default function RealtimeAnalytics({}) {
   const { id } = useParams();
   const [highlight, setHighlight] = useState(false);
   const [uniqueVisitors, setUniqueVistors] = useState(0);
+  const [deviceCount, setDeviceCount] = useState({
+    Desktop: 0,
+    Tablet: 0,
+    Mobile: 0,
+
+  });
+  const abortRef = useRef(null);
+
+
 
   const fetchAnalytics = useCallback(async (id) => {
+
+     if (abortRef.current) {
+    abortRef.current.abort();
+  }
+
+  // 🟢 new controller
+  const controller = new AbortController();
+  abortRef.current = controller;
     try {
-      const response = await apiFunction("get", getAllAnalyticsCamp, id, null);
+      const response = await apiFunction("get", getAllAnalyticsCamp, id, null,controller.signal);
+      if (!response) return;
       const analyticsData = response.data.data;
       console.log(analyticsData);
-      setUniqueVistors(analyticsData?.[2]?.uniquecount);
+      setUniqueVistors(analyticsData?.[4]?.uniquecount);
+      const deviceInfo = analyticsData?.[1];
+      const deviceinfo2 = analyticsData?.[2];
+      const deviceinfo3 = analyticsData?.[3];
+
+
+      const deviceMap = {
+        Dektop: 0,
+        Mobile: 0,
+        Tablet: 0,
+      };
+
+      if (Array.isArray(deviceInfo)) {
+        deviceInfo.forEach((item) => {
+          if (item?.device && item?.total != null) {
+            deviceMap[item.device] = item.total;
+          }
+        });
+      } else if (deviceInfo?.device) {
+        deviceMap[deviceInfo.device] = deviceInfo.total;
+      }
+
+      if (Array.isArray(deviceinfo2)) {
+        deviceinfo2.forEach((item) => {
+          if (item?.device && item?.total != null) {
+            deviceMap[item.device] = item.total;
+          }
+        });
+      } else if (deviceinfo2?.device) {
+        deviceMap[deviceinfo2.device] = deviceinfo2.total;
+      }
+
+      if (Array.isArray(deviceinfo3)) {
+        deviceinfo3.forEach((item) => {
+          if (item?.device && item?.total != null) {
+            deviceMap[item.device] = item.total;
+          }
+        });
+      } else if (deviceinfo3?.device) {
+        deviceMap[deviceinfo3.device] = deviceinfo3.total;
+      }
+
+      setDeviceCount(deviceMap);
 
       const analytics = analyticsData?.[0];
 
@@ -55,22 +117,37 @@ export default function RealtimeAnalytics({}) {
       console.log("logs", formattedLogs);
 
       setLogs(
-        formattedLogs.sort(
-          (a, b) => new Date(a.created_at) - new Date(b.created_at)
-        )
+        formattedLogs
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // 🔥 IMPORTANT
+          .slice(0, 5)
       );
 
       setLoadingLogs(false);
     } catch (error) {
-      console.log("Something went wrong", error);
-      setLoadingLogs(false);
-    }
+  if (
+    error?.name === "CanceledError" ||
+    error?.code === "ERR_CANCELED"
+  ) {
+    console.log("Analytics API aborted");
+    return;
+  }
+
+  console.log("Something went wrong", error);
+  setLoadingLogs(false);
+}
+
   }, []);
 
   useEffect(() => {
     if (id) {
       fetchAnalytics(id);
+    }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+
+     return () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
     }
+  };
   }, [id, fetchAnalytics]);
 
   const handleRefresh = () => {
@@ -89,19 +166,18 @@ export default function RealtimeAnalytics({}) {
 
     socket.on("new_click", (data) => {
       const newLog = {
-    ...data.data,
-    uniqueKey: `${Date.now()}-${Math.random()}`,
-    isNew: true,
-  };
-  console.log("newLog", newLog);
-      console.log("fuf", data);
+        ...data.data,
+        created_at: data.data?.created_at || new Date().toISOString(),
+        uniqueKey: `${Date.now()}-${Math.random()}`,
+        isNew: true,
+      };
 
       setLogs((prev) => {
-        const updated = [newLog, ...prev]
-          .slice(0, 5)
-          .map((log) => ({ ...log, isNew: false }));
+        const updated = [
+          newLog,
+          ...prev.map((l) => ({ ...l, isNew: false })),
+        ].slice(0, 5);
 
-        updated[0].isNew = true; // sirf top card animate
         return updated;
       });
     });
@@ -152,15 +228,33 @@ export default function RealtimeAnalytics({}) {
           <div className="flex justify-between w-full gap-4 mb-3">
             <div className="text-center flex-1">
               <p className="text-slate-300 text-sm">Mobile</p>
-              <p className="text-3xl font-bold">0</p>
+              <p
+                className={`text-3xl font-bold mt-1 transition-all ${
+                  highlight ? "text-green-400 scale-110" : ""
+                }`}
+              >
+                {deviceCount.Mobile || 0}
+              </p>
             </div>
             <div className="text-center flex-1">
               <p className="text-slate-300 text-sm">Tablet</p>
-              <p className="text-3xl font-bold">0</p>
+              <p
+                className={`text-3xl font-bold mt-1 transition-all ${
+                  highlight ? "text-green-400 scale-110" : ""
+                }`}
+              >
+                {deviceCount.Tablet || 0}
+              </p>
             </div>
             <div className="text-center flex-1">
               <p className="text-slate-300 text-sm">Desktop</p>
-              <p className="text-3xl font-bold">0</p>
+              <p
+                className={`text-3xl font-bold mt-1 transition-all ${
+                  highlight ? "text-green-400 scale-110" : ""
+                }`}
+              >
+                {deviceCount.Desktop || 0}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">

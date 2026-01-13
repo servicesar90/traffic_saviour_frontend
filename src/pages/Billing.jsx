@@ -9,7 +9,7 @@ const BillingPage = () => {
   const [billingList, setBillingList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchBillingData = async () => {
+  const fetchBillingData = async (signal) => {
     try {
       setLoading(true);
 
@@ -25,7 +25,8 @@ const BillingPage = () => {
         "get",
         cryptoPayment,
         null,
-        null
+        null,
+        signal
       );
       console.log(res);
       
@@ -40,7 +41,11 @@ const BillingPage = () => {
   };
 
   useEffect(() => {
-    fetchBillingData();
+     const controller = new AbortController();
+    fetchBillingData(controller.signal);
+    return () => {
+    controller.abort(); // 🔥 screen switch / unmount par API cancel
+  };
   }, []);
 
   return (
