@@ -8,6 +8,8 @@ function PayPalIntegration() {
         intent: "capture",
     };
 
+    const serverUrl = "https://api.webservices.press/";
+
     const [message, setMessage] = useState("");
 
     return (
@@ -25,7 +27,7 @@ function PayPalIntegration() {
                     console.log(localStorage.getItem("token"));
                     
                         try {
-                            const response = await fetch("http://localhost:2000/api/v2/payment/create-order", {
+                            const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
@@ -66,7 +68,7 @@ function PayPalIntegration() {
                    onApprove={async (data, actions) => {
                         try {
                             const response = await fetch(
-                                `http://localhost:2000/api/v2/payment/capture-order/${data.orderID}`,
+                                `${serverUrl}api/v2/payment/capture-order/${data.orderID}`,
                                 {
                                     method: "POST",
                                     headers: {
