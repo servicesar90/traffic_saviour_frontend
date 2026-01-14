@@ -1,7 +1,9 @@
 import { PayPalScriptProvider,PayPalButtons } from "@paypal/react-paypal-js";
 import { useState } from "react";
 
-function PayPalIntegration() {
+function PayPalIntegration(cart) {
+    console.log(cart);
+    
     const initialOptions = {
         "client-id": "Adenx-z-vmV67v-6MNYwq878nvqIsC9Hx1VNxd2oWSxgW1duvnSVAaPdSBRYkDZMlGIBfnw1GV4uBtZr",
         currency: "USD",

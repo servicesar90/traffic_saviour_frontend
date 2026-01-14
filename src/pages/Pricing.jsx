@@ -96,10 +96,11 @@ export default function Pricing() {
   const [network, setNetwork] = useState("");
   const [txHash, setTxHash] = useState("");
   const [loading, setLoading] = useState(false);
+  const [payload, setPayload] = useState(null);
   const isConfirmDisabled = !txHash.trim() || loading;
 
 
-    const resetPaymentState = () => {
+  const resetPaymentState = () => {
     setModalStep(0);
     setSelectedPlan(null);
     setPaymentMethod("");
@@ -111,31 +112,31 @@ export default function Pricing() {
 
 
   const calculateStartEndDates = (billing) => {
-  const start = new Date(); // now
-  const end = new Date(start);
+    const start = new Date(); // now
+    const end = new Date(start);
 
-  if (billing === "Monthly") {
-    end.setMonth(end.getMonth() + 1);
-  }
+    if (billing === "Monthly") {
+      end.setMonth(end.getMonth() + 1);
+    }
 
-  if (billing === "quarterly") {
-    end.setMonth(end.getMonth() + 3);
-  }
+    if (billing === "quarterly") {
+      end.setMonth(end.getMonth() + 3);
+    }
 
-  if (billing === "Yearly") {
-    end.setFullYear(end.getFullYear() + 1);
-  }
+    if (billing === "Yearly") {
+      end.setFullYear(end.getFullYear() + 1);
+    }
 
-  return {
-    start_date: start.toISOString(), // ✅ UTC
-    end_date: end.toISOString(),     // ✅ UTC
+    return {
+      start_date: start.toISOString(), // ✅ UTC
+      end_date: end.toISOString(),     // ✅ UTC
+    };
   };
-};
 
 
 
 
-  
+
 
   /* ===== PRICE LOGIC (UNCHANGED) ===== */
   const calculateMonthlyPrice = (price) => {
@@ -182,11 +183,10 @@ export default function Pricing() {
               <button
                 key={type}
                 onClick={() => setBilling(type)}
-                className={`px-6 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
-                  billing === type
+                className={`px-6 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${billing === type
                     ? "bg-blue-600 text-white"
                     : "text-gray-300 hover:bg-gray-700"
-                }`}
+                  }`}
               >
                 {type}
                 {type !== "Monthly" && (
@@ -204,11 +204,10 @@ export default function Pricing() {
           {plans.map((plan, i) => (
             <div
               key={i}
-              className={`relative bg-[#1E293B] border rounded-2xl p-8 ${
-                plan.popular
+              className={`relative bg-[#1E293B] border rounded-2xl p-8 ${plan.popular
                   ? "border-blue-500 ring-1 ring-blue-500"
                   : "border-gray-700"
-              }`}
+                }`}
             >
               {plan.popular && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs px-4 py-1 rounded-full">
@@ -243,11 +242,10 @@ export default function Pricing() {
                   setSelectedPlan(plan);
                   setModalStep(1);
                 }}
-                className={`mt-8 w-full py-3 rounded-xl cursor-pointer ${
-                  plan.popular
+                className={`mt-8 w-full py-3 rounded-xl cursor-pointer ${plan.popular
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-gray-700 hover:bg-gray-600"
-                }`}
+                  }`}
               >
                 Choose Plan
               </button>
@@ -305,7 +303,38 @@ export default function Pricing() {
                   </button>
                   <button
                     disabled={!paymentMethod}
-                    onClick={() => setModalStep(2)}
+                    onClick={() => {
+                      setModalStep(2)
+                      if (paymentMethod === "card") {
+                        const { start_date, end_date } =
+                          calculateStartEndDates(billing);
+                        setPayload({
+                          plan_id: selectedPlan.id,
+                          plan_name: selectedPlan.name,
+                          billing_cycle: billing,
+
+                          method:
+                            paymentMethod === "USDT"
+                              ? "cryptocurrency"
+                              : "card",
+
+                          amount: totalAmount,
+
+                          currency:
+                            paymentMethod === "USDT"
+                              ? network === "ERC20"
+                                ? "USDT (ERC20)"
+                                : "USDT (TRC20)"
+                              : "USD",
+
+                          start_date,
+                          end_date,
+
+                          payment_id: null,
+                        })
+                      }
+                    }
+                    }
                     className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
                   >
                     Continue
@@ -350,11 +379,11 @@ export default function Pricing() {
               </>
             )}
 
-             {modalStep === 2 && paymentMethod === "card" && (
+            {modalStep === 2 && paymentMethod === "card" && (
               <>
-                
+
                 <div className="mt-12">
-                    <PayPalIntegration />
+                  <PayPalIntegration cart={payload} />
                 </div>
 
                 <div className="flex justify-between mt-6">
@@ -378,124 +407,123 @@ export default function Pricing() {
             {/* STEP 3 */}
             {/* STEP 3 */}
             {modalStep === 3 && (
-  <>
-    <h2 className="text-xl font-bold">Confirm Purchase</h2>
+              <>
+                <h2 className="text-xl font-bold">Confirm Purchase</h2>
 
-    <p className="mt-2 text-sm">
-      You selected <b>USDT</b> on <b>{network}</b> network
-    </p>
+                <p className="mt-2 text-sm">
+                  You selected <b>USDT</b> on <b>{network}</b> network
+                </p>
 
-    <img
-      src={PAYMENT_DETAILS[network].qr}
-      alt={`${network} QR`}
-      className="mx-auto mt-4 w-36"
-    />
+                <img
+                  src={PAYMENT_DETAILS[network].qr}
+                  alt={`${network} QR`}
+                  className="mx-auto mt-4 w-36"
+                />
 
-    <div className="mt-4">
-      <label className="text-sm">Amount to Pay</label>
-      <input
-        disabled
-        value={`${totalAmount} USDT`}
-        className="w-full mt-1 p-2 bg-gray-800 rounded"
-      />
-    </div>
+                <div className="mt-4">
+                  <label className="text-sm">Amount to Pay</label>
+                  <input
+                    disabled
+                    value={`${totalAmount} USDT`}
+                    className="w-full mt-1 p-2 bg-gray-800 rounded"
+                  />
+                </div>
 
-    <div className="mt-4">
-      <label className="text-sm">Pay to this address</label>
-      <input
-        disabled
-        value={PAYMENT_DETAILS[network].address}
-        className="w-full mt-1 p-2 bg-gray-800 rounded"
-      />
-    </div>
+                <div className="mt-4">
+                  <label className="text-sm">Pay to this address</label>
+                  <input
+                    disabled
+                    value={PAYMENT_DETAILS[network].address}
+                    className="w-full mt-1 p-2 bg-gray-800 rounded"
+                  />
+                </div>
 
-    <div className="mt-4">
-      <label className="text-sm">Transaction Hash</label>
-      <input
-        placeholder="Enter transaction hash"
-        value={txHash}
-        onChange={(e) => setTxHash(e.target.value)}
-        className="w-full mt-1 p-2 bg-gray-800 rounded"
-      />
-    </div>
+                <div className="mt-4">
+                  <label className="text-sm">Transaction Hash</label>
+                  <input
+                    placeholder="Enter transaction hash"
+                    value={txHash}
+                    onChange={(e) => setTxHash(e.target.value)}
+                    className="w-full mt-1 p-2 bg-gray-800 rounded"
+                  />
+                </div>
 
-    <div className="flex justify-between mt-6">
-      <button
-        className="cursor-pointer"
-        onClick={() => setModalStep(2)}
-        disabled={loading}
-      >
-        Back
-      </button>
+                <div className="flex justify-between mt-6">
+                  <button
+                    className="cursor-pointer"
+                    onClick={() => setModalStep(2)}
+                    disabled={loading}
+                  >
+                    Back
+                  </button>
 
-      <button
-        disabled={!txHash.trim() || loading}
-        className={`px-4 py-2 rounded cursor-pointer flex items-center gap-2 ${
-          !txHash.trim() || loading
-            ? "bg-gray-600 cursor-not-allowed"
-            : "bg-green-600 hover:bg-green-700"
-        }`}
-        onClick={async () => {
-          if (!txHash.trim() || loading) return;
+                  <button
+                    disabled={!txHash.trim() || loading}
+                    className={`px-4 py-2 rounded cursor-pointer flex items-center gap-2 ${!txHash.trim() || loading
+                        ? "bg-gray-600 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                      }`}
+                    onClick={async () => {
+                      if (!txHash.trim() || loading) return;
 
-          setLoading(true);
+                      setLoading(true);
 
-          const { start_date, end_date } =
-            calculateStartEndDates(billing);
+                      const { start_date, end_date } =
+                        calculateStartEndDates(billing);
 
-          const payload = {
-            plan_id: selectedPlan.id,
-            plan_name: selectedPlan.name,
-            billing_cycle: billing,
+                      setPayload({
+                        plan_id: selectedPlan.id,
+                        plan_name: selectedPlan.name,
+                        billing_cycle: billing,
 
-            method:
-              paymentMethod === "USDT"
-                ? "cryptocurrency"
-                : "card",
+                        method:
+                          paymentMethod === "USDT"
+                            ? "cryptocurrency"
+                            : "card",
 
-            amount: totalAmount,
+                        amount: totalAmount,
 
-            currency:
-              paymentMethod === "USDT"
-                ? network === "ERC20"
-                  ? "USDT (ERC20)"
-                  : "USDT (TRC20)"
-                : "CARD",
+                        currency:
+                          paymentMethod === "USDT"
+                            ? network === "ERC20"
+                              ? "USDT (ERC20)"
+                              : "USDT (TRC20)"
+                            : "CARD",
 
-            start_date,
-            end_date,
+                        start_date,
+                        end_date,
 
-            payment_id: txHash,
-          };
+                        payment_id: txHash,
+                      });
 
-          try {
-                      const res = await makeCryptoPayment(payload);
-                      console.log(res);
-                      
-                      if (res?.success || res?.status === 201) {
-                        
-                        resetPaymentState();
-                        setModalStep(0 );
+                      try {
+                        const res = await makeCryptoPayment(payload);
+                        console.log(res);
+
+                        if (res?.success || res?.status === 201) {
+
+                          resetPaymentState();
+                          setModalStep(0);
+                        }
+                      } catch {
+                        alert("Payment failed");
+                      } finally {
+                        setLoading(false);
                       }
-                    } catch {
-                      alert("Payment failed");
-                    } finally {
-                      setLoading(false);
-                    }
-        }}
-      >
-        {loading ? (
-          <>
-            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-            Processing...
-          </>
-        ) : (
-          "Confirm Payment"
-        )}
-      </button>
-    </div>
-  </>
-)}
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                        Processing...
+                      </>
+                    ) : (
+                      "Confirm Payment"
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
 
           </div>
         </div>
