@@ -9,6 +9,9 @@ function PayPalIntegration() {
     };
 
     const serverUrl = "https://api.webservices.press/";
+        // const serverUrl = "http://localhost:2000/";
+
+
 
     const [message, setMessage] = useState("");
 
@@ -25,13 +28,14 @@ function PayPalIntegration() {
                     }}
                    createOrder={async () => {
                     console.log(localStorage.getItem("token"));
+                    const token = localStorage.getItem("token");
                     
                         try {
                             const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
-                                    "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6eyJpZCI6MTAwMDAxLCJlbWFpbCI6ImNvZGVAZ21haWwuY29tIn0sImlhdCI6MTc2ODIwNDQwOCwiZXhwIjoxNzY4Mzc3MjA4fQ.PdszGduHDDAtteyI2DxfdtsSYJtDBjhHUIUqLIbfZ84`,
+                                    "Authorization": `Bearer ${token}`,
                                 },
                                 // use the "body" param to optionally pass additional order information
                                 // like product ids and quantities
@@ -67,12 +71,14 @@ function PayPalIntegration() {
                     }}
                    onApprove={async (data, actions) => {
                         try {
+                            const token = localStorage.getItem("token");
                             const response = await fetch(
                                 `${serverUrl}api/v2/payment/capture-order/${data.orderID}`,
                                 {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
+                                        "Authorization": `Bearer ${token}`,
                                     },
                                 }
                             );
