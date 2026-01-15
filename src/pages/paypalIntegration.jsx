@@ -11,8 +11,8 @@ function PayPalIntegration(cart) {
         intent: "capture",
     };
 
-    const serverUrl = "https://api.webservices.press/";
-    // const serverUrl = "http://localhost:2000/";
+    // const serverUrl = "https://api.webservices.press/";
+        const serverUrl = "http://localhost:2000/";
 
 
 
@@ -43,12 +43,7 @@ function PayPalIntegration(cart) {
                                 // use the "body" param to optionally pass additional order information
                                 // like product ids and quantities
                                 body: JSON.stringify({
-                                    cart: [
-                                        {
-                                            id: 1245,
-                                            quantity: 1,
-                                        },
-                                    ],
+                                    cart: cart?.cart,
                                 }),
                             });
 
