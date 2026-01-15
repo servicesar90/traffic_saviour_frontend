@@ -264,6 +264,7 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { createApiFunction } from "../api/ApiFunction";
 import { logInApi } from "../api/Apis";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
@@ -277,6 +278,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [token, setToken] = useState(null); // Turnstile token state
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -431,6 +433,16 @@ export default function LoginPage() {
               Forgot password?
             </Link>
           </div>
+
+          {/* Cloudflare Turnstile */}
+          <div className="mb-6">
+
+      <Turnstile
+        siteKey="0x4AAAAAACMpjTD163cCGaKh"
+        onSuccess={(token) => setToken(token)}
+        onExpire={() => setToken(null)}
+        />
+        </div>
 
           {/* Submit */}
           <button
