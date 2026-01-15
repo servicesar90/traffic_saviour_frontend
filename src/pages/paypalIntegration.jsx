@@ -85,7 +85,7 @@ function PayPalIntegration(cart) {
 
                             const response = await apiFunction("post", paypalCaptureOrder, data.orderID, null);
 
-                            const orderData = response.data;
+                            const orderData = response.data; 
                             // Three cases to handle:
                             //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
                             //   (2) Other non-recoverable errors -> Show a failure message
@@ -116,8 +116,13 @@ function PayPalIntegration(cart) {
                                     orderData,
                                     JSON.stringify(orderData, null, 2)
                                 );
-
-                                const response = await apiFunction("post", cryptoPayment, null, cart);
+                                console.log("cart.cart",cart?.cart);
+                                
+                                if (orderData.status === "COMPLETED") {
+                                    // clearCart();
+                                    return  await apiFunction("post", cryptoPayment, null, {...cart?.cart,payment_id:orderData.id,status:"Paid"});
+                                }
+                                const response = await apiFunction("post", cryptoPayment, null, {...cart?.cart,payment_id:orderData.id});
                                 return response;
 
                             }
