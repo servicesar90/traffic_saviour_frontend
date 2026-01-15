@@ -1,6 +1,7 @@
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useState } from "react";
 import { apiFunction } from "../api/ApiFunction";
+import { paypalCreateOrder, paypalCaptureOrder, cryptoPayment } from "../api/Apis";
 
 function PayPalIntegration(cart) {
     console.log(cart);
@@ -34,18 +35,19 @@ function PayPalIntegration(cart) {
                         const token = localStorage.getItem("token");
 
                         try {
-                            const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "Authorization": `Bearer ${token}`,
-                                },
-                                // use the "body" param to optionally pass additional order information
-                                // like product ids and quantities
-                                body: JSON.stringify({
-                                    cart: cart?.cart,
-                                }),
-                            });
+                            // const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
+                            //     method: "POST",
+                            //     headers: {
+                            //         "Content-Type": "application/json",
+                            //         "Authorization": `Bearer ${token}`,
+                            //     },
+                            //     // use the "body" param to optionally pass additional order information
+                            //     // like product ids and quantities
+                            //     body: JSON.stringify({
+                            //         cart: cart?.cart,
+                            //     }),
+                            // });
+                            const response = await apifunction("post", paypalCreateOrder, null, { cart: cart?.cart });
 
 
                             const orderData = await response.json();
