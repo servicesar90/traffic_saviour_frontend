@@ -47,10 +47,10 @@ function PayPalIntegration(cart) {
                             //         cart: cart?.cart,
                             //     }),
                             // });
-                            const response = await apifunction("post", paypalCreateOrder, null, { cart: cart?.cart });
+                            const response = await apiFunction("post", paypalCreateOrder, null, { cart: cart?.cart });
 
 
-                            const orderData = await response.json();
+                            const orderData = response.data;
                             console.log("orderData", orderData);
                             if (orderData.id) {
                                 return orderData.id;
@@ -72,18 +72,20 @@ function PayPalIntegration(cart) {
                     onApprove={async (data, actions) => {
                         try {
                             const token = localStorage.getItem("token");
-                            const response = await fetch(
-                                `${serverUrl}api/v2/payment/capture-order/${data.orderID}`,
-                                {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "Authorization": `Bearer ${token}`,
-                                    },
-                                }
-                            );
+                            // const response = await fetch(
+                            //     `${serverUrl}api/v2/payment/capture-order/${data.orderID}`,
+                            //     {
+                            //         method: "POST",
+                            //         headers: {
+                            //             "Content-Type": "application/json",
+                            //             "Authorization": `Bearer ${token}`,
+                            //         },
+                            //     }
+                            // );
 
-                            const orderData = await response.json();
+                            const response = await apiFunction("post", paypalCaptureOrder, data.orderID, null);
+
+                            const orderData = response.data;
                             // Three cases to handle:
                             //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
                             //   (2) Other non-recoverable errors -> Show a failure message
