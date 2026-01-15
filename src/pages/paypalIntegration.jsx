@@ -2,7 +2,7 @@ import { PayPalScriptProvider,PayPalButtons } from "@paypal/react-paypal-js";
 import { useState } from "react";
 
 function PayPalIntegration(cart) {
-    console.log(cart);
+    console.log(cart?.cart);
     
     const initialOptions = {
         "client-id": "Adenx-z-vmV67v-6MNYwq878nvqIsC9Hx1VNxd2oWSxgW1duvnSVAaPdSBRYkDZMlGIBfnw1GV4uBtZr",
@@ -10,8 +10,8 @@ function PayPalIntegration(cart) {
         intent: "capture",
     };
 
-    const serverUrl = "https://api.webservices.press/";
-        // const serverUrl = "http://localhost:2000/";
+    // const serverUrl = "https://api.webservices.press/";
+        const serverUrl = "http://localhost:2000/";
 
 
 
@@ -42,12 +42,7 @@ function PayPalIntegration(cart) {
                                 // use the "body" param to optionally pass additional order information
                                 // like product ids and quantities
                                 body: JSON.stringify({
-                                    cart: [
-                                        {
-                                            id: 1245,
-                                            quantity: 1,
-                                        },
-                                    ],
+                                    cart: cart?.cart,
                                 }),
                             });
 
