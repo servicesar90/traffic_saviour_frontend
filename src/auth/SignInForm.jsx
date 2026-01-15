@@ -269,7 +269,8 @@ import { createApiFunction } from "../api/ApiFunction";
 import { logInApi } from "../api/Apis";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 
-import {showErrorToast, showSuccessToast} from "../components/toast/toast";
+import { showErrorToast, showSuccessToast } from "../components/toast/toast";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -304,8 +305,8 @@ export default function LoginPage() {
 
     try {
       const response = await createApiFunction("post", logInApi, null, formData);
-     
-      
+
+
 
       if (response && response.data?.token) {
         localStorage.removeItem("user");
@@ -334,7 +335,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row overflow-hidden">
       {/* LEFT PANEL */}
-       <div className="w-full xl:w-1/2 bg-white flex flex-col justify-center px-8 md:px-20 py-12">
+      <div className="w-full xl:w-1/2 bg-white flex flex-col justify-center px-8 md:px-20 py-12">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Sign In</h1>
         <p className="text-gray-500 mb-8">
           Enter your email and password to access your dashboard.
@@ -342,7 +343,7 @@ export default function LoginPage() {
 
         {/* Google Sign-in */}
         <div className="flex justify-center items-center gap-4 mb-6">
-          <button
+          {/* <button
             type="button"
             className="flex items-center justify-center w-1/2 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition cursor-pointer"
             onClick={() => showErrorToast("Google login is not yet implemented.")}
@@ -355,7 +356,18 @@ export default function LoginPage() {
             <span className="text-sm text-gray-700 font-medium">
               Sign in with Google
             </span>
-          </button>
+          </button> */}
+          <GoogleOAuthProvider clientId="841461646285-9dimu89k2vjo4cbdj69ound7s0j7jm2s.apps.googleusercontent.com">
+            <GoogleLogin
+              onSuccess={(credentialResponse) => {
+                // Send token to backend
+                console.log("google auth", credentialResponse.credential);
+
+                // loginWithGoogle(credentialResponse.credential);
+              }}
+              onError={() => console.log("Login Failed")}
+            />
+          </GoogleOAuthProvider>
         </div>
 
         <div className="flex items-center mb-6">
@@ -406,11 +418,11 @@ export default function LoginPage() {
                 role="button"
                 tabIndex={0}
               >
-               {showPassword ? (
-    <EyeIcon className="h-5 w-5" />
-  ) : (
-    <EyeSlashIcon className="h-5 w-5" />
-  )}
+                {showPassword ? (
+                  <EyeIcon className="h-5 w-5" />
+                ) : (
+                  <EyeSlashIcon className="h-5 w-5" />
+                )}
               </span>
             </div>
           </div>
@@ -437,22 +449,21 @@ export default function LoginPage() {
           {/* Cloudflare Turnstile */}
           <div className="mb-6">
 
-      <Turnstile
-        siteKey="0x4AAAAAACMpjTD163cCGaKh"
-        onSuccess={(token) => setToken(token)}
-        onExpire={() => setToken(null)}
-        />
-        </div>
+            <Turnstile
+              siteKey="0x4AAAAAACMpjTD163cCGaKh"
+              onSuccess={(token) => setToken(token)}
+              onExpire={() => setToken(null)}
+            />
+          </div>
 
           {/* Submit */}
           <button
             disabled={isSubmitting}
             onClick={!isSubmitting ? onSubmit : undefined}
             className={`w-full py-2.5 rounded-lg font-medium cursor-pointer transition flex items-center justify-center gap-2
-              ${
-                isSubmitting
-                  ? "bg-indigo-400 text-white cursor-not-allowed opacity-70"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
+              ${isSubmitting
+                ? "bg-indigo-400 text-white cursor-not-allowed opacity-70"
+                : "bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
               }`}
           >
             {isSubmitting ? (
@@ -495,7 +506,7 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT PANEL */}
-     <div className="hidden xl:flex w-1/2 bg-[#0B0E2A] text-white items-center justify-center relative overflow-hidden">
+      <div className="hidden xl:flex w-1/2 bg-[#0B0E2A] text-white items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05)_1px,_transparent_1px)] bg-[length:40px_40px]" />
         <div className="relative text-center px-10">
           <div className="flex items-center justify-center mb-4">
