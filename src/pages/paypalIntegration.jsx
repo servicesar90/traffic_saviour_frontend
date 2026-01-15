@@ -1,9 +1,10 @@
-import { PayPalScriptProvider,PayPalButtons } from "@paypal/react-paypal-js";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useState } from "react";
+import { apiFunction } from "../api/ApiFunction";
 
 function PayPalIntegration(cart) {
     console.log(cart);
-    
+
     const initialOptions = {
         "client-id": "Adenx-z-vmV67v-6MNYwq878nvqIsC9Hx1VNxd2oWSxgW1duvnSVAaPdSBRYkDZMlGIBfnw1GV4uBtZr",
         currency: "USD",
@@ -11,7 +12,7 @@ function PayPalIntegration(cart) {
     };
 
     const serverUrl = "https://api.webservices.press/";
-        // const serverUrl = "http://localhost:2000/";
+    // const serverUrl = "http://localhost:2000/";
 
 
 
@@ -19,19 +20,19 @@ function PayPalIntegration(cart) {
 
     return (
         <div className="paypal-integration mt-6">
-           
+
             <PayPalScriptProvider options={initialOptions}>
                 <PayPalButtons
-                   style={{
+                    style={{
                         shape: "rect",
                         layout: "vertical",
                         color: "gold",
                         label: "paypal",
                     }}
-                   createOrder={async () => {
-                    console.log(localStorage.getItem("token"));
-                    const token = localStorage.getItem("token");
-                    
+                    createOrder={async () => {
+                        console.log(localStorage.getItem("token"));
+                        const token = localStorage.getItem("token");
+
                         try {
                             const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
                                 method: "POST",
@@ -71,7 +72,7 @@ function PayPalIntegration(cart) {
                             );
                         }
                     }}
-                   onApprove={async (data, actions) => {
+                    onApprove={async (data, actions) => {
                         try {
                             const token = localStorage.getItem("token");
                             const response = await fetch(
@@ -116,6 +117,10 @@ function PayPalIntegration(cart) {
                                     orderData,
                                     JSON.stringify(orderData, null, 2)
                                 );
+
+                                const response = await apiFunction("post", cryptoPayment, null, cart);
+                                return response;
+
                             }
                         } catch (error) {
                             console.error(error);
