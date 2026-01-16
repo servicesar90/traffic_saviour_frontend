@@ -266,7 +266,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { createApiFunction } from "../api/ApiFunction";
-import { logInApi } from "../api/Apis";
+import { googleLoginApi, logInApi } from "../api/Apis";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
@@ -332,6 +332,41 @@ export default function LoginPage() {
     }
   };
 
+  // ✅ Google Login Handler
+  const loginWithGoogle = async (googleToken) => {
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const response = await createApiFunction("post", googleLoginApi, null, {
+        token: googleToken,
+      });
+
+      if (response && response.data?.token) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        showSuccessToast("Signin successful!");
+
+        await new Promise((res) => setTimeout(res, 400));
+        navigate("/Dashboard/allStats");
+      } else {
+        showErrorToast("Unexpected response from server. Please try again.");
+      }
+    } catch (err) {
+      console.error("❌ Google login error:", err);
+      const msg =
+        err.response?.data?.message ||
+        "Google login failed. Please try again.";
+      showErrorToast(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row overflow-hidden">
       {/* LEFT PANEL */}
@@ -361,9 +396,8 @@ export default function LoginPage() {
             <GoogleLogin
               onSuccess={(credentialResponse) => {
                 // Send token to backend
-                console.log("google auth", credentialResponse.credential);
 
-                // loginWithGoogle(credentialResponse.credential);
+                loginWithGoogle(credentialResponse.credential);
               }}
               onError={() => console.log("Login Failed")}
             />

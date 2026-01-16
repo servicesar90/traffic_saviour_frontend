@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { showErrorToast, showSuccessToast } from "../../components/toast/toast";
+import { googleLoginApi } from "../../api/Apis";
+import { createApiFunction } from "../../api/ApiFunction";
 
 export default function LandingActions() {
   const navigate = useNavigate();
@@ -15,6 +19,39 @@ export default function LandingActions() {
     localStorage.clear();
     setUser(null);
     navigate("/signin");
+  };
+
+  // ✅ Google Login Handler
+  const loginWithGoogle = async (googleToken) => {
+
+    // if (isSubmitting) return;
+    // setIsSubmitting(true);
+
+    try {
+      const response = await createApiFunction("post", googleLoginApi, null, {
+        token: googleToken,
+      });
+
+      if (response && response.data?.token) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        showSuccessToast("Signin successful!");
+
+        await new Promise((res) => setTimeout(res, 400));
+        navigate("/Dashboard/allStats");
+      } else {
+        showErrorToast("Unexpected response from server. Please try again.");
+      }
+    } catch (err) {
+      console.error("❌ Google login error:", err);
+      const msg =
+        err.response?.data?.message ||
+        "Google login failed. Please try again.";
+      showErrorToast(msg);
+    }
   };
 
   return (
@@ -34,8 +71,8 @@ export default function LandingActions() {
 
           {!user && (
             <>
-                <div className="flex justify-center items-center gap-4 mb-6">
-                        <button
+              <div className="flex justify-center items-center gap-4 mb-6">
+                {/* <button
                           type="button"
                           className="flex items-center justify-center w-1/2 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition cursor-pointer"
                           onClick={() => showErrorToast("Google login is not yet implemented.")}
@@ -48,8 +85,17 @@ export default function LandingActions() {
                           <span className="text-sm text-gray-700 font-medium">
                             Sign in with Google
                           </span>
-                        </button>
-                      </div> 
+                        </button> */}
+                <GoogleOAuthProvider clientId="841461646285-9dimu89k2vjo4cbdj69ound7s0j7jm2s.apps.googleusercontent.com">
+                  <GoogleLogin
+                    onSuccess={(credentialResponse) => {
+
+                      loginWithGoogle(credentialResponse.credential);
+                    }}
+                    onError={() => console.log("Login Failed")}
+                  />
+                </GoogleOAuthProvider>
+              </div>
 
               <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 h-px bg-slate-200" />
@@ -131,7 +177,7 @@ export default function LandingActions() {
         </div>
       </div> */}
 
-       <div className="hidden xl:flex w-1/2 bg-[#0B0E2A] text-white items-center justify-center relative overflow-hidden">
+      <div className="hidden xl:flex w-1/2 bg-[#0B0E2A] text-white items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05)_1px,_transparent_1px)] bg-[length:40px_40px]" />
         <div className="relative text-center px-10">
           <div className="flex items-center justify-center mb-4">

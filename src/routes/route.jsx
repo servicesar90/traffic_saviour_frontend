@@ -11,7 +11,7 @@ import { LoginProtector, RoutesProtector } from "./routesProtector";
 import UpdatePassword from "../auth/updatePassword";
 
 // ✅ Lazy imports
-const LandingPage = lazy(() => import("../pages/home.jsx/landingPage"));
+const LandingPage = lazy(() => import("../pages/home/landingPage"));
 const Dashboard = lazy(() => import("../pages/dashboard"));
 const Campaign = lazy(() => import("../pages/campaignCreation"));
 const CloakingIntegration = lazy(() => import("../pages/CampaignIntegration"));

@@ -12,6 +12,8 @@ export const signupApi = `${base_url}/auth/signup`;
 
 export const logInApi = `${base_url}/auth/login`;
 
+export const googleLoginApi = `${base_url}/auth/authgoogle`;
+
 export const getProfileApi = `${base_url}/profile/getProfile`;
 
 export const createCampaignApi = `${base_url}/api/v2/campaign`;
