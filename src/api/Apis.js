@@ -1,7 +1,7 @@
-// const base_url = 'http://localhost:2000';
+const base_url = 'http://localhost:2000';
 // const base_url="http://192.168.1.64:2000";
 
-const base_url="https://api.webservices.press";
+// const base_url="https://api.webservices.press";
 
 // const base_url="http://192.168.1.3:2000";
 // const base_url = "https://app.clockerly.io"
@@ -11,6 +11,8 @@ const base_url="https://api.webservices.press";
 export const signupApi = `${base_url}/auth/signup`;
 
 export const logInApi = `${base_url}/auth/login`;
+
+export const impersonateLoginApi = `${base_url}/admin/auth/impersonate/login`;
 
 export const googleLoginApi = `${base_url}/auth/authgoogle`;
 
