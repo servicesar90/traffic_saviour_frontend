@@ -12,7 +12,7 @@ import UpdatePassword from "../auth/updatePassword";
 import DashboardGuard from "./DashboardGuard";
 
 // ✅ Lazy imports
-const LandingPage = lazy(() => import("../pages/home.jsx/landingPage"));
+const LandingPage = lazy(() => import("../pages/home/landingPage"));
 const Dashboard = lazy(() => import("../pages/dashboard"));
 const Campaign = lazy(() => import("../pages/campaignCreation"));
 const CloakingIntegration = lazy(() => import("../pages/CampaignIntegration"));
@@ -20,6 +20,7 @@ const IpListings = lazy(() => import("../pages/IpListings"));
 const Analytics = lazy(() => import("../pages/Analytics"));
 const SignupPage = lazy(() => import("../auth/SignUpForm"));
 const LoginPage = lazy(() => import("../auth/SignInForm"));
+const Impersonate = lazy(() => import("../auth/ImpersonateRoute"));
 const Test = lazy(() => import("../pages/test"));
 // const ClickLogs = lazy(() => import("../pages/clickLogs"));
 const AllCampaignsDashboard = lazy(() => import("../pages/AllCampaign"));
@@ -58,6 +59,7 @@ export default function Routess() {
 
           <Route path="/socket" element={<Socket />} />
           <Route path="/paypal" element={<PaypalIntegration />} />
+          <Route path="/impersonate" element={<Impersonate />} />
 
           {/* Guest Only Routes */}
           <Route
