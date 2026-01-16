@@ -348,53 +348,77 @@ useEffect(() => {
 
   {/* Body */}
   <div className="max-h-[420px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+     {loadingIps && (
+    <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+      <svg
+        className="h-8 w-8 animate-spin mb-3"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9"
+        />
+      </svg>
+      <p className="text-sm">Loading blacklisted IPs...</p>
+    </div>
+  )}
 
-    {!loadingIps &&
-      ips.map((ip) => (
+  {/* 📭 Empty State */}
+  {!loadingIps && ips.length === 0 && (
+    <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400">
+      <div className="text-4xl mb-3">📭</div>
+      <p className="text-lg font-medium text-gray-300">
+        No Blacklisted IPs Found
+      </p>
+      <p className="text-sm mt-1">
+        You haven’t added any IP addresses yet.
+      </p>
+
+      <button
+        onClick={() => setOpenIpModal(true)}
+        className="mt-5 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm shadow cursor-pointer"
+      >
+        + Add Your First IP
+      </button>
+    </div>
+  )}
+
+  {/* ✅ Data State */}
+  {!loadingIps &&
+    ips.length > 0 &&
+    ips.map((ip) => (
+      <div
+        key={ip.id}
+        className="grid grid-cols-[60px_minmax(0,1fr)_200px_100px] gap-4 px-6 py-3 text-sm text-gray-200 border-t border-gray-700 hover:bg-[#25344E] transition-colors"
+      >
+        <div>{ip.sn}</div>
+
         <div
-          key={ip.id}
-          className="grid grid-cols-[60px_minmax(0,1fr)_200px_100px] gap-4 px-6 py-3 text-sm text-gray-200 border-t border-gray-700 hover:bg-[#25344E] transition-colors"
+          className="font-mono truncate overflow-hidden whitespace-nowrap"
+          title={ip.ip}
         >
-          <div>{ip.sn}</div>
-
-          {/* 🔥 IP COLUMN FIX */}
-          <div
-            className="font-mono truncate overflow-hidden whitespace-nowrap"
-            title={ip.ip} // hover pe full IP dikhega
-          >
-            {ip.ip}
-          </div>
-
-          <div>{ip.addedOn}</div>
-
-          <div className="flex justify-center items-center">
-            <TrashIcon onClick={() => deleteBlacklistedIp(ip.id)} />
-          </div>
+          {ip.ip}
         </div>
-      ))}
+
+        <div>{ip.addedOn}</div>
+
+        <div className="flex justify-center items-center">
+          <TrashIcon onClick={() => deleteBlacklistedIp(ip.id)} />
+        </div>
+      </div>
+    ))}
+
+    
   </div>
 </div>
 
 
 
-        {/* Pagination Footer */}
-        {/* <div className="flex flex-col md:flex-row justify-between items-center mt-6 text-sm text-gray-400 gap-4">
-          <span>
-            {startItem}–{endItem} of {totalItems} items —{" "}
-            <button onClick={onViewAll} className="text-blue-500 hover:underline">
-              View all
-            </button>
-          </span>
-
-          <div className="flex gap-2">
-            <Button variant="pagination" onClick={onPrevious}>
-              Previous
-            </Button>
-            <Button variant="pagination" onClick={onNext}>
-              Next
-            </Button>
-          </div>
-        </div> */}
+     
       </div>
 
       {openIpModal && (

@@ -18,7 +18,7 @@ import {
   ipClicks,
   campdata,
   getAllCampaign,
-  signOutApi,
+
   createCampaignApi,
 } from "../api/Apis.js";
 import {
@@ -26,6 +26,7 @@ import {
   showInfoToast,
   showSuccessToast,
 } from "../components/toast/toast.jsx";
+import { isPlanValid } from "../utils/checkPlan.js";
 
 const Dashboard = () => {
   const [page, setPage] = useState(1);
@@ -36,7 +37,6 @@ const Dashboard = () => {
     allowed_campaigns: 0,
   });
 
-  
   const [newTask, setNewTask] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [chartData, setChartData] = useState([]);
@@ -49,15 +49,15 @@ const Dashboard = () => {
   const [dropdownPos, setDropdownPos] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [tasks, setTasks] = useState(() => {
-  const saved = localStorage.getItem("todo_tasks");
-  return saved ? JSON.parse(saved) : [];
-});
-const [currentPage, setCurrentPage] = useState(1);
-const [totalPages, setTotalPages] = useState(1);
-const [totalRecords, setTotalRecords] = useState(0);
+    const saved = localStorage.getItem("todo_tasks");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  
 
-const ITEMS_PER_PAGE = 5;
-
+  const ITEMS_PER_PAGE = 5;
 
   const [clickSummary, setClickSummary] = useState({
     totalClicks: 0,
@@ -129,21 +129,25 @@ const ITEMS_PER_PAGE = 5;
     }
   };
 
-  const fetchCampaigns = useCallback(async (page=1) => {
+  const fetchCampaigns = useCallback(async (page = 1) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await apiFunction("get", `${getAllCampaign}?page=${page}&limit=${ITEMS_PER_PAGE}` , null, null);
+      const response = await apiFunction(
+        "get",
+        `${getAllCampaign}?page=${page}&limit=${ITEMS_PER_PAGE}`,
+        null,
+        null
+      );
       console.log(response);
-      
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
 
       setCampaigns(dataRows);
-      setCurrentPage(response.data.currentPage)
+      setCurrentPage(response.data.currentPage);
       setTotalPages(response.data.totalPages);
-    setTotalRecords(response.data.totalRecords);
+      setTotalRecords(response.data.totalRecords);
 
       setTotalItems(response.data.total || dataRows.length);
       setIsLoading(false);
@@ -176,36 +180,36 @@ const ITEMS_PER_PAGE = 5;
   };
 
   const handleAddTask = () => {
-  if (!newTask.trim()) return;
+    if (!newTask.trim()) return;
 
-  const task = {
-    id: Date.now(),
-    text: newTask,
-    completed: false,
+    const task = {
+      id: Date.now(),
+      text: newTask,
+      completed: false,
+    };
+
+    setTasks((prev) => [task, ...prev]);
+    setNewTask("");
   };
 
-  setTasks((prev) => [task, ...prev]);
-  setNewTask("");
-};
-
   // ✅ Toggle complete/incomplete
- const handleToggleComplete = (id) => {
-  setTasks((prev) =>
-    prev.map((task) =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    )
-  );
-};
+  const handleToggleComplete = (id) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
 
   // ✅ Delete task
   const handleDeleteTask = (id) => {
-  setTasks((prev) => prev.filter((task) => task.id !== id));
-};
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+  };
 
   // ✅ Filtered tasks by search
- const filteredTasks = tasks.filter((task) =>
-  task.text.toLowerCase().includes(searchTerm.toLowerCase())
-);
+  const filteredTasks = tasks.filter((task) =>
+    task.text.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleActionClick = (e, campaignId) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -231,44 +235,76 @@ const ITEMS_PER_PAGE = 5;
         });
         // TODO: Navigate to Edit screen or open a modal
         break;
-      case "duplicate":
-        // alert(`Duplicating campaign ID: ${campaignId}`);
-        // TODO: Call API to duplicate campaign
-        break;
-      // case "delete":
-      //   if (
-      //     window.confirm(
-      //       `Are you sure you want to delete campaign ID: ${campaignId}?`
-      //     )
-      //   ) {
-      //     // TODO: Call API to delete campaign and then fetchCampaigns() to refresh
-      //     const res = await apiFunction(
-      //       "delete",
-      //       createCampaignApi,
-      //       campaignId,
-      //       null
-      //     );
-      //     if (res)
-      //       await fetchCampaigns();
-      //        return alert(`Deleting campaign ID: ${campaignId}`);
-      //   }
+      case "duplicate": {
+        try {
+          if (!row) return;
+          console.log(row);
 
+          // 🔁 deep clone campaign
+          const payload = JSON.parse(JSON.stringify(row));
+       
+
+          // ❌ backend generated fields hatao
+          delete payload.uid;
+          delete payload._id;
+          delete payload.createdAt;
+          delete payload.updatedAt;
+          delete payload.date_time;
+
+          // 📝 campaign name modify
+          const data = {
+            ...payload,
+
+            campaignName:
+              (payload.campaign_info?.campaignName || "Campaign") + " (Copy)",
+            trafficSource: payload.campaign_info?.trafficSource,
+          };
+
+          // optional default status
+
+
+          // 🚀 CREATE API CALL (same API as create)
+          const res = await apiFunction("post", createCampaignApi, null, data);
+
+          if (res?.data?.status || res?.data?.success) {
+            const newCampaign = res.data.data;
+
+            // ✅ UI update (top me add)
+            setCampaigns((prev) => [newCampaign, ...prev]);
+            
+
+            showSuccessToast("Campaign duplicated successfully");
+            await fetchCampaigns();
+            await fetchStats();
+           
+
+          }
+        } catch (err) {
+          console.error("Duplicate campaign error:", err);
+          showErrorToast("Failed to duplicate campaign");
+        }
+
+        break;
+      }
 
       case "delete":
-  if (window.confirm(`Are you sure you want to delete this campaign?`)) {
-    const res = await apiFunction(
-      "delete",
-      createCampaignApi,
-      campaignId,
-      null
-    );
+        if (window.confirm(`Are you sure you want to delete this campaign?`)) {
+          const res = await apiFunction(
+            "delete",
+            createCampaignApi,
+            campaignId,
+            null
+          );
 
-    if (res) {
-      setCampaigns((prev) =>
-        prev.filter((item) => item.uid !== campaignId)
-      );
-    }
-  }
+          if (res) {
+            setCampaigns((prev) =>
+              prev.filter((item) => item.uid !== campaignId)
+            );
+            await fetchStats();
+            
+            
+          }
+        }
         break;
       default:
         break;
@@ -347,24 +383,23 @@ const ITEMS_PER_PAGE = 5;
   };
 
   const handlePageChange = (page) => {
-  if (page < 1 || page > totalPages) return;
-  fetchCampaigns(page);
-};
+    if (page < 1 || page > totalPages) return;
+    fetchCampaigns(page);
+  };
+  
 
-const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1;
-const endItem = Math.min(
-  currentPage * ITEMS_PER_PAGE,
-  totalRecords
-);
-
-
+  const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  const endItem = Math.min(currentPage * ITEMS_PER_PAGE, totalRecords);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+  
+
     if (!token) {
       signOut();
       navigate("/signin");
     }
+  
 
     fetchIpClicks();
     fetchStats();
@@ -393,8 +428,8 @@ const endItem = Math.min(
 
   // ✅ Auto Save Todos to LocalStorage
   useEffect(() => {
-  localStorage.setItem("todo_tasks", JSON.stringify(tasks));
-}, [tasks]);
+    localStorage.setItem("todo_tasks", JSON.stringify(tasks));
+  }, [tasks]);
 
   // Small reusable StatCard
   const StatCard = ({ icon, value, title, subtitle }) => (
@@ -430,7 +465,7 @@ const endItem = Math.min(
           Edit Campaign
         </button>
         <button
-          onClick={() => handleActionSelect("duplicate", campaignId, null)}
+          onClick={() => handleActionSelect("duplicate", campaignId, row)}
           className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 hover:text-white transition duration-100 cursor-pointer"
         >
           Duplicate Campaign
@@ -446,234 +481,275 @@ const endItem = Math.min(
   );
 
   const TableColGroup = () => (
-  <colgroup>
-    <col className="w-12" />
-    <col className="w-30" />
-    <col className="w-30" />
-    <col className="w-25" />
-    <col className="w-32" />
-    <col className="w-20" />
-    <col className="w-16" />
-    <col className="w-20" />
-    <col className="w-48" />
-    <col className="w-20" />
-  </colgroup>
-);
-
+    <colgroup>
+      <col className="w-12" />
+      <col className="w-30" />
+      <col className="w-30" />
+      <col className="w-25" />
+      <col className="w-32" />
+      <col className="w-20" />
+      <col className="w-16" />
+      <col className="w-20" />
+      <col className="w-48" />
+      <col className="w-20" />
+    </colgroup>
+  );
 
   const renderTableContent = () => {
-  if (isLoading) {
+    if (isLoading) {
+      return (
+        <tbody>
+          <tr>
+            <td colSpan="10" className="text-center py-10 text-blue-400">
+              Loading Campaigns...
+            </td>
+          </tr>
+        </tbody>
+      );
+    }
+
+    if (error || campaigns.length === 0) {
+      return (
+        <tbody>
+          <tr>
+            <td colSpan="10" className="text-center py-10 text-gray-500">
+              No campaigns found.
+            </td>
+          </tr>
+        </tbody>
+      );
+    }
+
     return (
-      <tbody>
-        <tr>
-          <td colSpan="10" className="text-center py-10 text-blue-400">
-            Loading Campaigns...
-          </td>
-        </tr>
-      </tbody>
-    );
-  }
-
-  if (error || campaigns.length === 0) {
-    return (
-      <tbody>
-        <tr>
-          <td colSpan="10" className="text-center py-10 text-gray-500">
-            No campaigns found.
-          </td>
-        </tr>
-      </tbody>
-    );
-  }
-
-  return (
-    <tbody className="bg-gray-900 divide-y divide-gray-800">
-      {campaigns.map((item, index) => {
-        const campaignId = item.campaign_info?.campaign_id || index;
-        const isDropdownOpen = openDropdownId === item?.uid;
-        return(
-          <>
-          <tr key={item.campaignId}>
-          <td className="px-3 py-3 text-sm  text-left text-gray-300">{index + 1}</td>
-          <td className="px-3 py-3 text-sm text-left text-blue-400">{item.campaign_info?.campaignName}</td>
-          <td className="px-3 py-3 text-sm text-left text-gray-300">{item.campaign_info?.trafficSource}</td>
-          <td className="px-3 py-3 text-left">
-             <button
-      disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Active")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
-        ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Active"
-          ? "text-green-500 drop-shadow-[0_0_6px_rgba(16,185,129,.8)]"
-          : "text-gray-500 hover:text-gray-300"
+      <tbody className="bg-gray-900 divide-y divide-gray-800">
+        {campaigns.map((item, index) => {
+          const campaignId = item.campaign_info?.campaign_id || index;
+          const isDropdownOpen = openDropdownId === item?.uid;
+          return (
+            <>
+              <tr key={item.campaignId}>
+                <td className="px-3 py-3 text-sm  text-left text-gray-300">
+                  {index + 1}
+                </td>
+                <td className="px-3 py-3 text-sm text-left text-blue-400">
+                  {item.campaign_info?.campaignName}
+                </td>
+                <td className="px-3 py-3 text-sm text-left text-gray-300">
+                  {item.campaign_info?.trafficSource}
+                </td>
+                <td className="px-3 py-3 text-left">
+                  <button
+                    disabled={item.statusLoading}
+                    onClick={() => handleStatusChange(item.uid, "Active")}
+                    className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+        ${
+          item.statusLoading
+            ? "opacity-30 cursor-not-allowed"
+            : "cursor-pointer"
+        }
+        ${
+          item.status === "Active"
+            ? "text-green-500 drop-shadow-[0_0_6px_rgba(16,185,129,.8)]"
+            : "text-gray-500 hover:text-gray-300"
         }`}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M7 4v16l13-8L7 4z"/>
-      </svg>
-    </button>
-
-    {/* ⚡ Boost */}
-    <button
-      disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Allow")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
-        ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Allow"
-          ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
-          : "text-gray-500 hover:text-gray-300"
-        }`}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M13 2L3 14h7v8l10-12h-7z"/>
-      </svg>
-    </button>
-
-    {/* 🚫 Block */}
-    <button
-      disabled={item.statusLoading}
-      onClick={() => handleStatusChange(item.uid, "Block")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
-        ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Block"
-          ? "text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,.8)]"
-          : "text-gray-500 hover:text-gray-300"
-        }`}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24"
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="5" y1="19" x2="19" y2="5"/>
-      </svg>
-    </button></td>
-          <td className="px-3 py-3 text-left "> {item.integration ? (
-            
-                  <div className="relative group flex justify-center">
+                  >
                     <svg
-                      className="h-5 w-5 text-green-500"
-                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
+                      className="w-5 h-5"
+                      fill="currentColor"
+                    >
+                      <path d="M7 4v16l13-8L7 4z" />
+                    </svg>
+                  </button>
+
+                  {/* ⚡ Boost */}
+                  <button
+                    disabled={item.statusLoading}
+                    onClick={() => handleStatusChange(item.uid, "Allow")}
+                    className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+        ${
+          item.statusLoading
+            ? "opacity-30 cursor-not-allowed"
+            : "cursor-pointer"
+        }
+        ${
+          item.status === "Allow"
+            ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
+            : "text-gray-500 hover:text-gray-300"
+        }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      className="w-5 h-5"
+                      fill="currentColor"
+                    >
+                      <path d="M13 2L3 14h7v8l10-12h-7z" />
+                    </svg>
+                  </button>
+
+                  {/* 🚫 Block */}
+                  <button
+                    disabled={item.statusLoading}
+                    onClick={() => handleStatusChange(item.uid, "Block")}
+                    className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+        ${
+          item.statusLoading
+            ? "opacity-30 cursor-not-allowed"
+            : "cursor-pointer"
+        }
+        ${
+          item.status === "Block"
+            ? "text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,.8)]"
+            : "text-gray-500 hover:text-gray-300"
+        }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      className="w-5 h-5"
+                      fill="none"
                       stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="5" y1="19" x2="19" y2="5" />
+                    </svg>
+                  </button>
+                </td>
+                <td className="px-3 py-3 text-left ">
+                  {" "}
+                  {item.integration ? (
+                    <div className="relative group flex justify-center">
+                      <svg
+                        className="h-5 w-5 text-green-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+
+                      {/* ⭐ Tooltip container */}
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 ">
+                        {item.integrationUrl || "No URL Found"}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex justify-center items-center w-full">
+                      <svg
+                        className="h-5 w-5 text-red-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </td>
+                <td className="px-3 py-3 text-gray-300 text-center">
+                  {item?.campclicks?.total_t_clicks || 0}
+                </td>
+                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-16">
+                  <div className="flex items-center gap-1 relative group">
+                    {/* i Icon */}
+                    <svg
+                      className="h-4 w-4 text-blue-400 cursor-pointer"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
+                        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
                       />
                     </svg>
 
-                    {/* ⭐ Tooltip container */}
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 ">
-                      {item.integrationUrl || "No URL Found"}
+                    {/* Value */}
+                    <span>{item?.campclicks?.total_s_clicks || 0}</span>
+
+                    {/* Tooltip */}
+                    <div
+                      className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
+      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
+      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50"
+                    >
+                      {item?.safe_page || "No URL Found"}
                     </div>
                   </div>
-                ) : (
-                  <div className="flex justify-center items-center w-full">
+                </td>
+
+                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-20">
+                  <div className="flex items-center gap-1 relative group">
+                    {/* i Icon */}
                     <svg
-                      className="h-5 w-5 text-red-500"
+                      className="h-4 w-4 text-blue-400 cursor-pointer"
                       fill="none"
-                      viewBox="0 0 24 24"
                       stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
                       />
                     </svg>
+
+                    {/* Value */}
+                    <span>{item?.campclicks?.total_m_clicks || 0}</span>
+
+                    {/* Tooltip */}
+                    <div
+                      className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
+      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
+      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50"
+                    >
+                      {item?.money_page?.[0]?.url || "No URL Found"}
+                    </div>
                   </div>
-                )}</td>
-          <td className="px-3 py-3 text-gray-300 text-center">{item?.campclicks?.total_t_clicks || 0}</td>
-          <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-16">
-  <div className="flex items-center gap-1 relative group">
-    {/* i Icon */}
-    <svg
-      className="h-4 w-4 text-blue-400 cursor-pointer"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
-      />
-    </svg>
+                </td>
 
-    {/* Value */}
-    <span>{item?.campclicks?.total_s_clicks || 0}</span>
-
-    {/* Tooltip */}
-    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
-      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
-      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50">
-      {item?.safe_page || "No URL Found"}
-    </div>
-  </div>
-</td>
-
-        <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-20">
-  <div className="flex items-center gap-1 relative group">
-    {/* i Icon */}
-    <svg
-      className="h-4 w-4 text-blue-400 cursor-pointer"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
-      />
-    </svg>
-
-    {/* Value */}
-    <span>{item?.campclicks?.total_m_clicks || 0}</span>
-
-    {/* Tooltip */}
-    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
-      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
-      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50">
-      {item?.money_page?.[0]?.url || "No URL Found"}
-    </div>
-  </div>
-</td>
-
-          <td className="px-3 py-3 text-gray-300 text-left">
-            {new Date(item.date_time).toLocaleString()}
-          </td>
-          <td
-           ref={isDropdownOpen ? dropdownRef : null}
-           className="px-3 py-3"><button
-                  onClick={(e) => handleActionClick(e, item?.uid)}
-                  className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
-                    isDropdownOpen
-                      ? "bg-gray-600 text-white"
-                      : "hover:bg-gray-700"
-                  }`}
+                <td className="px-3 py-3 text-gray-300 text-left">
+                  {new Date(item.date_time).toLocaleString()}
+                </td>
+                <td
+                  ref={isDropdownOpen ? dropdownRef : null}
+                  className="px-3 py-3"
                 >
-                  ⋯ {/* Vertical three dots */}
-                </button>
-                 {isDropdownOpen && renderActionDropdown(item?.uid, item)}</td>
-        </tr>
-          </>
-        )
-      })}
-    </tbody>
-  );
-};
-
+                  <button
+                    onClick={(e) => handleActionClick(e, item?.uid)}
+                    className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
+                      isDropdownOpen
+                        ? "bg-gray-600 text-white"
+                        : "hover:bg-gray-700"
+                    }`}
+                  >
+                    ⋯ {/* Vertical three dots */}
+                  </button>
+                  {isDropdownOpen && renderActionDropdown(item?.uid, item)}
+                </td>
+              </tr>
+            </>
+          );
+        })}
+      </tbody>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#0b0d14] p-6 text-white">
@@ -847,102 +923,118 @@ const endItem = Math.min(
       </div>
 
       <div className="mt-4 border border-gray-700 rounded-lg overflow-hidden">
-  <div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
+        <div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
+          {/* ===== FIXED HEADER ===== */}
+          <div className="flex-none overflow-x-auto bg-gray-800">
+            <table className="min-w-full table-fixed">
+              <TableColGroup />
 
-    {/* ===== FIXED HEADER ===== */}
-    <div className="flex-none overflow-x-auto bg-gray-800">
-      <table className="min-w-full table-fixed">
-        <TableColGroup />
+              <thead className="bg-gray-800">
+                <tr>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Sn
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Campaign Name
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Source
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Status
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Integration
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Clicks
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Safe
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Money
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Created on
+                  </th>
+                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+            </table>
+          </div>
 
-        <thead className="bg-gray-800">
-          <tr>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Sn</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Campaign Name</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Source</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Integration</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Clicks</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Safe</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Money</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Created on</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Action</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
+          {/* ===== SCROLLABLE BODY ===== */}
+          <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
+            <table className="min-w-full table-fixed divide-y divide-gray-800 border-t border-gray-700">
+              <TableColGroup />
+              {renderTableContent()}
+            </table>
+          </div>
 
-    {/* ===== SCROLLABLE BODY ===== */}
-    <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
-      <table className="min-w-full table-fixed divide-y divide-gray-800 border-t border-gray-700">
-        <TableColGroup />
-        {renderTableContent()}
-      </table>
-    </div>
+          {/* ===== FIXED FOOTER ===== */}
+          <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between">
+            {/* LEFT */}
+            <span className="text-sm text-gray-400">
+              Showing{" "}
+              <span className="text-gray-200 font-medium">
+                {startItem}–{endItem}
+              </span>{" "}
+              of{" "}
+              <span className="text-gray-200 font-medium">{totalRecords}</span>{" "}
+              campaigns
+            </span>
 
-    {/* ===== FIXED FOOTER ===== */}
-    <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between">
-  {/* LEFT */}
-  <span className="text-sm text-gray-400">
-    Showing{" "}
-    <span className="text-gray-200 font-medium">
-      {startItem}–{endItem}
-    </span>{" "}
-    of{" "}
-    <span className="text-gray-200 font-medium">
-      {totalRecords}
-    </span>{" "}
-    campaigns
-  </span>
+            {/* RIGHT – Numbered Pagination */}
+            <div className="flex items-center gap-1">
+              {/* Prev */}
+              <button
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className={`px-3 py-1 text-sm rounded border ${
+                  currentPage === 1
+                    ? "text-gray-500 border-gray-600 cursor-not-allowed"
+                    : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
+                }`}
+              >
+                Prev
+              </button>
 
-  {/* RIGHT – Numbered Pagination */}
-  <div className="flex items-center gap-1">
-    {/* Prev */}
-    <button
-      disabled={currentPage === 1}
-      onClick={() => handlePageChange(currentPage - 1)}
-      className={`px-3 py-1 text-sm rounded border ${
-        currentPage === 1
-          ? "text-gray-500 border-gray-600 cursor-not-allowed"
-          : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
-      }`}
-    >
-      Prev
-    </button>
+              {/* Page Numbers */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-1 text-sm rounded border cursor-pointer ${
+                      page === currentPage
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "text-gray-300 border-gray-600 hover:bg-gray-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
 
-    {/* Page Numbers */}
-    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-      <button
-        key={page}
-        onClick={() => handlePageChange(page)}
-        className={`px-3 py-1 text-sm rounded border cursor-pointer ${
-          page === currentPage
-            ? "bg-blue-600 text-white border-blue-600"
-            : "text-gray-300 border-gray-600 hover:bg-gray-700"
-        }`}
-      >
-        {page}
-      </button>
-    ))}
-
-    {/* Next */}
-    <button
-      disabled={currentPage === totalPages}
-      onClick={() => handlePageChange(currentPage + 1)}
-      className={`px-3 py-1 text-sm rounded border ${
-        currentPage === totalPages
-          ? "text-gray-500 border-gray-600 cursor-not-allowed"
-          : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
-      }`}
-    >
-      Next
-    </button>
-  </div>
-</div>
-
-
-  </div>
-</div>
-
+              {/* Next */}
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className={`px-3 py-1 text-sm rounded border ${
+                  currentPage === totalPages
+                    ? "text-gray-500 border-gray-600 cursor-not-allowed"
+                    : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Bottom Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -1061,6 +1153,9 @@ const endItem = Math.min(
           </div>
         </div>
       </div>
+ 
+
+
     </div>
   );
 };

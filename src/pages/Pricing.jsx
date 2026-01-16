@@ -9,7 +9,7 @@ const plans = [
   {
     id: 1,
     name: "Starter",
-    basePrice: 19,
+    basePrice: 49,
     campaigns: "1 Campaign",
     clicks: "1,000 Clicks",
     features: [

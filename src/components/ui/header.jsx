@@ -38,7 +38,8 @@ const Header = ({ onMenuClick }) => {
     if (response) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
-      localStorage.removeItem("dashboard_todos");
+      localStorage.removeItem("plan");
+      localStorage.removeItem("todo_tasks");
 
       navigate("/");
     }

@@ -305,15 +305,20 @@ export default function LoginPage() {
 
     try {
       const response = await createApiFunction("post", logInApi, null, formData);
+      console.log("fjjf",response)
+      
 
 
 
       if (response && response.data?.token) {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+         localStorage.removeItem("plan");
 
         localStorage.setItem("user", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
+         localStorage.setItem("plan", JSON.stringify(response.data.plan));
+
         showSuccessToast("Signin successful!");
 
         await new Promise((res) => setTimeout(res, 400));

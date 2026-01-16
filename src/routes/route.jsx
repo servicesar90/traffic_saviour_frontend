@@ -9,6 +9,7 @@ import {
 import { Toaster } from "react-hot-toast";
 import { LoginProtector, RoutesProtector } from "./routesProtector";
 import UpdatePassword from "../auth/updatePassword";
+import DashboardGuard from "./DashboardGuard";
 
 // ✅ Lazy imports
 const LandingPage = lazy(() => import("../pages/home.jsx/landingPage"));
@@ -29,10 +30,10 @@ const Clicklog = lazy(() => import("../pages/clickLogs1"));
 const CheckoutFlow = lazy(() => import("../components/ui/checkOutFlow"));
 const ResetPassword = lazy(() => import("../auth/ResetPassword"));
 // const UpdatePassword = lazy(() => import("../auth/updatePassword"));
-const RealtimeAnalytics = lazy(()=> import("../pages/RealtimeAnalytics"))
-const Socket = lazy(()=> import("../pages/socket"));
-const PaypalIntegration = lazy(()=> import("../pages/paypalIntegration"));
-const Billing = lazy(()=>import("../pages/Billing"));
+const RealtimeAnalytics = lazy(() => import("../pages/RealtimeAnalytics"));
+const Socket = lazy(() => import("../pages/socket"));
+const PaypalIntegration = lazy(() => import("../pages/paypalIntegration"));
+const Billing = lazy(() => import("../pages/Billing"));
 
 const Layout = () => (
   <div className="w-[100vw] h-[100vh] bg-[#0b0d14]">
@@ -98,37 +99,34 @@ export default function Routess() {
             path="/Dashboard"
             element={
               <RoutesProtector>
-                <Dashboard />
+                <DashboardGuard >
+                  <Dashboard/>
+                </DashboardGuard>
               </RoutesProtector>
             }
           >
-            <Route path="allStats" element={<AllStats />} />
-            <Route path="allCampaign" element={<AllCampaignsDashboard />} />
-            <Route path="create-campaign" element={<Campaign />} />
-            <Route
-              path="campaign-integration"
-              element={<CloakingIntegration />}
-            />
-            <Route path="ipListings" element={<IpListings />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="test" element={<Test />} />
-            {/* <Route path="clickLogs" element={<ClickLogs />} /> */}
+            
+              <Route path="allStats" element={<AllStats />} />
+              <Route path="allCampaign" element={<AllCampaignsDashboard />} />
+              <Route path="create-campaign" element={<Campaign />} />
+              <Route
+                path="campaign-integration"
+                element={<CloakingIntegration />}
+              />
+              <Route path="ipListings" element={<IpListings />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="test" element={<Test />} />
+              {/* <Route path="clickLogs" element={<ClickLogs />} /> */}
 
-            <Route path="reports" element={<Clicklog />} />
-            <Route
-              path="real-time-analytics/:id"
-              element={<RealtimeAnalytics />}
-            />
-            <Route
-              path="pricing"
-              element={<Pricing />}
-            />
-             <Route
-              path="billing"
-              element={<Billing />}
-            />
+              <Route path="reports" element={<Clicklog />} />
+              <Route
+                path="real-time-analytics/:id"
+                element={<RealtimeAnalytics />}
+              />
+              <Route path="pricing" element={<Pricing />} />
+              <Route path="billing" element={<Billing />} />
+           
           </Route>
-          
 
           <Route
             path="/myProfile"
@@ -140,7 +138,7 @@ export default function Routess() {
             }
           />
 
-          <Route
+          {/* <Route
             path="/pricing"
             element={
               <RoutesProtector>
@@ -148,7 +146,7 @@ export default function Routess() {
                 <CheckoutFlow />
               </RoutesProtector>
             }
-          />
+          /> */}
 
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />

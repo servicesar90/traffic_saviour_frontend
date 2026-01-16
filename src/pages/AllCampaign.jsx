@@ -5,10 +5,12 @@ import {
   ipClicks,
   campdata,
   updateCampaignStatus,
+  signOutApi
 } from "../api/Apis";
 import { apiFunction } from "../api/ApiFunction";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast, showInfoToast, showSuccessToast } from "../components/toast/toast";
+import { isPlanValid } from "../utils/checkPlan";
 
 // Note: TABS definition is kept here for reference
 
@@ -27,6 +29,7 @@ function AllCampaignsDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  
   const campaignAbortRef = useRef(null);
 const ipClickAbortRef = useRef(null);
 const statsAbortRef = useRef(null);
@@ -93,6 +96,8 @@ const statsAbortRef = useRef(null);
       setTotalItems(0);
     }
   }, []);
+
+
 
   const fetchIpClicks = async () => {
      if (ipClickAbortRef.current) {
@@ -242,6 +247,11 @@ const statsAbortRef = useRef(null);
 
 
   useEffect(() => {
+  
+
+
+
+
     fetchCampaigns();
     fetchIpClicks();
     fetchStats();
@@ -281,46 +291,96 @@ const statsAbortRef = useRef(null);
     setOpenDropdownId(openDropdownId === campaignId ? null : campaignId);
   };
 
+
   const handleActionSelect = async (action, campaignId, row) => {
-    setOpenDropdownId(null); // मेनू बंद करें
-    switch (action) {
-      case "edit":
-         showInfoToast(`Editing campaign ID: ${campaignId}`);
-    
-         
-        navigate("/Dashboard/create-campaign", {
-          state: {
-            mode: "edit",
-            id: row.uid,
-            data: row, // campaign data from db
-          },
-        });
-        // TODO: Navigate to Edit screen or open a modal
-        break;
-      case "duplicate":
-        // alert(`Duplicating campaign ID: ${campaignId}`);
-        // TODO: Call API to duplicate campaign
-        break;
+     setOpenDropdownId(null); // मेनू बंद करें
+     switch (action) {
+       case "edit":
+         // alert(`Editing campaign ID: ${campaignId}`);
+         navigate("/Dashboard/create-campaign", {
+           state: {
+             mode: "edit",
+             id: row.uid,
+             data: row, // campaign data from db
+           },
+         });
+         // TODO: Navigate to Edit screen or open a modal
+         break;
+       case "duplicate": {
+         try {
+           if (!row) return;
+           console.log(row);
+ 
+           // 🔁 deep clone campaign
+           const payload = JSON.parse(JSON.stringify(row));
+        
+ 
+           // ❌ backend generated fields hatao
+           delete payload.uid;
+           delete payload._id;
+           delete payload.createdAt;
+           delete payload.updatedAt;
+           delete payload.date_time;
+ 
+           // 📝 campaign name modify
+           const data = {
+             ...payload,
+ 
+             campaignName:
+               (payload.campaign_info?.campaignName || "Campaign") + " (Copy)",
+             trafficSource: payload.campaign_info?.trafficSource,
+           };
+ 
+           // optional default status
+ 
+ 
+           // 🚀 CREATE API CALL (same API as create)
+           const res = await apiFunction("post", createCampaignApi, null, data);
+ 
+           if (res?.data?.status || res?.data?.success) {
+             const newCampaign = res.data.data;
+ 
+             // ✅ UI update (top me add)
+             setCampaigns((prev) => [newCampaign, ...prev]);
+             
+ 
+             showSuccessToast("Campaign duplicated successfully");
+             await fetchCampaigns();
+             await fetchStats();
+            
+ 
+           }
+         } catch (err) {
+           console.error("Duplicate campaign error:", err);
+           showErrorToast("Failed to duplicate campaign");
+         }
+ 
+         break;
+       }
+ 
        case "delete":
-        if (window.confirm(`Are you sure you want to delete this campaign?`)) {
-          const res = await apiFunction(
-            "delete",
-            createCampaignApi,
-            campaignId,
-            null
-          );
-      
-          if (res) {
-            setCampaigns((prev) =>
-              prev.filter((item) => item.uid !== campaignId)
-            );
-          }
-        }
-        break;
-      default:
-        break;
-    }
-  };
+         if (window.confirm(`Are you sure you want to delete this campaign?`)) {
+           const res = await apiFunction(
+             "delete",
+             createCampaignApi,
+             campaignId,
+             null
+           );
+ 
+           if (res) {
+             setCampaigns((prev) =>
+               prev.filter((item) => item.uid !== campaignId)
+             );
+             await fetchStats();
+             
+             
+           }
+         }
+         break;
+       default:
+         break;
+     }
+   };
 
   // --- Existing Handlers ---
  const handleRefresh = async () => {
@@ -406,7 +466,7 @@ const endItem = Math.min(
           Edit Campaign
         </button>
         <button
-          onClick={() => handleActionSelect("duplicate", campaignId, null)}
+          onClick={() => handleActionSelect("duplicate", campaignId, row)}
           className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 hover:text-white transition duration-100 cursor-pointer"
         >
           Duplicate Campaign
@@ -900,6 +960,8 @@ const endItem = Math.min(
       </div> */}
 
       {/* Fixed Components */}
+
+      
     </div>
   );
 }
