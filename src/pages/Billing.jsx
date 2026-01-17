@@ -33,31 +33,225 @@ const BillingPage = () => {
     }
   };
 
- const InvoiceTemplate = ({ item }) => (
-  <div
-    style={{
-      width: "800px",
-      padding: "40px",
-      background: "#ffffff",
-      color: "#000",
-      fontFamily: "Outfit",
-    }}
+const InvoiceTemplate = ({ item }) => {
+  return (
+    <div
+      style={{
+        width: "800px",
+        padding: "40px",
+        backgroundColor: "#ffffff",
+        color: "#111827",
+        fontFamily: "Outfit, Arial, sans-serif",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* HEADER */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "40px" }}>
+        <div>
+          {/* LOGO PLACEHOLDER */}
+          <div
+            style={{
+              width: "120px",
+              height: "40px",
+              backgroundColor: "#e5e7eb",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "12px",
+              fontWeight: 600,
+              marginBottom: "10px",
+            }}
+          >
+            LOGO
+          </div>
+
+          <h1 style={{ fontSize: "28px", margin: 0 }}>INVOICE</h1>
+          <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
+          <h3 style={{ fontSize: "16px", margin: 0 }}>Click Stopper</h3>
+          </p>
+        </div>
+
+        <div style={{ textAlign: "right", fontSize: "12px", color: "#374151" }}>
+          <p><b>Invoice ID:</b> {item.payment_id}</p>
+          <p><b>Date:</b> {new Date(item.start_date).toLocaleDateString()}</p>
+          <p>
+            <b>Status:</b>{" "}
+            <span
+              style={{
+                color:
+                  item.status === "Paid"
+                    ? "#16a34a"
+                    : item.status === "Rejected"
+                    ? "#dc2626"
+                    : "#d97706",
+                fontWeight: 600,
+              }}
+            >
+              {item.status?.toUpperCase()}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      {/* BILL TO */}
+      <div style={{ marginBottom: "30px" }}>
+        <h3 style={{ fontSize: "14px", marginBottom: "6px", color: "#111827" }}>
+          Billed For
+        </h3>
+        <p style={{ fontSize: "13px", color: "#374151", margin: 0 }}>
+          Subscription Plan: <b>{item.plan_name || "N/A"}</b>
+        </p>
+        <p style={{ fontSize: "13px", color: "#374151", margin: 0 }}>
+          Payment Method: {item.method || "N/A"}
+        </p>
+      </div>
+
+      {/* COMPANY DETAILS */}
+      <div style={{ marginBottom: "30px", fontSize: "13px", color: "#374151" }}>
+        <p style={{ margin: 0 }}><b>Email:</b> billing@clickstopper.com</p>
+        <p style={{ margin: 0 }}>
+  <b>Phone:</b>{" "}
+  <a
+    href="tel:+13214188331"
+    style={{ color: "#111827", textDecoration: "none" }}
   >
-    <h1 style={{ fontSize: "24px", marginBottom: "20px" }}>INVOICE</h1>
+    +1 321-418-8331
+  </a>
+</p>
+        <p style={{ margin: 0 }}>
+          <b>Address:</b> 5600 Tribune Way, Plano, TX 75094-4502, US
+        </p>
+      </div>
 
-    <p><b>Plan:</b> {item.plan_name}</p>
-    <p><b>Payment ID:</b> {item.payment_id}</p>
-    <p><b>Method:</b> {item.method}</p>
-    <p><b>Amount:</b> ${item.amount}</p>
-    <p><b>Invoice Date:</b> {new Date(item.start_date).toLocaleDateString()}</p>
+      {/* TABLE */}
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          marginBottom: "20px",
+        }}
+      >
+        <thead>
+          <tr style={{ backgroundColor: "#f3f4f6" }}>
+            <th style={th}>Description</th>
+            <th style={th}>Period</th>
+            <th style={{ ...th, textAlign: "right" }}>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style={td}>{item.plan_name} Subscription</td>
+            <td style={td}>
+              {item.start_date
+                ? new Date(item.start_date).toLocaleDateString()
+                : "N/A"}{" "}
+              –{" "}
+              {item.end_date
+                ? new Date(item.end_date).toLocaleDateString()
+                : "N/A"}
+            </td>
+            <td style={{ ...td, textAlign: "right", fontWeight: 600 }}>
+              ${item.amount}
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <hr style={{ margin: "20px 0" }} />
+      {/* TOTAL */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
+        <div style={{ width: "250px" }}>
+          <div style={totalRow}>
+            <span>Subtotal</span>
+            <span>${item.amount}</span>
+          </div>
+          <div style={totalRow}>
+            <span>Tax</span>
+            <span>$0.00</span>
+          </div>
+          <div style={{ ...totalRow, fontWeight: 700, fontSize: "16px" }}>
+            <span>Total</span>
+            <span>${item.amount}</span>
+          </div>
+        </div>
+      </div>
 
-    <p style={{ fontSize: "12px", color: "#666" }}>
-      This is a system generated invoice.
-    </p>
-  </div>
-);
+      {/* EXTRA / LEGAL CONTENT BELOW TOTAL */}
+      <div
+        style={{
+          marginBottom: "30px",
+          paddingTop: "10px",
+          borderTop: "1px dashed #e5e7eb",
+          fontSize: "12px",
+          color: "#4b5563",
+        }}
+      >
+        <p style={{ marginBottom: "6px" }}>
+          This invoice reflects the successful processing of your subscription payment.
+        </p>
+
+        <p style={{ marginBottom: "6px" }}>
+          All amounts are in USD. Please make the payment within 15 days from the
+          issue date of this invoice.
+        </p>
+
+        <p style={{ marginBottom: "6px" }}>
+          Tax is not charged on this bill as per paragraph 1 of Article 9 of the
+          Value Added Tax Act.
+        </p>
+
+        <p style={{ marginBottom: "6px" }}>
+          If you have any questions regarding this invoice or your subscription,
+          please contact our billing team at <b>billing@clickstopper.com</b>.
+        </p>
+
+        <p style={{ fontStyle: "italic" }}>
+          Thank you for your confidence in my work.
+        </p>
+      </div>
+
+      {/* FOOTER */}
+      <div
+        style={{
+          borderTop: "1px solid #e5e7eb",
+          paddingTop: "16px",
+          fontSize: "11px",
+          color: "#6b7280",
+          textAlign: "center",
+        }}
+      >
+        This is a system generated invoice. No signature required.<br />
+        © {new Date().getFullYear()} Click Stopper. All rights reserved.
+      </div>
+    </div>
+  );
+};
+
+
+
+
+/* Styles */
+const th = {
+  padding: "12px",
+  fontSize: "12px",
+  textAlign: "left",
+  borderBottom: "1px solid #e5e7eb",
+  color: "#374151",
+};
+
+const td = {
+  padding: "12px",
+  fontSize: "13px",
+  borderBottom: "1px solid #e5e7eb",
+  color: "#111827",
+};
+
+const totalRow = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginBottom: "8px",
+  fontSize: "13px",
+};
+
 
 const handleDownloadInvoice = async (item) => {
   const container = document.createElement("div");
@@ -194,9 +388,9 @@ const handleDownloadInvoice = async (item) => {
                         <span
                           className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter border
                           ${
-                            item.status === "success"
+                            item.status === "Paid"
                               ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                              : item.status === "failed"
+                              : item.status === "Rejected"
                               ? "bg-red-500/10 text-red-500 border-red-500/20"
                               : "bg-amber-500/10 text-amber-500 border-amber-500/20"
                           }`}
