@@ -113,7 +113,7 @@ const Header = ({ onMenuClick }) => {
                 {/* billing */}
 
                 <button
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/Dashboard/pricing")}
                   className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 cursor-pointer"
                 >
                   <DollarSign className="w-4 h-4 mr-2" />Pricing

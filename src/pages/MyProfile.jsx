@@ -47,7 +47,10 @@ const MyProfile = () => {
     try {
       const res = await apiFunction("get", signOutApi, null, null);
       if (res) {
-        localStorage.clear();
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("plan");
+        localStorage.removeItem("todo_tasks ");
         navigate("/");
       }
     } catch (error) {
@@ -87,12 +90,12 @@ const MyProfile = () => {
             />
 
             {/* PAGE SWITCHING ON SAME SCREEN */}
-            <SidebarItem
+            {/* <SidebarItem
               title="Orders"
               icon={<FaClipboardList />}
                active={activeTab === "orders"}
               onClick={() => setActiveTab("orders")}
-            />
+            /> */}
 
             <SidebarItem
               title="My Subscription"
