@@ -1,12 +1,12 @@
-// const base_url = 'http://localhost:2000';
+const base_url = 'http://localhost:2000';
 // const base_url="http://192.168.1.64:2000";
 
-const base_url="https://api.webservices.press";
+// const base_url="https://api.webservices.press";
 
 // const base_url="http://192.168.1.3:2000";
 // const base_url = "https://app.clockerly.io"
 // const base_url= "https://app.clockerly.io";
-
+ 
 
 export const signupApi = `${base_url}/auth/signup`;
 
@@ -52,5 +52,9 @@ export const cryptoPayment = `${base_url}/api/v2/payment`;
 
 export const paypalCreateOrder = `${base_url}/api/v2/payment/create-order`;
 export const paypalCaptureOrder = `${base_url}/api/v2/payment/capture-order`;   
+
+export const verifyOtpApi = `${base_url}/auth/verify-otp`;
+
+export const resendOtpApi = `${base_url}/auth/resend-otp`;
 
 

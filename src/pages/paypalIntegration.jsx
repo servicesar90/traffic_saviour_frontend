@@ -7,13 +7,10 @@ function PayPalIntegration(cart) {
     console.log(cart);
 
     const initialOptions = {
-        "client-id": "Adenx-z-vmV67v-6MNYwq878nvqIsC9Hx1VNxd2oWSxgW1duvnSVAaPdSBRYkDZMlGIBfnw1GV4uBtZr",
+        "client-id": "Ab-9ZC08-4ikVMDnmZr4k9teR3h_LzRNt68jZ8PthU5SaQAB3bVqb2NVM0ehq-956WUS40XG8Sy6Hlsz",
         currency: "USD",
         intent: "capture",
     };
-
-    // const serverUrl = "https://api.webservices.press/";
-        const serverUrl = "http://localhost:2000/";
 
 
 
