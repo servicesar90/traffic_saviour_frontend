@@ -1,5 +1,5 @@
-const base_url = 'http://localhost:2000';
-// const base_url="http://192.168.1.64:2000";
+// const base_url = 'http://localhost:2000';
+const base_url="http://192.168.1.64:2000";
 
 // const base_url="https://api.webservices.press";
 
@@ -58,5 +58,7 @@ export const getPlans = `${base_url}/api/v2/utils/plans`
 export const verifyOtpApi = `${base_url}/auth/verify-otp`;
 
 export const resendOtpApi = `${base_url}/auth/resend-otp`;
+
+export const getSubscription = `${base_url}/auth/v2/plan/subscription`;
 
 

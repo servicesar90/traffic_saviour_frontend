@@ -6,6 +6,7 @@ import {
   paypalCreateOrder,
   paypalCaptureOrder,
   cryptoPayment,
+  getSubscription,
 } from "../api/Apis";
 
 function PayPalIntegration(cart) {
@@ -22,6 +23,8 @@ function PayPalIntegration(cart) {
 
 
     const [message, setMessage] = useState("");
+    const [openSuccessModal,setOpenSuccessModal]=useState(false);
+    const [openCancelModal, setOpenCancelModal]= useState(false)
 
   return (
     <div className="paypal-integration mt-6">
@@ -138,6 +141,16 @@ function PayPalIntegration(cart) {
                     status: "Paid",
                   });
 
+                  const res= await apiFunction("get", getSubscription, null, null);
+                  console.log(res);
+
+                  if(res?.data?.success && res?.data?.data){
+                    const subscriptionData = res?.data?.data;
+
+                    localStorage.setItem("plan",JSON.stringify(subscriptionData));
+                  }
+                  
+
                   setPaymentInfo({
                     paymentId: orderData.id,
                     amount:
@@ -248,7 +261,7 @@ onError={(err) => {
             </div>
           </div>
         </div>
-      )};
+      )}
 
       {openCancelModal && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -304,7 +317,7 @@ onError={(err) => {
       </div>
     </div>
   </div>
-)};
+)}  
 
     </div>
   );
