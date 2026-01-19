@@ -1,77 +1,9 @@
-import React, { useState } from "react";
-import { apiFunction } from "../api/ApiFunction";
-import { cryptoPayment } from "../api/Apis";
+import React, { useEffect, useState } from "react";
+import { apiFunction, createApiFunction } from "../api/ApiFunction";
+import { cryptoPayment, getPlans } from "../api/Apis";
 import PayPalIntegration from "./paypalIntegration";
 
-/* ===================== DATA ===================== */
-
-const plans = [
-  {
-    id: 1,
-    name: "Starter",
-    basePrice: 49,
-    campaigns: "1 Campaign",
-    clicks: "1,000 Clicks",
-    features: [
-      "VPN / Proxy Protection",
-      "Bot Protection",
-      "Block Empty Referrer",
-      "Block Blacklist IP's",
-      "Country Targeting",
-      "Device Targeting",
-      "OS Targeting",
-      "Download Report",
-      "Realtime Click Report",
-    ],
-  },
-  {
-    id: 2,
-    name: "Pro",
-    basePrice: 99,
-    campaigns: "5 Campaigns",
-    clicks: "5,000 Clicks",
-    popular: true,
-    features: [
-      "VPN / Proxy Protection",
-      "Bot Protection",
-      "Block Empty Referrer",
-      "Block Blacklist IP's",
-      "Country Targeting",
-      "Device Targeting",
-      "OS Targeting",
-      "Download Report",
-      "Realtime Click Report",
-      "Safe Page",
-      "Money Page",
-    ],
-  },
-  {
-    id: 3,
-    name: "Enterprise",
-    basePrice: 149,
-    campaigns: "20 Campaigns",
-    clicks: "Unlimited Clicks",
-    features: [
-      "VPN / Proxy Protection",
-      "Bot Protection",
-      "Block Empty Referrer",
-      "Block Blacklist IP's",
-      "Country Targeting",
-      "Device Targeting",
-      "OS Targeting",
-      "Download Report",
-      "Realtime Click Report",
-      "Safe Page",
-      "Money Page",
-    ],
-  },
-];
-
-const discounts = {
-  Monthly: 0,
-  quarterly: 10,
-  Yearly: 20,
-};
+/* ===================== PAYMENT DETAILS ===================== */
 
 const PAYMENT_DETAILS = {
   ERC20: {
@@ -88,17 +20,38 @@ const PAYMENT_DETAILS = {
 
 export default function Pricing() {
   const [billing, setBilling] = useState("Monthly");
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
 
   // MODAL STATE
-  const [modalStep, setModalStep] = useState(0); // 0=closed
+  const [modalStep, setModalStep] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [network, setNetwork] = useState("");
   const [txHash, setTxHash] = useState("");
   const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState(null);
-  const isConfirmDisabled = !txHash.trim() || loading;
 
+  /* ===================== FETCH PLANS ===================== */
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await createApiFunction("get", getPlans, null, null);
+        console.log("PLANS RESPONSE 👉", res);
+
+        if (res?.data?.success && Array.isArray(res.data.Plans)) {
+          setPlans(res.data.Plans);
+        }
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  /* ===================== HELPERS ===================== */
 
   const resetPaymentState = () => {
     setModalStep(0);
@@ -107,59 +60,53 @@ export default function Pricing() {
     setNetwork("");
     setTxHash("");
     setLoading(false);
+    setPayload(null);
   };
 
-
-
   const calculateStartEndDates = (billing) => {
-    const start = new Date(); // now
+    const start = new Date();
     const end = new Date(start);
 
-    if (billing === "Monthly") {
-      end.setMonth(end.getMonth() + 1);
-    }
-
-    if (billing === "quarterly") {
-      end.setMonth(end.getMonth() + 3);
-    }
-
-    if (billing === "Yearly") {
-      end.setFullYear(end.getFullYear() + 1);
-    }
+    if (billing === "Monthly") end.setMonth(end.getMonth() + 1);
+    if (billing === "quarterly") end.setMonth(end.getMonth() + 3);
+    if (billing === "Yearly") end.setFullYear(end.getFullYear() + 1);
 
     return {
-      start_date: start.toISOString(), // ✅ UTC
-      end_date: end.toISOString(),     // ✅ UTC
+      start_date: start.toISOString(),
+      end_date: end.toISOString(),
     };
   };
 
-
-
-
-
-
-  /* ===== PRICE LOGIC (UNCHANGED) ===== */
-  const calculateMonthlyPrice = (price) => {
-    const discount = discounts[billing];
-    return Math.round(price - (price * discount) / 100);
+  const parseFeatures = (features) => {
+    try {
+      return JSON.parse(features);
+    } catch {
+      return [];
+    }
   };
-  const getBillingMultiplier = () => {
-    if (billing === "quarterly") return 3;
-    if (billing === "Yearly") return 12;
-    return 1; // Monthly
-  };
-  const MonthlyPrice = selectedPlan
-    ? calculateMonthlyPrice(selectedPlan.basePrice)
-    : 0;
 
-  const totalAmount = MonthlyPrice * getBillingMultiplier();
+  const filteredPlans = plans.filter((plan) => {
+    if (billing === "Monthly") return plan.durationInMonths === 1;
+    if (billing === "quarterly") return plan.durationInMonths === 3;
+    if (billing === "Yearly") return plan.durationInMonths === 12;
+    return false;
+  });
 
+  const totalAmount = selectedPlan ? selectedPlan.price : 0;
 
   const makeCryptoPayment = async (payload) => {
-    const response = await apiFunction("post", cryptoPayment, null, payload);
-    return response;
+    return await apiFunction("post", cryptoPayment, null, payload);
   };
 
+  /* ===================== LOADER ===================== */
+
+  if (loadingPlans) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading plans...
+      </div>
+    );
+  }
 
   /* ===================== UI ===================== */
 
@@ -179,37 +126,50 @@ export default function Pricing() {
         {/* BILLING TOGGLE */}
         <div className="flex justify-center mb-14">
           <div className="bg-[#1E293B] p-1 rounded-xl flex gap-1">
-            {["Monthly", "quarterly", "Yearly"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setBilling(type)}
-                className={`px-6 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${billing === type
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:bg-gray-700"
+            {["Monthly", "quarterly", "Yearly"].map((type) => {
+              const discount =
+                type === "quarterly"
+                  ? "10% OFF"
+                  : type === "Yearly"
+                    ? "20% OFF"
+                    : null;
+
+              return (
+                <button
+                  key={type}
+                  onClick={() => setBilling(type)}
+                  className={`relative px-6 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
+                    billing === type
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-300 hover:bg-gray-700"
                   }`}
-              >
-                {type}
-                {type !== "Monthly" && (
-                  <span className="ml-2 text-xs text-green-400">
-                    {discounts[type]}% OFF
-                  </span>
-                )}
-              </button>
-            ))}
+                >
+                  {type}
+
+                  {/* DISCOUNT BADGE */}
+                  {discount && (
+                    <span className="absolute -top-2 -right-2 bg-green-500 text-black text-[10px] font-bold px-2 py-[2px] rounded-full">
+                      {discount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* CARDS */}
+        {/* PLANS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan, i) => (
+          {filteredPlans.map((plan) => (
             <div
-              key={i}
-              className={`relative bg-[#1E293B] border rounded-2xl p-8 ${plan.popular
+              key={plan.id}
+              className={`relative bg-[#1E293B] border rounded-2xl p-8 ${
+                plan.name.includes("Pro")
                   ? "border-blue-500 ring-1 ring-blue-500"
                   : "border-gray-700"
-                }`}
+              }`}
             >
-              {plan.popular && (
+              {plan.name.includes("Pro") && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs px-4 py-1 rounded-full">
                   Most Popular
                 </span>
@@ -218,18 +178,19 @@ export default function Pricing() {
               <h3 className="text-xl font-semibold">{plan.name}</h3>
 
               <div className="mt-4">
-                <span className="text-4xl font-bold">
-                  ${calculateMonthlyPrice(plan.basePrice)}
-                </span>
-                <span className="text-gray-400 ml-2">/ Monthly</span>
+                <span className="text-4xl font-bold">${plan.price}</span>
+                <span className="text-gray-400 ml-2">/ {billing}</span>
               </div>
 
               <p className="mt-3 text-gray-400 text-sm">
-                {plan.campaigns} • {plan.clicks}
+                {plan.maxCampaigns} Campaigns •{" "}
+                {plan.clicksPerCampaign === -1
+                  ? "Unlimited Clicks"
+                  : `${plan.clicksPerCampaign} Clicks/Campaign`}
               </p>
 
               <ul className="mt-6 space-y-2 text-sm">
-                {plan.features.map((f, idx) => (
+                {parseFeatures(plan.features).map((f, idx) => (
                   <li key={idx} className="flex gap-2">
                     <span className="text-green-400">✔</span>
                     {f}
@@ -242,10 +203,11 @@ export default function Pricing() {
                   setSelectedPlan(plan);
                   setModalStep(1);
                 }}
-                className={`mt-8 w-full py-3 rounded-xl cursor-pointer ${plan.popular
+                className={`mt-8 w-full py-3 rounded-xl cursor-pointer ${
+                  plan.name.includes("Pro")
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-gray-700 hover:bg-gray-600"
-                  }`}
+                }`}
               >
                 Choose Plan
               </button>
@@ -258,10 +220,9 @@ export default function Pricing() {
       {modalStep > 0 && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-[#111827] w-full max-w-md rounded-2xl p-6 border border-gray-700 relative">
-            {/* CLOSE */}
             <button
               onClick={resetPaymentState}
-              className="absolute top-3 right-4 text-gray-400 hover:text-white cursor-pointer"
+              className="absolute top-3 right-4 text-gray-400 hover:text-white"
             >
               ✕
             </button>
@@ -271,107 +232,28 @@ export default function Pricing() {
               <>
                 <h2 className="text-xl font-bold">Confirm Purchase</h2>
                 <p className="text-yellow-400 mt-2">
-                  Are you sure you want to activate <b>{selectedPlan.name}</b>?
+                  Activate <b>{selectedPlan.name}</b> for <b>${totalAmount}</b>?
                 </p>
 
                 <div className="mt-6 space-y-3">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      checked={paymentMethod === "USDT"}
-                      onChange={() => setPaymentMethod("USDT")}
-                    />
-                    <span>USDT</span>
-                  </label>
-
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      checked={paymentMethod === "card"}
-                      onChange={() => setPaymentMethod("card")}
-                    />
-                    <span>Card</span>
-                  </label>
-                </div>
-
-                <div className="flex justify-between mt-6">
-                  <button
-                    className="cursor-pointer"
-                    onClick={() => setModalStep(0)}
-                  >
-                    Close
-                  </button>
-                  <button
-                    disabled={!paymentMethod}
-                    onClick={() => {
-                      setModalStep(2)
-                      if (paymentMethod === "card") {
-                        const { start_date, end_date } =
-                          calculateStartEndDates(billing);
-                        setPayload({
-                          plan_id: selectedPlan.id,
-                          plan_name: selectedPlan.name,
-                          billing_cycle: billing,
-
-                          method:
-                            paymentMethod === "USDT"
-                              ? "cryptocurrency"
-                              : "card",
-
-                          amount: totalAmount,
-
-                          currency:
-                            paymentMethod === "USDT"
-                              ? network === "ERC20"
-                                ? "USDT (ERC20)"
-                                : "USDT (TRC20)"
-                              : "USD",
-
-                          start_date,
-                          end_date,
-
-                          payment_id: null,
-                        })
-                      }
-                    }
-                    }
-                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
-                  >
-                    Continue
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* STEP 2 */}
-            {modalStep === 2 && paymentMethod === "USDT" && (
-              <>
-                <h2 className="text-xl font-bold">Select Network</h2>
-
-                <div className="mt-6 space-y-3">
-                  {["ERC20", "TRC20"].map((n) => (
-                    <label key={n} className="flex gap-3 cursor-pointer">
+                  {["USDT", "card"].map((m) => (
+                    <label key={m} className="flex gap-3 cursor-pointer">
                       <input
                         type="radio"
-                        checked={network === n}
-                        onChange={() => setNetwork(n)}
+                        checked={paymentMethod === m}
+                        onChange={() => setPaymentMethod(m)}
                       />
-                      {n}
+                      {m.toUpperCase()}
                     </label>
                   ))}
                 </div>
 
                 <div className="flex justify-between mt-6">
+                  <button onClick={resetPaymentState}>Close</button>
                   <button
-                    className="cursor-pointer"
-                    onClick={() => setModalStep(1)}
-                  >
-                    Back
-                  </button>
-                  <button
-                    disabled={!network}
-                    onClick={() => setModalStep(3)}
-                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
+                    disabled={!paymentMethod}
+                    onClick={() => setModalStep(2)}
+                    className="bg-blue-600 px-4 py-2 rounded"
                   >
                     Continue
                   </button>
@@ -379,28 +261,41 @@ export default function Pricing() {
               </>
             )}
 
-            {modalStep === 2 && paymentMethod === "card" && (
+            {/* STEP 2 - USDT */}
+            {modalStep === 2 && paymentMethod === "USDT" && (
               <>
-
-                <div className="mt-12">
-                  <PayPalIntegration cart={payload} />
-                </div>
+                <h2 className="text-xl font-bold">Select Network</h2>
+                {["ERC20", "TRC20"].map((n) => (
+                  <label key={n} className="flex gap-3 mt-4 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={network === n}
+                      onChange={() => setNetwork(n)}
+                    />
+                    {n}
+                  </label>
+                ))}
 
                 <div className="flex justify-between mt-6">
+                  <button onClick={() => setModalStep(1)}>Back</button>
                   <button
-                    className="cursor-pointer"
-                    onClick={() => setModalStep(1)}
-                  >
-                    Back
-                  </button>
-                  {/* <button
                     disabled={!network}
                     onClick={() => setModalStep(3)}
-                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
+                    className="bg-blue-600 px-4 py-2 rounded"
                   >
                     Continue
-                  </button> */}
+                  </button>
                 </div>
+              </>
+            )}
+
+            {/* STEP 2 - CARD */}
+            {modalStep === 2 && paymentMethod === "card" && (
+              <>
+                <PayPalIntegration cart={payload} />
+                <button className="mt-6" onClick={() => setModalStep(1)}>
+                  Back
+                </button>
               </>
             )}
 
@@ -410,7 +305,7 @@ export default function Pricing() {
               <>
                 <h2 className="text-xl font-bold">Confirm Purchase</h2>
 
-                <p className="mt-2 text-sm">
+                <p className="mt-2 text-sm text-gray-300">
                   You selected <b>USDT</b> on <b>{network}</b> network
                 </p>
 
@@ -420,8 +315,9 @@ export default function Pricing() {
                   className="mx-auto mt-4 w-36"
                 />
 
+                {/* Amount */}
                 <div className="mt-4">
-                  <label className="text-sm">Amount to Pay</label>
+                  <label className="text-sm text-gray-400">Amount to Pay</label>
                   <input
                     disabled
                     value={`${totalAmount} USDT`}
@@ -429,8 +325,11 @@ export default function Pricing() {
                   />
                 </div>
 
+                {/* Address */}
                 <div className="mt-4">
-                  <label className="text-sm">Pay to this address</label>
+                  <label className="text-sm text-gray-400">
+                    Pay to this address
+                  </label>
                   <input
                     disabled
                     value={PAYMENT_DETAILS[network].address}
@@ -438,8 +337,11 @@ export default function Pricing() {
                   />
                 </div>
 
+                {/* TX HASH */}
                 <div className="mt-4">
-                  <label className="text-sm">Transaction Hash</label>
+                  <label className="text-sm text-gray-400">
+                    Transaction Hash
+                  </label>
                   <input
                     placeholder="Enter transaction hash"
                     value={txHash}
@@ -459,10 +361,11 @@ export default function Pricing() {
 
                   <button
                     disabled={!txHash.trim() || loading}
-                    className={`px-4 py-2 rounded cursor-pointer flex items-center gap-2 ${!txHash.trim() || loading
+                    className={`px-4 py-2 rounded cursor-pointer flex items-center gap-2 ${
+                      !txHash.trim() || loading
                         ? "bg-gray-600 cursor-not-allowed"
                         : "bg-green-600 hover:bg-green-700"
-                      }`}
+                    }`}
                     onClick={async () => {
                       if (!txHash.trim() || loading) return;
 
@@ -471,39 +374,23 @@ export default function Pricing() {
                       const { start_date, end_date } =
                         calculateStartEndDates(billing);
 
-                      setPayload({
+                      const payloadData = {
                         plan_id: selectedPlan.id,
                         plan_name: selectedPlan.name,
                         billing_cycle: billing,
-
-                        method:
-                          paymentMethod === "USDT"
-                            ? "cryptocurrency"
-                            : "card",
-
+                        method: "cryptocurrency",
                         amount: totalAmount,
-
                         currency:
-                          paymentMethod === "USDT"
-                            ? network === "ERC20"
-                              ? "USDT (ERC20)"
-                              : "USDT (TRC20)"
-                            : "CARD",
-
+                          network === "ERC20" ? "USDT (ERC20)" : "USDT (TRC20)",
                         start_date,
                         end_date,
-
                         payment_id: txHash,
-                      });
+                      };
 
                       try {
-                        const res = await makeCryptoPayment(payload);
-                        console.log(res);
-
+                        const res = await makeCryptoPayment(payloadData);
                         if (res?.success || res?.status === 201) {
-
-                          resetPaymentState();
-                          setModalStep(0);
+                         setModalStep(4);
                         }
                       } catch {
                         alert("Payment failed");
@@ -514,7 +401,7 @@ export default function Pricing() {
                   >
                     {loading ? (
                       <>
-                        <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                        <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full "></span>
                         Processing...
                       </>
                     ) : (
@@ -524,6 +411,48 @@ export default function Pricing() {
                 </div>
               </>
             )}
+
+            {/* STEP 4 - THANK YOU */}
+{modalStep === 4 && (
+  <div className="text-center">
+    <div className="flex justify-center">
+      <div className="h-16 w-16 rounded-full bg-green-600 flex items-center justify-center text-3xl">
+        ✓
+      </div>
+    </div>
+
+    <h2 className="text-2xl font-bold mt-4 text-white">
+      Thank You for Your Payment!
+    </h2>
+
+    <p className="mt-3 text-gray-300 text-sm leading-relaxed">
+      We have successfully received your payment.
+      <br />
+      Your transaction is currently under review.
+    </p>
+
+    <div className="mt-4 bg-[#1E293B] p-4 rounded-lg text-sm text-gray-300">
+      ⏳ <b>Review Time:</b> Up to <b>24 hours</b> <br />
+      After verification, your account will get full access to:
+      <ul className="mt-2 text-left list-disc list-inside text-gray-400">
+        <li>Campaign creation</li>
+        <li>Dashboard analytics</li>
+        <li>All plan features</li>
+      </ul>
+    </div>
+
+    <p className="mt-4 text-xs text-gray-400">
+      You will be notified once your payment is approved.
+    </p>
+
+    <button
+      onClick={resetPaymentState}
+      className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg cursor-pointer"
+    >
+      OK
+    </button>
+  </div>
+)}
 
           </div>
         </div>

@@ -51,6 +51,8 @@ export const javascriptIntegrationCheckApi = `${base_url}/api/v2/trafficfilter/c
 export const cryptoPayment = `${base_url}/api/v2/payment`;
 
 export const paypalCreateOrder = `${base_url}/api/v2/payment/create-order`;
-export const paypalCaptureOrder = `${base_url}/api/v2/payment/capture-order`;   
+export const paypalCaptureOrder = `${base_url}/api/v2/payment/capture-order`; 
+
+export const getPlans = `${base_url}/api/v2/utils/plans`
 
 
