@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+
 // import {ipClicks} from "../api/Apis.js";
 import { apiFunction } from "../api/ApiFunction.js";
 import {
@@ -26,7 +26,7 @@ import {
   showInfoToast,
   showSuccessToast,
 } from "../components/toast/toast.jsx";
-import { isPlanValid } from "../utils/checkPlan.js";
+
 
 const Dashboard = () => {
   const [page, setPage] = useState(1);

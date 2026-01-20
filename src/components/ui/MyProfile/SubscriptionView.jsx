@@ -4,13 +4,7 @@ import html2canvas from "html2canvas";
 import { createRoot } from "react-dom/client";
 
 export const SubscriptionView = () => {
-  const subscription = {
-    status: "Active",
-    startDate: "August 15, 2024",
-    lastOrderDate: "August 15, 2025",
-    nextPaymentDate: "August 16, 2026",
-    paymentType: "Via Manual Renewal",
-  };
+  
 
    
 

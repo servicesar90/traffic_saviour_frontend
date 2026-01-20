@@ -59,4 +59,6 @@ export const verifyOtpApi = `${base_url}/auth/verify-otp`;
 
 export const resendOtpApi = `${base_url}/auth/resend-otp`;
 
+export const getSubscription = `${base_url}/auth/v2/plan/subscription`;
+
 

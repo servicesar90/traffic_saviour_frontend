@@ -330,7 +330,7 @@ const handleDownloadInvoice = async (item) => {
               </div>
 
               {/* TABLE BODY */}
-              <div className="max-h-[550px] overflow-y-auto divide-y divide-gray-800 custom-scrollbar">
+              <div className="max-h-[450px] overflow-y-auto divide-y divide-gray-800 custom-scrollbar">
                 {loading ? (
                   <div className="px-6 py-12 text-center text-gray-500">
                     Loading records...

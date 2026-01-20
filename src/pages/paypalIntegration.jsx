@@ -6,6 +6,7 @@ import {
   paypalCreateOrder,
   paypalCaptureOrder,
   cryptoPayment,
+  getSubscription,
 } from "../api/Apis";
 
 
@@ -138,6 +139,16 @@ function PayPalIntegration(cart) {
                     payment_id: orderData.id,
                     status: "Paid",
                   });
+
+                  const res= await apiFunction("get", getSubscription, null, null);
+                  console.log(res);
+
+                  if(res?.data?.success && res?.data?.data){
+                    const subscriptionData = res?.data?.data;
+
+                    localStorage.setItem("plan",JSON.stringify(subscriptionData));
+                  }
+                  
 
                   setPaymentInfo({
                     paymentId: orderData.id,
