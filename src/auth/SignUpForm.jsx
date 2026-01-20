@@ -77,19 +77,29 @@ export default function SignupPage() {
        * }
        */
 
-      if (response?.status === 201 || response?.success) {
-        showSuccessToast("Account created successfully!");
+      if (response?.data?.success === true) {
+       
+        
+        showSuccessToast("Enter Otp to Verify your mail!");
 
-        setRegisteredEmail(data.email);
+     localStorage.setItem("signup_data",JSON.stringify({
+      name:`${data.firstName} ${data.lastName}`,
+      email:data.email,
+      password:data.password
+     })); 
     
         reset();
         navigate("/verify-otp");
       } else {
+        
         showErrorToast(
+          
+          
           response?.message || "Something went wrong. Please try again.",
         );
       }
     } catch (err) {
+    
       const message =
         err?.response?.data?.message ||
         err?.message ||

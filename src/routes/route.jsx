@@ -35,7 +35,7 @@ const RealtimeAnalytics = lazy(() => import("../pages/RealtimeAnalytics"));
 const Socket = lazy(() => import("../pages/socket"));
 const PaypalIntegration = lazy(() => import("../pages/paypalIntegration"));
 const Billing = lazy(() => import("../pages/Billing"));
-const VerifyOtp = lazy(()=> import("../auth/VerifyOtp"));
+const Verifyotp = lazy(()=> import("../auth/VerifyOtp"));
 
 const Layout = () => (
   <div className="w-[100vw] h-[100vh] bg-[#0b0d14]">
@@ -100,9 +100,9 @@ export default function Routess() {
           <Route
             path="/verify-otp"
             element={
-              <LoginProtector>
-                <VerifyOtp />
-              </LoginProtector>
+               <LoginProtector>
+                <Verifyotp />
+               </LoginProtector>
             }
           />
 
