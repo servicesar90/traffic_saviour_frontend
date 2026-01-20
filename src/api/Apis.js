@@ -55,7 +55,7 @@ export const paypalCaptureOrder = `${base_url}/api/v2/payment/capture-order`;
 
 export const getPlans = `${base_url}/api/v2/utils/plans`
 
-export const verifyOtpApi = `${base_url}/auth/verify-otp`;
+export const verifyOtpApi = `${base_url}/auth/verify-registration`;
 
 export const resendOtpApi = `${base_url}/auth/resend-otp`;
 

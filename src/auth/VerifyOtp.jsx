@@ -1,47 +1,48 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { useNavigate } from "react-router-dom";
 import { createApiFunction } from "../api/ApiFunction";
-import { verifyOtpApi, resendOtpApi } from "../api/Apis";
+import { verifyOtpApi, resendOtpApi, signupApi } from "../api/Apis";
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
 
 export default function VerifyOtp() {
   const navigate = useNavigate();
-  const email = localStorage.getItem("otp_email");
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const signupData = JSON.parse(localStorage.getItem("signup_data"));
+  const email = signupData?.email;
 
   useEffect(() => {
-    if (!email) navigate("/signup");
-  }, [email, navigate]);
+    if (!signupData) navigate("/signup");
+  }, [signupData, navigate]);
 
   const handleVerify = async () => {
-    if (otp.length !== 4) {
-      showErrorToast("Enter valid 4 digit OTP");
+    if (otp.length !== 6) {
+      showErrorToast("Enter valid 6 digit OTP");
       return;
     }
 
+    const payload = {
+      name: signupData?.name,
+      email,
+      password: signupData?.password,
+      otp: otp,
+    };
+
     setLoading(true);
     try {
-      const res = await createApiFunction(
-        "post",
-        verifyOtpApi,
-        null,
-        { email, otp }
-      );
+      const res = await createApiFunction("post", verifyOtpApi, null, payload);
 
       if (res?.success) {
-        showSuccessToast("Email verified successfully");
-        localStorage.removeItem("otp_email");
+        showSuccessToast("Account created successfully 🎉");
+        localStorage.removeItem("signup_data");
         navigate("/signin");
       } else {
         showErrorToast(res?.message || "Invalid OTP");
       }
     } catch (err) {
-      showErrorToast(
-        err?.response?.data?.message || "OTP verification failed"
-      );
+      showErrorToast(err?.response?.data?.message || "OTP verification failed");
     } finally {
       setLoading(false);
     }
@@ -49,14 +50,14 @@ export default function VerifyOtp() {
 
   const handleResend = async () => {
     setResending(true);
+    const payload = {
+      email,
+    };
     try {
-      await createApiFunction(
-        "post",
-        resendOtpApi,
-        null,
-        { email }
-      );
-      showSuccessToast("OTP resent to your email");
+      await createApiFunction("post", signupApi, null, payload);
+      if (response?.data?.success === true) {
+        showSuccessToast("Enter Otp to Verify your mail!");
+      }
     } catch {
       showErrorToast("Failed to resend OTP");
     } finally {
@@ -66,16 +67,16 @@ export default function VerifyOtp() {
 
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row overflow-hidden">
-          {/* LEFT PANEL */}
+      {/* LEFT PANEL */}
       <div className="w-full xl:w-1/2 bg-white flex flex-col justify-center px-8 md:px-20 py-12">
         <h2 className="text-xl font-semibold mb-2">Verify Email</h2>
         <p className="text-sm text-gray-500 mb-4">
-          Enter 4 digit OTP sent to <b>{email}</b>
+          Enter 4 digit OTP sent to <b>{signupData.email}</b>
         </p>
 
         <input
           type="text"
-          maxLength={4}
+          maxLength={6}
           value={otp}
           onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           className="w-full h-12 text-center text-lg tracking-widest border rounded-lg mb-4"
