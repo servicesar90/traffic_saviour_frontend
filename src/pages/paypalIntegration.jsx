@@ -9,10 +9,11 @@ import {
   getSubscription,
 } from "../api/Apis";
 
+
 function PayPalIntegration(cart) {
   const navigate = useNavigate();
 
-  console.log(cart);
+  console.log("dsjfjsd",cart);
 
     const initialOptions = {
         "client-id": "Ab-9ZC08-4ikVMDnmZr4k9teR3h_LzRNt68jZ8PthU5SaQAB3bVqb2NVM0ehq-956WUS40XG8Sy6Hlsz",
@@ -23,8 +24,8 @@ function PayPalIntegration(cart) {
 
 
     const [message, setMessage] = useState("");
-    const [openSuccessModal,setOpenSuccessModal]=useState(false);
-    const [openCancelModal, setOpenCancelModal]= useState(false)
+    const [openSuccessModal, setOpenSuccessModal] = useState(false);
+    const [openCancelModal, setOpenCancelModal] = useState(false);
 
   return (
     <div className="paypal-integration mt-6">
@@ -40,8 +41,6 @@ function PayPalIntegration(cart) {
             label: "paypal",
           }}
           createOrder={async () => {
-            console.log(localStorage.getItem("token"));
-            const token = localStorage.getItem("token");
 
             try {
               // const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
@@ -317,7 +316,7 @@ onError={(err) => {
       </div>
     </div>
   </div>
-)}  
+)}
 
     </div>
   );

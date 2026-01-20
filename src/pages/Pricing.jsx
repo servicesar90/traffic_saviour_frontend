@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { apiFunction, createApiFunction } from "../api/ApiFunction";
 import { cryptoPayment, getPlans } from "../api/Apis";
 import PayPalIntegration from "./paypalIntegration";
+import { useNavigate } from "react-router-dom";
 
 /* ===================== PAYMENT DETAILS ===================== */
 
@@ -31,6 +32,7 @@ export default function Pricing() {
   const [txHash, setTxHash] = useState("");
   const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState(null);
+  const navigate = useNavigate();
 
   /* ===================== FETCH PLANS ===================== */
 
@@ -61,6 +63,7 @@ export default function Pricing() {
     setTxHash("");
     setLoading(false);
     setPayload(null);
+    navigate("/Dashboard/billing");
   };
 
   const calculateStartEndDates = (billing) => {
@@ -131,8 +134,8 @@ export default function Pricing() {
                 type === "quarterly"
                   ? "10% OFF"
                   : type === "Yearly"
-                    ? "20% OFF"
-                    : null;
+                  ? "20% OFF"
+                  : null;
 
               return (
                 <button
@@ -252,7 +255,37 @@ export default function Pricing() {
                   <button onClick={resetPaymentState}>Close</button>
                   <button
                     disabled={!paymentMethod}
-                    onClick={() => setModalStep(2)}
+                    onClick={() => {
+                      setModalStep(2);
+                      if (paymentMethod === "card") {
+                        const { start_date, end_date } =
+                          calculateStartEndDates(billing);
+                        setPayload({
+                          plan_id: selectedPlan.id,
+                          plan_name: selectedPlan.name,
+                          billing_cycle: billing,
+
+                          method:
+                            paymentMethod === "USDT"
+                              ? "cryptocurrency"
+                              : "card",
+
+                          amount: totalAmount,
+
+                          currency:
+                            paymentMethod === "USDT"
+                              ? network === "ERC20"
+                                ? "USDT (ERC20)"
+                                : "USDT (TRC20)"
+                              : "USD",
+
+                          start_date,
+                          end_date,
+
+                          payment_id: null,
+                        });
+                      }
+                    }}
                     className="bg-blue-600 px-4 py-2 rounded"
                   >
                     Continue
@@ -390,7 +423,7 @@ export default function Pricing() {
                       try {
                         const res = await makeCryptoPayment(payloadData);
                         if (res?.success || res?.status === 201) {
-                         setModalStep(4);
+                          setModalStep(4);
                         }
                       } catch {
                         alert("Payment failed");
@@ -413,47 +446,46 @@ export default function Pricing() {
             )}
 
             {/* STEP 4 - THANK YOU */}
-{modalStep === 4 && (
-  <div className="text-center">
-    <div className="flex justify-center">
-      <div className="h-16 w-16 rounded-full bg-green-600 flex items-center justify-center text-3xl">
-        ✓
-      </div>
-    </div>
+            {modalStep === 4 && (
+              <div className="text-center">
+                <div className="flex justify-center">
+                  <div className="h-16 w-16 rounded-full bg-green-600 flex items-center justify-center text-3xl">
+                    ✓
+                  </div>
+                </div>
 
-    <h2 className="text-2xl font-bold mt-4 text-white">
-      Thank You for Your Payment!
-    </h2>
+                <h2 className="text-2xl font-bold mt-4 text-white">
+                  Thank You for Your Payment!
+                </h2>
 
-    <p className="mt-3 text-gray-300 text-sm leading-relaxed">
-      We have successfully received your payment.
-      <br />
-      Your transaction is currently under review.
-    </p>
+                <p className="mt-3 text-gray-300 text-sm leading-relaxed">
+                  We have successfully received your payment.
+                  <br />
+                  Your transaction is currently under review.
+                </p>
 
-    <div className="mt-4 bg-[#1E293B] p-4 rounded-lg text-sm text-gray-300">
-      ⏳ <b>Review Time:</b> Up to <b>24 hours</b> <br />
-      After verification, your account will get full access to:
-      <ul className="mt-2 text-left list-disc list-inside text-gray-400">
-        <li>Campaign creation</li>
-        <li>Dashboard analytics</li>
-        <li>All plan features</li>
-      </ul>
-    </div>
+                <div className="mt-4 bg-[#1E293B] p-4 rounded-lg text-sm text-gray-300">
+                  ⏳ <b>Review Time:</b> Up to <b>24 hours</b> <br />
+                  After verification, your account will get full access to:
+                  <ul className="mt-2 text-left list-disc list-inside text-gray-400">
+                    <li>Campaign creation</li>
+                    <li>Dashboard analytics</li>
+                    <li>All plan features</li>
+                  </ul>
+                </div>
 
-    <p className="mt-4 text-xs text-gray-400">
-      You will be notified once your payment is approved.
-    </p>
+                <p className="mt-4 text-xs text-gray-400">
+                  You will be notified once your payment is approved.
+                </p>
 
-    <button
-      onClick={resetPaymentState}
-      className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg cursor-pointer"
-    >
-      OK
-    </button>
-  </div>
-)}
-
+                <button
+                  onClick={resetPaymentState}
+                  className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg cursor-pointer"
+                >
+                  OK
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
