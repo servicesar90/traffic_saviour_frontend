@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { createApiFunction } from "../api/ApiFunction";
 import { verifyOtpApi, resendOtpApi, signupApi } from "../api/Apis";
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
+import { set } from "react-hook-form";
 
 export default function VerifyOtp() {
   const navigate = useNavigate();
@@ -51,13 +52,18 @@ export default function VerifyOtp() {
   const handleResend = async () => {
     setResending(true);
     const payload = {
+      name: signupData?.name,
       email,
+      password: signupData?.password,
     };
     try {
-      await createApiFunction("post", signupApi, null, payload);
-      if (response?.data?.success === true) {
-        showSuccessToast("Enter Otp to Verify your mail!");
-      }
+      const response = await createApiFunction("post", signupApi, null, payload);
+      console.log(response);
+      setOtp("");
+      
+      if (response?.data?.success) {
+        showSuccessToast("OTP resent successfully!");
+      };
     } catch {
       showErrorToast("Failed to resend OTP");
     } finally {
@@ -69,7 +75,7 @@ export default function VerifyOtp() {
     <div className="min-h-screen w-screen flex flex-col md:flex-row overflow-hidden">
       {/* LEFT PANEL */}
       <div className="w-full xl:w-1/2 bg-white flex flex-col justify-center px-8 md:px-20 py-12">
-        <h2 className="text-xl font-semibold mb-2">Verify Email</h2>
+        <h2 className="text-xl font-semibold mb-2 text-gray-800">Verify Email</h2>
         <p className="text-sm text-gray-500 mb-4">
           Enter 4 digit OTP sent to <b>{signupData.email}</b>
         </p>
@@ -79,7 +85,7 @@ export default function VerifyOtp() {
           maxLength={6}
           value={otp}
           onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-          className="w-full h-12 text-center text-lg tracking-widest border rounded-lg mb-4"
+          className="h-11 w-full mb-3 rounded-lg border px-3 py-2 text-sm placeholder:text-gray-400 text-gray-800 focus:outline-none transition"
           placeholder="____"
         />
 
