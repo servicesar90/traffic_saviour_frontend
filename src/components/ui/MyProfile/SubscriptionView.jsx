@@ -20,7 +20,8 @@ export const SubscriptionView = () => {
       }
     }, []);
 
-
+    console.log("subs",details);
+    
 
     const InvoiceTemplate = ({data}) => {
     return (
@@ -292,11 +293,11 @@ export const SubscriptionView = () => {
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
         <table className="w-full border-collapse text-sm">
           <tbody>
-            <TableRow label="Status" value={details?.status ||"Not Available" } />
-            <TableRow label="Start Date" value={details?.start_date || "Not Available"} />
-            <TableRow label="Last Order Date" value={details?.end_date || "Not Available"} />
-            <TableRow label="Next Payment Date" value={details?.end_date || "Not Available"} />
-            <TableRow label="Payment Method" value={details?.method || "Not Available"} />
+            <TableRow label="Status" value={details?.isActive ? "Active" : "Inactive"} />
+            <TableRow label="Start Date" value={details?.startDate?.split("T")[0] || "Not Available"} />
+            <TableRow label="Last Order Date" value={details?.endDate?.split("T")[0] || "Not Available"} />
+            <TableRow label="Next Payment Date" value={details?.endDate?.split("T")[0] || "Not Available"} />
+            {/* <TableRow label="Payment Method" value={details?.method || "Not Available"} /> */}
           </tbody>
         </table>
 
@@ -314,10 +315,10 @@ export const SubscriptionView = () => {
 
         <table className="w-full border-collapse text-sm">
          <tbody>
-            <TableRow label="Billing Cycle" value={details?.billing_cycle ||"Not Available" } />
-            <TableRow label="Currency" value={details?.currency || "Not Available"} />
-            <TableRow label="Plan Name" value={details?.plan_name || "Not Available"} />
-            <TableRow label="Total" value={details?.amount || "Not Available"} />
+            <TableRow label="Billing Cycle" value={details?.Plan?.name.split(" ")[1] ||"Not Available" } />
+            {/* <TableRow label="Currency" value={details?.currency || "Not Available"} /> */}
+            <TableRow label="Plan Name" value={details?.Plan?.name || "Not Available"} />
+            <TableRow label="Total" value={details?.Plan?.price || "Not Available"} />
 
             
           </tbody>
@@ -325,7 +326,7 @@ export const SubscriptionView = () => {
       </div>
 
       {/* RELATED ORDERS */}
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+      {/* <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
         <h2 className="text-xl font-semibold mb-4">Related orders</h2>
 
         <table className="w-full border-collapse text-sm">
@@ -355,7 +356,7 @@ export const SubscriptionView = () => {
             
           </tbody>
         </table>
-      </div>
+      </div> */}
 
     </div>
   );
