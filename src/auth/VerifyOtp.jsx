@@ -175,7 +175,7 @@ const handlePaste = (e) => {
         <button
           onClick={handleVerify}
           disabled={loading}
-          className="w-full bg-indigo-600 text-white py-2 rounded-lg"
+          className="w-full bg-indigo-600 text-white py-2 rounded-lg cursor-pointer"
         >
           {loading ? "Verifying..." : "Verify OTP"}
         </button>
@@ -183,7 +183,7 @@ const handlePaste = (e) => {
         <button
           onClick={handleResend}
           disabled={resending}
-          className="mt-3 text-sm text-indigo-600 w-full"
+          className="mt-3 text-sm text-indigo-600 w-full cursor-pointer"
         >
           {resending ? "Resending..." : "Resend OTP"}
         </button>
