@@ -34,8 +34,8 @@ export default function VerifyOtp() {
     setLoading(true);
     try {
       const res = await createApiFunction("post", verifyOtpApi, null, payload);
-
-      if (res?.success) {
+      
+      if (res?.status === 201) {
         showSuccessToast("Account created successfully 🎉");
         localStorage.removeItem("signup_data");
         navigate("/signin");
