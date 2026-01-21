@@ -54,7 +54,11 @@ export default function RealtimeAnalytics({}) {
       if (!response) return;
       const analyticsData = response.data.data;
       console.log(analyticsData);
-      setUniqueVistors(analyticsData?.[4]?.uniquecount);
+      const uniqueVisitors =
+    analyticsData?.find(item => 'uniquecount' in item)?.uniquecount || 0;
+      setUniqueVistors(uniqueVisitors);
+      console.log(uniqueVisitors);
+      
       const deviceInfo = analyticsData?.[1];
       const deviceinfo2 = analyticsData?.[2];
       const deviceinfo3 = analyticsData?.[3];
@@ -176,7 +180,6 @@ export default function RealtimeAnalytics({}) {
           newLog,
           ...prev.map((l) => ({ ...l, isNew: false })),
         ].slice(0, 5);
-
         return updated;
       });
     });

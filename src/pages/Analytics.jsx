@@ -191,7 +191,7 @@ const addUrlCamp = async (signal) => {
       "post",
       getAllAnalyticsCamp,
       null,
-      payload, signal
+      payload,
     );
 
     if (res?.data?.success) {
@@ -207,6 +207,7 @@ const addUrlCamp = async (signal) => {
       showSuccessToast('Campaign Created Successfully..!!')
     }
   } catch (error) {
+    console.log(error);
     
     showErrorToast("Failed to add URL");
   } finally {
@@ -234,7 +235,8 @@ const addUrlCamp = async (signal) => {
 
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(selectedCdnCode);
+    
+      await navigator.clipboard.writeText(selectedCdnCode?.cdn);
       setIsCopied(true);
       showSuccessToast("Code copied to clipboard!");
 
@@ -398,7 +400,7 @@ const addUrlCamp = async (signal) => {
       </p>
 
       <button
-        onClick={() => navigate("/Dashboard/create-campaign")}
+       onClick={() => setOpen1(true)}
         className="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm shadow"
       >
         + Create Campaign
