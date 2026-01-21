@@ -8,7 +8,8 @@ import { set } from "react-hook-form";
 export default function VerifyOtp() {
   const navigate = useNavigate();
 
-  const [otp, setOtp] = useState("");
+ const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const signupData = JSON.parse(localStorage.getItem("signup_data"));
@@ -18,17 +19,67 @@ export default function VerifyOtp() {
     if (!signupData) navigate("/signup");
   }, [signupData, navigate]);
 
-  const handleVerify = async () => {
-    if (otp.length !== 6) {
-      showErrorToast("Enter valid 6 digit OTP");
-      return;
+
+  const handleOtpChange = (e, index) => {
+  const value = e.target.value;
+
+  // only single digit number
+  if (!/^\d?$/.test(value)) return;
+
+  const newOtp = [...otp];
+  newOtp[index] = value;
+  setOtp(newOtp);
+
+  // auto focus next
+  if (value && index < otp.length - 1) {
+    document.getElementById(`otp-${index + 1}`)?.focus();
+  }
+};
+
+const handleKeyDown = (e, index) => {
+  if (e.key === "Backspace") {
+    if (otp[index]) {
+      // clear current
+      const newOtp = [...otp];
+      newOtp[index] = "";
+      setOtp(newOtp);
+    } else if (index > 0) {
+      // move focus back
+      document.getElementById(`otp-${index - 1}`)?.focus();
     }
+  }
+};
+
+// Optional but professional: paste full OTP
+const handlePaste = (e) => {
+  e.preventDefault();
+  const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+
+  if (pastedData.length === 0) return;
+
+  const newOtp = pastedData.split("");
+  while (newOtp.length < 6) newOtp.push("");
+
+  setOtp(newOtp);
+
+  const focusIndex = Math.min(pastedData.length, 5);
+  document.getElementById(`otp-${focusIndex}`)?.focus();
+};
+
+
+  const handleVerify = async () => {
+    const finalOtp = otp.join(""); 
+
+  if (finalOtp.length !== 6) {
+    showErrorToast("Please enter complete OTP");
+    return;
+  }
 
     const payload = {
       name: signupData?.name,
       email,
       password: signupData?.password,
-      otp: otp,
+      otp: finalOtp,
     };
 
     setLoading(true);
@@ -59,7 +110,7 @@ export default function VerifyOtp() {
     try {
       const response = await createApiFunction("post", signupApi, null, payload);
       console.log(response);
-      setOtp("");
+      setOtp(["", "", "", "", "", ""] );
       
       if (response?.data?.success) {
         showSuccessToast("OTP resent successfully!");
@@ -77,18 +128,50 @@ export default function VerifyOtp() {
       <div className="w-full xl:w-1/2 bg-white flex flex-col justify-center px-8 md:px-20 py-12">
         <h2 className="text-xl font-semibold mb-2 text-gray-800">Verify Email</h2>
         <p className="text-sm text-gray-500 mb-4">
-          Enter 4 digit OTP sent to <b>{signupData.email}</b>
+          Enter 6 digit OTP sent to <b>{signupData.email}</b>
         </p>
 
-        <input
+        {/* <input
           type="text"
           maxLength={6}
           value={otp}
           onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           className="h-11 w-full mb-3 rounded-lg border px-3 py-2 text-sm placeholder:text-gray-400 text-gray-800 focus:outline-none transition"
           placeholder="____"
-        />
+        /> */}
+        <div  onPaste={handlePaste}>
+           {otp.map((digit, index) => (
+    <input
+      key={index}
+      id={`otp-${index}`}
+      type="text"
+      inputMode="numeric"
+      maxLength={1}
+      value={digit}
+      onChange={(e) => handleOtpChange(e, index)}
+      onKeyDown={(e) => handleKeyDown(e, index)}
+      className="
+        h-12 w-12 
+        m-1
+        mb-3
+        rounded-sm 
+        border 
+        text-gray-800
+        text-center 
+        text-lg 
+        font-semibold 
+        text-gray-800
+        focus:outline-none 
+        focus:ring-2 
+        focus:ring-[#4f39f6]
+        transition
+      "
+    />
+  ))}
 
+        </div>
+
+        
         <button
           onClick={handleVerify}
           disabled={loading}
