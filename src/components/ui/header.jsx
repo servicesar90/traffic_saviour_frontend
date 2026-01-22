@@ -62,7 +62,7 @@ const Header = ({ onMenuClick }) => {
         <div className="flex items-center gap-4 text-sm font-medium text-gray-700">
           <span>
             <span className="text-white mr-1 font-normal">Plan Name:</span>
-            <span className="text-white">{planDetails.name}
+            <span className="text-green-600">{planDetails.name}
           </span></span>
           <span>
             <span className="text-white mr-1 font-normal">Status:</span>
