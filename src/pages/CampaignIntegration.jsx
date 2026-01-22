@@ -380,13 +380,13 @@ const handleCopy = (text) => {
 const generateZip = async () => {
   const zip = new JSZip();
   // ADD FILES TO ZIP
-  const folder = zip.folder("SecurityShield");
+  const folder = zip.folder("trafficshield");
 
   folder.file("index.php", wordpressPluginCode);
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
 
-  saveAs(zipBlob, "SecurityShield.zip");
+  saveAs(zipBlob, "trafficshield.zip");
 };
 
 const generatePhpZip = async (phpCode) => {

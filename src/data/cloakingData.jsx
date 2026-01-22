@@ -1,17 +1,16 @@
-export const wordpressPluginCode = `
-<?php
+export const wordpressPluginCode = `<?php
 /**
-* Plugin Name: Security Shield
-* Plugin URI: https://webservices.press
-* Description: Security Shield wordpress plugin. Helps in protecting unwanted clicks from bot/spiders/crawlers,etc.
+* Plugin Name: Click Stopper
+* Plugin URI: https://clickstopper.com
+* Description: Click Stopper- Real-Time Visitor Verification and Fraud Prevention for Your Website.
 * Version: 1.2.01
-* Author: Security Shield
-* Author URI: https://webservices.press
+* Author: Click Stopper
+* Author URI: https://clickstopper.com
 * License: GPL2
 */
 
 if (!function_exists('add_action')) {
-    echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
+    echo 'Hi there!  I am just a plugin, not much I can do when called directly.';
     exit;
 }
 
@@ -24,7 +23,7 @@ function tswp_add_meta_box() {
 
         add_meta_box(
             'tswp_id',
-            __('Traffic Shield', 'tswp_textdomain'),
+            __('Click Stopper - (Impportant: Disable any installed cache Plugin.)', 'tswp_textdomain'),
             'tswp_meta_box_callback',
             $screen
         );
@@ -34,6 +33,9 @@ add_action('add_meta_boxes', 'tswp_add_meta_box');
 
 //View Details//
 
+//View Details//
+//
+//
 function tswp_meta_box_callback($post) {
 
     wp_nonce_field('tswp_save_meta_box_data', 'tswp_meta_box_nonce');
@@ -41,7 +43,7 @@ function tswp_meta_box_callback($post) {
     $value = get_post_meta($post->ID, '_ts_meta_value_key', true);
 
     echo '<label for="tswp_field">';
-    _e('Paste The Code From Security Shield Campaign', 'tswp_textdomain');
+    _e('Paste The Code From ClickStopper Campaign', 'tswp_textdomain');
     echo '</label> ';
     
     echo '<textarea id="tswp_field" name="tswp_field" class="widefat" cols="50" rows="5">' . esc_attr($value) . '</textarea>';
@@ -96,8 +98,7 @@ function user_redirection_code() {
     }
 
 }
-
-?>`
+`
 
 
 export const phpZipCode = `
