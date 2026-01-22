@@ -61,4 +61,6 @@ export const resendOtpApi = `${base_url}/auth/resend-otp`;
 
 export const getSubscription = `${base_url}/auth/v2/plan/subscription`;
 
+export const getUpdatedPlan = `${base_url}/api/v2/plan/subscription`;
+
 

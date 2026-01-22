@@ -8,19 +8,41 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFunction } from "../../api/ApiFunction";
-import { signOutApi } from "../../api/Apis";
+import { getUpdatedPlan, signOutApi } from "../../api/Apis";
 
 const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const avatarRef = useRef(null);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [planName, setPlanName]= useState();
+  const [planStatus,setPlanStatus]= useState();
 
   // Example plan data (replace later with API)
-  const [planDetails] = useState({
-    name: "Premium Plan",
-    status: "Active",
-  });
+ 
+
+ const fetchUpdatedPlan = async () => {
+  try {
+    const response = await apiFunction("get", getUpdatedPlan, null, null);
+    
+
+    const plan = response?.data?.data;
+    console.log(plan?.status);
+    
+
+    if (plan) {
+      localStorage.setItem("plan", JSON.stringify(plan));
+        setPlanName(plan?.Plan?.name);
+  setPlanStatus(plan?.status);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+
+
+
 
   // ✅ Close dropdown on outside click
   useEffect(() => {
@@ -31,7 +53,14 @@ const Header = ({ onMenuClick }) => {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+   
   }, []);
+  useEffect(()=>{
+    
+   
+    fetchUpdatedPlan();
+  
+  },[]);
 
   const handleLogout = async () => {
     const response = await apiFunction("get", signOutApi, null, null);
@@ -44,6 +73,9 @@ const Header = ({ onMenuClick }) => {
       navigate("/");
     }
   };
+
+
+  
 
   return (
     <header className="w-full flex items-center justify-between bg-[#1e2939] px-6 py-3 shadow-sm  border-gray-200 text-white ">
@@ -59,21 +91,22 @@ const Header = ({ onMenuClick }) => {
       {/* Right: Plan Info + Avatar */}
       <div className="flex items-center gap-6">
         {/* Plan Info (side by side with labels) */}
+       {/* <button onClick={()=>}></button> */}
         <div className="flex items-center gap-4 text-sm font-medium text-gray-700">
           <span>
             <span className="text-white mr-1 font-normal">Plan Name:</span>
-            <span className="text-green-600">{planDetails.name}
+            <span className="text-white">{planName || "N/A"}
           </span></span>
           <span>
             <span className="text-white mr-1 font-normal">Status:</span>
             <span
               className={`font-semibold ${
-                planDetails.status === "Active"
+                planStatus === "Active"
                   ? "text-green-600"
                   : "text-red-600"
               }`}
             >
-              {planDetails.status}
+              {planStatus || "N/A"}
             </span>
           </span>
         </div>

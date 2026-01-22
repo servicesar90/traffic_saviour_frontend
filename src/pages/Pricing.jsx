@@ -252,7 +252,7 @@ export default function Pricing() {
                 </div>
 
                 <div className="flex justify-between mt-6">
-                  <button onClick={resetPaymentState}>Close</button>
+                  <button className="cursor-pointer" onClick={resetPaymentState}>Close</button>
                   <button
                     disabled={!paymentMethod}
                     onClick={() => {
@@ -286,7 +286,7 @@ export default function Pricing() {
                         });
                       }
                     }}
-                    className="bg-blue-600 px-4 py-2 rounded"
+                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
                   >
                     Continue
                   </button>
@@ -310,11 +310,11 @@ export default function Pricing() {
                 ))}
 
                 <div className="flex justify-between mt-6">
-                  <button onClick={() => setModalStep(1)}>Back</button>
+                  <button className="cursor-pointer" onClick={() => setModalStep(1)}>Back</button>
                   <button
                     disabled={!network}
                     onClick={() => setModalStep(3)}
-                    className="bg-blue-600 px-4 py-2 rounded"
+                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
                   >
                     Continue
                   </button>
@@ -326,7 +326,7 @@ export default function Pricing() {
             {modalStep === 2 && paymentMethod === "card" && (
               <>
                 <PayPalIntegration cart={payload} />
-                <button className="mt-6" onClick={() => setModalStep(1)}>
+                <button className="mt-6 cursor-pointer" onClick={() => setModalStep(1)}>
                   Back
                 </button>
               </>
@@ -434,7 +434,7 @@ export default function Pricing() {
                   >
                     {loading ? (
                       <>
-                        <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full "></span>
+                        <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full  "></span>
                         Processing...
                       </>
                     ) : (
