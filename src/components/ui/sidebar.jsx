@@ -175,7 +175,7 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
                     {item.icon}
                   </span>
                   {showFull && (
-                    <span className="text-md font-large">{item.label}</span>
+                    <span className="text-sm font-medium">{item.label}</span>
                   )}
                 </div>
                 {isDatabase && showFull && (
