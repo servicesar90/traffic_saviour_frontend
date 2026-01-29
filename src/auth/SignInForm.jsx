@@ -305,7 +305,7 @@ export default function LoginPage() {
 
     try {
       const response = await createApiFunction("post", logInApi, null, formData);
-      console.log("fjjf",response)
+      
       
 
 
@@ -548,33 +548,25 @@ export default function LoginPage() {
 
       {/* RIGHT PANEL */}
       <div className="hidden xl:flex w-1/2 bg-[#0B0E2A] text-white items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05)_1px,_transparent_1px)] bg-[length:40px_40px]" />
-        <div className="relative text-center px-10">
-          <div className="flex items-center justify-center mb-4">
-            <div className="bg-indigo-500 p-3 rounded-lg">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="white"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16m-7 6h7"
-                />
-              </svg>
+
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05)_1px,_transparent_1px)] bg-[length:40px_40px]" />
+          <div className="relative text-center px-10">
+            <div className="flex items-center justify-center ">
+             
+                <img
+    src="/logo1.svg"
+    alt="Click Stopper Logo"
+    className="w-30 h-30"
+  />
+              
+              <h2 className=" text-4xl font-semibold text-[#a855f7] mt-[30px]">Click Stopper</h2>
             </div>
-            <h2 className="ml-3 text-2xl font-semibold">Click Stopper</h2>
+            <p className="text-gray-300 text-sm max-w-sm mx-auto">
+              Shield your campaigns. Boost your performance. Experience smart
+              traffic cloaking — secure, optimized, and effortless.
+            </p>
           </div>
-          <p className="text-gray-300 text-sm max-w-sm mx-auto">
-            Shield your campaigns. Boost your performance. Experience smart
-            traffic cloaking — secure, optimized, and effortless.
-          </p>
         </div>
-      </div>
     </div>
   );
 }

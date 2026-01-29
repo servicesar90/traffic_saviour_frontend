@@ -9,7 +9,7 @@ const socketPage = () => {
     socket.emit("join", `${user.id}`);
 
     socket.on("new_click", (data) => {
-        console.log("fdhjs",data);
+       
         
     //   setClicks(prev => [data.click, ...prev]);
     });

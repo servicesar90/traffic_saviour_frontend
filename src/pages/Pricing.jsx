@@ -40,7 +40,7 @@ export default function Pricing() {
     const fetchPlans = async () => {
       try {
         const res = await createApiFunction("get", getPlans, null, null);
-        console.log("PLANS RESPONSE 👉", res);
+        
 
         if (res?.data?.success && Array.isArray(res.data.Plans)) {
           setPlans(res.data.Plans);

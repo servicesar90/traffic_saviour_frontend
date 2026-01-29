@@ -97,7 +97,7 @@ const tableControllerRef = useRef(null);
         setCampaigns(res?.data?.data || []); // store campaigns
       } catch (err) {
           if (err.name !== "CanceledError") {
-        console.error("Error fetching campaigns:", err);
+        // console.error("Error fetching campaigns:", err);
       }
       }
     };
@@ -152,7 +152,7 @@ const tableControllerRef = useRef(null);
       setTableData(res?.data?.data || []);
     } catch (err) {
        if (err.name !== "CanceledError") {
-      console.error("Error fetching data:", err);
+      // console.error("Error fetching data:", err);
     }
     } finally {
       setLoading(false);
