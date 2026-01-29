@@ -352,7 +352,7 @@ const statsAbortRef = useRef(null);
            }
          } catch (err) {
            console.error("Duplicate campaign error:", err);
-           showErrorToast("Failed to duplicate campaign");
+           showErrorToast(err?.response?.data?.message || "Failed to duplicate Campaign.");
          }
  
          break;
