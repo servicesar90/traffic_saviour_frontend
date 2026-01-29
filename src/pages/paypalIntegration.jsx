@@ -13,7 +13,7 @@ import {
 function PayPalIntegration(cart) {
   const navigate = useNavigate();
 
-  console.log("dsjfjsd",cart);
+  
 
     const initialOptions = {
         "client-id": "Ab-9ZC08-4ikVMDnmZr4k9teR3h_LzRNt68jZ8PthU5SaQAB3bVqb2NVM0ehq-956WUS40XG8Sy6Hlsz",
@@ -63,7 +63,7 @@ function PayPalIntegration(cart) {
               );
 
               const orderData = response.data;
-              console.log("orderData", orderData);
+            
               if (orderData.id) {
                 return orderData.id;
               } else {
@@ -75,7 +75,7 @@ function PayPalIntegration(cart) {
                 throw new Error(errorMessage);
               }
             } catch (error) {
-              console.error(error);
+            
               setMessage(`Could not initiate PayPal Checkout...${error}`);
             }
           }}
@@ -125,12 +125,12 @@ function PayPalIntegration(cart) {
                 setMessage(
                   `Transaction ${transaction.status}: ${transaction.id}. See console for all available details`,
                 );
-                console.log(
-                  "Capture result",
-                  orderData,
-                  JSON.stringify(orderData, null, 2),
-                );
-                console.log("cart.cart", cart?.cart);
+                // console.log(
+                //   "Capture result",
+                //   orderData,
+                //   JSON.stringify(orderData, null, 2),
+                // );
+                // console.log("cart.cart", cart?.cart);
 
                 if (orderData.status === "COMPLETED") {
                   // clearCart();
@@ -141,7 +141,7 @@ function PayPalIntegration(cart) {
                   });
 
                   const res= await apiFunction("get", getSubscription, null, null);
-                  console.log(res);
+                 
 
                   if(res?.data?.success && res?.data?.data){
                     const subscriptionData = res?.data?.data;
@@ -177,14 +177,14 @@ function PayPalIntegration(cart) {
                 return response;
               }
             } catch (error) {
-              console.error(error);
+              
               setMessage(
                 `Sorry, your transaction could not be processed...${error}`,
               );
             }
           }}
           onCancel={(data) => {
-  console.log("Payment cancelled", data);
+ 
 
   setCancelReason(
     "You cancelled the payment. No amount has been deducted."
@@ -192,7 +192,7 @@ function PayPalIntegration(cart) {
   setOpenCancelModal(true);
 }}
 onError={(err) => {
-  console.error("PayPal Error:", err);
+ 
 
   setCancelReason(
     "Payment failed due to a technical issue or card problem. Please try again."

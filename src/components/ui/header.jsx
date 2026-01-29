@@ -27,7 +27,7 @@ const Header = ({ onMenuClick }) => {
     
 
     const plan = response?.data?.data;
-    console.log(plan?.status);
+   
     
 
     if (plan) {
@@ -36,7 +36,7 @@ const Header = ({ onMenuClick }) => {
   setPlanStatus(plan?.status);
     }
   } catch (err) {
-    console.log(err);
+    // console.log(err);
   }
 };
 
@@ -81,12 +81,20 @@ const Header = ({ onMenuClick }) => {
     <header className="w-full flex items-center justify-between bg-[#1e2939] px-6 py-3 shadow-sm  border-gray-200 text-white ">
       {/* Left: Logo + Menu */}
       <div className="flex items-center gap-4 text-white">
-        <Menu
-          className="w-6 h-6 text-white cursor-pointer"
-          onClick={onMenuClick}
-        />
-        <span className="text-white font-semibold text-xl">Click Stopper</span>
-      </div>
+  <img
+     src="/logo2.svg"
+  alt="Click Stopper"
+  role="button"
+  tabIndex={0}
+  onClick={onMenuClick}
+ 
+  className="w-10 h-10 cursor-pointer"
+  />
+  <span className="text-[#a855f7] font-semibold text-xl ml-[-10px]">
+    Click Stopper
+  </span>
+</div>
+
 
       {/* Right: Plan Info + Avatar */}
       <div className="flex items-center gap-6">

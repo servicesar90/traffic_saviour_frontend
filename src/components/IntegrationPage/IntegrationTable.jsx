@@ -102,7 +102,7 @@ export default function Campaign({ camp, setShowIntegrationTable  }) {
 
   
   } catch (error) {
-    console.error("Delete campaign error:", error);
+    
     showErrorToast(
       error?.response?.data?.message || "Failed to delete campaign"
     );
@@ -125,7 +125,7 @@ export default function Campaign({ camp, setShowIntegrationTable  }) {
     }else if(type === "php"){
       checkIntegration(camp)
     }else{
-      console.log("incorect type",type);
+      // console.log("incorect type",type);
       
     }
     

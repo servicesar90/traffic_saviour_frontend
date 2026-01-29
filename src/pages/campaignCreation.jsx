@@ -462,7 +462,7 @@ export default function CampaignBuilder() {
     setDynamicVariables(c?.dynamicVariables || []);
     setActiveStatus(c?.status);
   } catch (err) {
-    console.error("Failed to fetch campaign", err);
+    // console.error("Failed to fetch campaign", err);
   }
 };
 

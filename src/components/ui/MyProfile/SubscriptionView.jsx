@@ -20,7 +20,6 @@ export const SubscriptionView = () => {
       }
     }, []);
 
-    console.log("subs",details);
     
 
     const InvoiceTemplate = ({data}) => {

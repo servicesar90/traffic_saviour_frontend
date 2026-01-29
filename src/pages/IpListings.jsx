@@ -153,7 +153,7 @@ const addBlacklistedIps = async (rawText) => {
     setOpenIpModal(false);
 
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     showErrorToast("Failed to add IP(s)");
   }
 };
@@ -207,7 +207,7 @@ if(!res) return;
     setIps(formatted);
   } catch (error) {
         if (error?.code === "ERR_CANCELED") return; 
-    console.error(error);
+    // console.error(error);
     showErrorToast("Failed to fetch IPs");
   } finally {
     setLoadingIps(false);
@@ -234,7 +234,7 @@ const deleteBlacklistedIp = async (id) => {
     // 🔁 refresh list OR local remove
     setIps((prev) => prev.filter((ip) => ip.id !== id));
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     showErrorToast("Failed to delete IP");
   }
 };

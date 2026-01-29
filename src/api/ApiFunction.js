@@ -76,13 +76,13 @@ export const apiFunction = async (
       error.name === "CanceledError" ||
       error.code === "ERR_CANCELED"
     ) {
-      console.log("API request aborted");
+
       return;
     }
 
     // 👇 existing 401 logic untouched
     if (error?.response?.status === 401) {
-      console.warn("Session expired / Unauthorized");
+      
 
       localStorage.removeItem("token");
       localStorage.clear();

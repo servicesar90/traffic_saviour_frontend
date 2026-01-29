@@ -49,29 +49,25 @@ const InvoiceTemplate = ({ item }) => {
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "40px" }}>
         <div>
           {/* LOGO PLACEHOLDER */}
-          <div
-            style={{
-              width: "120px",
-              height: "40px",
-              backgroundColor: "#e5e7eb",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: 600,
-              marginBottom: "10px",
-            }}
-          >
-            LOGO
-          </div>
+         <img
+  src="/logo1.svg"
+  alt="Click Stopper Logo"
+  style={{
+    width: "100px",
+    height: "auto",
+    objectFit: "cover",
+  }}
+/>
 
-          <h1 style={{ fontSize: "28px", margin: 0 }}>INVOICE</h1>
-          <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
-          <h3 style={{ fontSize: "16px", margin: 0 }}>Click Stopper</h3>
+ <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "-2px" }}>
+          <h3 style={{ fontSize: "25px", margin: 0, color: "#a855f7" }}>Click Stopper</h3>
           </p>
+          
+         
         </div>
 
         <div style={{ textAlign: "right", fontSize: "12px", color: "#374151" }}>
+          <h1 style={{ fontSize: "28px", margin: 0 }}>INVOICE</h1>
           <p><b>Invoice ID:</b> {item.payment_id}</p>
           <p><b>Date:</b> {new Date(item.start_date).toLocaleDateString()}</p>
           <p>

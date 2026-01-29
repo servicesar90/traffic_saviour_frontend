@@ -8,11 +8,11 @@ export const fetchProfile = createAsyncThunk(
     try {
       const response = await apiFunction("get", getProfileApi, null, null);
       if (response) {
-        console.log(response.data.data)
+        
         return response.data.data;
       }
     } catch (e) {
-      console.log("err", e);
+      // console.log("err", e);
     }
   }
 );

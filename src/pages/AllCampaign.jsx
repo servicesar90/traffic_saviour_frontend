@@ -76,7 +76,7 @@ const statsAbortRef = useRef(null);
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
-      console.log(dataRows )
+      
 
       setCampaigns(dataRows);
        setCurrentPage(response.data.currentPage)
@@ -85,7 +85,7 @@ const statsAbortRef = useRef(null);
       setTotalItems(response.data.total || dataRows.length);
       setIsLoading(false);
     } catch (err) {
-      console.error("Error fetching campaigns:", err);
+ 
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
@@ -138,7 +138,7 @@ const statsAbortRef = useRef(null);
       setClickSummary(totals);
     } catch (err) {
        if (err?.code === "ERR_CANCELED") return;
-      console.error("IP Click API Error:", err);
+    
       setChartData([]);
       setClickSummary({ totalClicks: 0, safeClicks: 0, moneyClicks: 0 });
     } finally {
@@ -166,8 +166,8 @@ const statsAbortRef = useRef(null);
         });
       } catch (error) {
         if (error?.code === "ERR_CANCELED") return;
-    console.error("Stats API Error:", error);
-        console.error("Stats API Error:", error);
+    // console.error("Stats API Error:", error);
+       
       }
     };
 
@@ -232,7 +232,7 @@ const statsAbortRef = useRef(null);
     showSuccessToast(`Status updated ✔ : ${newStatus}`);
 
   } catch (err) {
-    console.error("Status update error:", err);
+    // console.error("Status update error:", err);
     showErrorToast("Something went wrong!");
 
     // ❌ loading hatao
@@ -309,7 +309,7 @@ const statsAbortRef = useRef(null);
        case "duplicate": {
          try {
            if (!row) return;
-           console.log(row);
+          //  console.log(row);
  
            // 🔁 deep clone campaign
            const payload = JSON.parse(JSON.stringify(row));
@@ -351,8 +351,8 @@ const statsAbortRef = useRef(null);
  
            }
          } catch (err) {
-           console.error("Duplicate campaign error:", err);
-           showErrorToast(err?.response?.data?.message || "Failed to duplicate Campaign.");
+          //  console.error("Duplicate campaign error:", err);
+           showErrorToast(err?.response?.data?.message || "Failed to duplicate campaign");
          }
  
          break;
@@ -394,7 +394,7 @@ const statsAbortRef = useRef(null);
       fetchStats(),
     ]);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
   } finally {
     setTimeout(() => setIsRefreshing(false), 600); // smooth finish
   }

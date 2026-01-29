@@ -272,19 +272,19 @@ const addUrlCamp = async (signal) => {
       "post",
       javascriptIntegrationCheckApi, null, data
     );
-    console.log(res);
+    // console.log(res);
   
     if (res.status === 200) {
       const data = {
         integration: true,
       }
       try {
-        console.log("guhsuhuahu");
+        // console.log("guhsuhuahu");
         
         const integrate = await apiFunction("patch", getAllAnalyticsCamp, item?.id, data)
-        console.log(integrate);
+        // console.log(integrate);
       } catch (error) {
-        console.log("error",error);
+        // console.log("error",error);
         
       }
       

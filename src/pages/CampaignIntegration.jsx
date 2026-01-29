@@ -279,7 +279,7 @@ if ($data && isset($data['action'])) {
         );
     }
   };
-  console.log(showIntegrationTable);
+  // console.log(showIntegrationTable);
 
   return (
     // Outer padding and dark background for the main content area
@@ -373,7 +373,7 @@ const handleCopy = (text) => {
       showSuccessToast("Copied to clipboard!");
     })
     .catch((err) => {
-      console.error("Failed to copy text: ", err);
+      // console.error("Failed to copy text: ", err);
     });
 };
 
