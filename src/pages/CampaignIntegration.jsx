@@ -380,13 +380,13 @@ const handleCopy = (text) => {
 const generateZip = async () => {
   const zip = new JSZip();
   // ADD FILES TO ZIP
-  const folder = zip.folder("trafficshield");
+  const folder = zip.folder("ClickStopper");
 
   folder.file("index.php", wordpressPluginCode);
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
 
-  saveAs(zipBlob, "trafficshield.zip");
+  saveAs(zipBlob, "ClickStopper.zip");
 };
 
 const generatePhpZip = async (phpCode) => {
@@ -780,7 +780,7 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
 
     {/* === 5. Copy to Clipboard Button (Placed right after the code block) === */}
     <button
-      onClick={handleCopy}
+      onClick={() => handleCopy(phpCode)}
       className="flex items-center cursor-pointer justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg mb-8"
     >
       <svg
@@ -844,7 +844,7 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl,setShowIntegrationTa
       {/* Test URL Button */}
       <button
   disabled={!pastedUrl.trim()}
-  onClick={() => checkIntegration(camp, pastedUrl)}
+  onClick={() => checkIntegration(camp, pastedUrl, setShowIntegrationTable)}
   className={`flex items-center px-6 py-3 text-base font-semibold rounded-lg transition duration-150 shadow-md
     ${
       pastedUrl.trim()
