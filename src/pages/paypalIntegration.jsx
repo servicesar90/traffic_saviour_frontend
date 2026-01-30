@@ -16,7 +16,7 @@ function PayPalIntegration(cart) {
   
 
     const initialOptions = {
-        "client-id": "Ab-9ZC08-4ikVMDnmZr4k9teR3h_LzRNt68jZ8PthU5SaQAB3bVqb2NVM0ehq-956WUS40XG8Sy6Hlsz",
+        "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,
         currency: "USD",
         intent: "capture",
     };
