@@ -9,39 +9,34 @@ import {
   getSubscription,
 } from "../api/Apis";
 
-
 function PayPalIntegration(cart) {
   const navigate = useNavigate();
 
-  
+  const initialOptions = {
+    "client-id":
+      "Ab-9ZC08-4ikVMDnmZr4k9teR3h_LzRNt68jZ8PthU5SaQAB3bVqb2NVM0ehq-956WUS40XG8Sy6Hlsz",
+    currency: "USD",
+    intent: "capture",
+  };
 
-    const initialOptions = {
-        "client-id": "Ab-9ZC08-4ikVMDnmZr4k9teR3h_LzRNt68jZ8PthU5SaQAB3bVqb2NVM0ehq-956WUS40XG8Sy6Hlsz",
-        currency: "USD",
-        intent: "capture",
-    };
-
-
-
-    const [message, setMessage] = useState("");
-    const [openSuccessModal, setOpenSuccessModal] = useState(false);
-    const [openCancelModal, setOpenCancelModal] = useState(false);
+  const [message, setMessage] = useState("");
+  const [openSuccessModal, setOpenSuccessModal] = useState(false);
+  const [openCancelModal, setOpenCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("")
 
   return (
-    <div className="paypal-integration mt-6">
+    <div className="paypal-integration mt-6 bg-white">
       <PayPalScriptProvider options={initialOptions}>
-        <PayPalButtons
-          
-          
-        
+        <div className="max-h-[70vh] overflow-y-auto text-white">
+          <PayPalButtons
           style={{
             shape: "rect",
             layout: "vertical",
             color: "gold",
             label: "paypal",
+            
           }}
           createOrder={async () => {
-
             try {
               // const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
               //     method: "POST",
@@ -63,7 +58,7 @@ function PayPalIntegration(cart) {
               );
 
               const orderData = response.data;
-            
+
               if (orderData.id) {
                 return orderData.id;
               } else {
@@ -75,7 +70,6 @@ function PayPalIntegration(cart) {
                 throw new Error(errorMessage);
               }
             } catch (error) {
-            
               setMessage(`Could not initiate PayPal Checkout...${error}`);
             }
           }}
@@ -140,15 +134,21 @@ function PayPalIntegration(cart) {
                     status: "Paid",
                   });
 
-                  const res= await apiFunction("get", getSubscription, null, null);
-                 
+                  const res = await apiFunction(
+                    "get",
+                    getSubscription,
+                    null,
+                    null,
+                  );
 
-                  if(res?.data?.success && res?.data?.data){
+                  if (res?.data?.success && res?.data?.data) {
                     const subscriptionData = res?.data?.data;
 
-                    localStorage.setItem("plan",JSON.stringify(subscriptionData));
+                    localStorage.setItem(
+                      "plan",
+                      JSON.stringify(subscriptionData),
+                    );
                   }
-                  
 
                   setPaymentInfo({
                     paymentId: orderData.id,
@@ -177,31 +177,26 @@ function PayPalIntegration(cart) {
                 return response;
               }
             } catch (error) {
-              
               setMessage(
                 `Sorry, your transaction could not be processed...${error}`,
               );
             }
           }}
           onCancel={(data) => {
- 
-
-  setCancelReason(
-    "You cancelled the payment. No amount has been deducted."
-  );
-  setOpenCancelModal(true);
-}}
-onError={(err) => {
- 
-
-  setCancelReason(
-    "Payment failed due to a technical issue or card problem. Please try again."
-  );
-  setOpenCancelModal(true);
-}}
-
-
+            setCancelReason(
+              "You cancelled the payment. No amount has been deducted.",
+            );
+            setOpenCancelModal(false);
+          }}
+          onError={(err) => {
+            setCancelReason(
+              "Payment failed due to a technical issue or card problem. Please try again.",
+            );
+            setOpenCancelModal(false);
+          }}
         />
+        </div>
+        
       </PayPalScriptProvider>
 
       {openSuccessModal && (
@@ -263,61 +258,57 @@ onError={(err) => {
       )}
 
       {openCancelModal && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-[650px] shadow-2xl">
-      
-      {/* Header */}
-      <div className="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
-        <h2 className="text-xl text-red-500 font-semibold">
-          Payment Cancelled ❌
-        </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-[650px] shadow-2xl">
+            {/* Header */}
+            <div className="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
+              <h2 className="text-xl text-red-500 font-semibold">
+                Payment Cancelled ❌
+              </h2>
 
-        <button
-          onClick={() => setOpenCancelModal(false)}
-          className="text-gray-400 hover:text-white text-xl cursor-pointer"
-        >
-          ✕
-        </button>
-      </div>
+              <button
+                onClick={() => setOpenCancelModal(false)}
+                className="text-gray-400 hover:text-white text-xl cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
 
-      {/* Body */}
-      <div className="text-center space-y-3">
-        <div className="text-red-500 text-4xl">⚠️</div>
+            {/* Body */}
+            <div className="text-center space-y-3">
+              <div className="text-red-500 text-4xl">⚠️</div>
 
-        <p className="text-gray-300">
-          {cancelReason}
-        </p>
+              <p className="text-gray-300">{cancelReason}</p>
 
-        <div className="bg-black border border-slate-700 rounded-lg p-4 text-sm text-gray-300">
-          <p className="text-gray-400">
-            If money was deducted, it will be automatically refunded
-            within 5–7 working days.
-          </p>
+              <div className="bg-black border border-slate-700 rounded-lg p-4 text-sm text-gray-300">
+                <p className="text-gray-400">
+                  If money was deducted, it will be automatically refunded
+                  within 5–7 working days.
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setOpenCancelModal(false)}
+                className="border border-gray-500 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-800 cursor-pointer"
+              >
+                Close
+              </button>
+
+              <button
+                onClick={() => {
+                  setOpenCancelModal(false);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Footer */}
-      <div className="flex justify-end gap-3 mt-6">
-        <button
-          onClick={() => setOpenCancelModal(false)}
-          className="border border-gray-500 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-800 cursor-pointer"
-        >
-          Close
-        </button>
-
-        <button
-          onClick={() => {
-            setOpenCancelModal(false);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer"
-        >
-          Try Again
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+      )}
     </div>
   );
 }
