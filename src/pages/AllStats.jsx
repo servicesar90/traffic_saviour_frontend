@@ -453,8 +453,8 @@ const Dashboard = () => {
       className="fixed right-0 top-full mt-2 w-48 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-20"
       style={{
         zIndex: 9999999, // over ALL elements
-        left: dropdownPos.left,
-        top: dropdownPos.top, // adjust dynamically if needed
+        left: dropdownPos?.left,
+        top: dropdownPos?.top, // adjust dynamically if needed
       }}
     >
       <div className="py-1">
