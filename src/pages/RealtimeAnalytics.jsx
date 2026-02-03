@@ -53,11 +53,11 @@ export default function RealtimeAnalytics({}) {
       const response = await apiFunction("get", getAllAnalyticsCamp, id, null,controller.signal);
       if (!response) return;
       const analyticsData = response.data.data;
-      console.log(analyticsData);
+      
       const uniqueVisitors =
     analyticsData?.find(item => 'uniquecount' in item)?.uniquecount || 0;
       setUniqueVistors(uniqueVisitors);
-      console.log(uniqueVisitors);
+
       
       const deviceInfo = analyticsData?.[1];
       const deviceinfo2 = analyticsData?.[2];
@@ -118,7 +118,7 @@ export default function RealtimeAnalytics({}) {
         isNew: false,
       }));
 
-      console.log("logs", formattedLogs);
+      
 
       setLogs(
         formattedLogs
@@ -132,11 +132,11 @@ export default function RealtimeAnalytics({}) {
     error?.name === "CanceledError" ||
     error?.code === "ERR_CANCELED"
   ) {
-    console.log("Analytics API aborted");
+    
     return;
   }
 
-  console.log("Something went wrong", error);
+ 
   setLoadingLogs(false);
 }
 

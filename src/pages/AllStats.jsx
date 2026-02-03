@@ -75,7 +75,7 @@ const Dashboard = () => {
 
       await Promise.all([fetchIpClicks(), fetchStats(), fetchCampaigns()]);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     } finally {
       setTimeout(() => setIsRefreshing(false), 600); // smooth UX
     }
@@ -121,7 +121,7 @@ const Dashboard = () => {
 
       setClickSummary(totals);
     } catch (err) {
-      console.error("IP Click API Error:", err);
+      // console.error("IP Click API Error:", err);
       setChartData([]);
       setClickSummary({ totalClicks: 0, safeClicks: 0, moneyClicks: 0 });
     } finally {
@@ -139,7 +139,7 @@ const Dashboard = () => {
         null,
         null
       );
-      console.log(response);
+      // console.log(response);
 
       // Assume total items is available in response.data.total or we use array length
       const dataRows = response.data.data || [];
@@ -152,7 +152,7 @@ const Dashboard = () => {
       setTotalItems(response.data.total || dataRows.length);
       setIsLoading(false);
     } catch (err) {
-      console.error("Error fetching campaigns:", err);
+      // console.error("Error fetching campaigns:", err);
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
@@ -175,7 +175,7 @@ const Dashboard = () => {
         allowed_campaigns: res?.data?.data?.allowed_campaigns || 0,
       });
     } catch (error) {
-      console.error("Stats API Error:", error);
+      // console.error("Stats API Error:", error);
     }
   };
 
@@ -238,7 +238,7 @@ const Dashboard = () => {
       case "duplicate": {
         try {
           if (!row) return;
-          console.log(row);
+          // console.log(row);
 
           // 🔁 deep clone campaign
           const payload = JSON.parse(JSON.stringify(row));
@@ -280,8 +280,8 @@ const Dashboard = () => {
 
           }
         } catch (err) {
-          console.error("Duplicate campaign error:", err);
-          showErrorToast("Failed to duplicate campaign");
+          // console.error("Duplicate campaign error:", err);
+          showErrorToast(err?.response?.data?.message || "Failed to duplicate campaign");
         }
 
         break;
@@ -370,7 +370,7 @@ const Dashboard = () => {
 
       showSuccessToast(`Status updated ✔ : ${newStatus}`);
     } catch (err) {
-      console.error("Status update error:", err);
+      // console.error("Status update error:", err);
       showErrorToast("Something went wrong!");
 
       // ❌ loading hatao
@@ -453,8 +453,8 @@ const Dashboard = () => {
       className="fixed right-0 top-full mt-2 w-48 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-20"
       style={{
         zIndex: 9999999, // over ALL elements
-        left: dropdownPos.left,
-        top: dropdownPos.top, // adjust dynamically if needed
+        left: dropdownPos?.left,
+        top: dropdownPos?.top, // adjust dynamically if needed
       }}
     >
       <div className="py-1">

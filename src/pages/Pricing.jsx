@@ -40,7 +40,6 @@ export default function Pricing() {
     const fetchPlans = async () => {
       try {
         const res = await createApiFunction("get", getPlans, null, null);
-        console.log("PLANS RESPONSE 👉", res);
 
         if (res?.data?.success && Array.isArray(res.data.Plans)) {
           setPlans(res.data.Plans);
@@ -56,6 +55,17 @@ export default function Pricing() {
   /* ===================== HELPERS ===================== */
 
   const resetPaymentState = () => {
+    setModalStep(0);
+    setSelectedPlan(null);
+    setPaymentMethod("");
+    setNetwork("");
+    setTxHash("");
+    setLoading(false);
+    setPayload(null);
+    // navigate("/Dashboard/billing");
+  };
+
+  const resetPaymentState1 = () => {
     setModalStep(0);
     setSelectedPlan(null);
     setPaymentMethod("");
@@ -134,8 +144,8 @@ export default function Pricing() {
                 type === "quarterly"
                   ? "10% OFF"
                   : type === "Yearly"
-                  ? "20% OFF"
-                  : null;
+                    ? "20% OFF"
+                    : null;
 
               return (
                 <button
@@ -222,10 +232,22 @@ export default function Pricing() {
       {/* ===================== MODAL ===================== */}
       {modalStep > 0 && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#111827] w-full max-w-md rounded-2xl p-6 border border-gray-700 relative">
+          <div
+            className={`w-full max-w-md rounded-2xl p-6 border relative
+    ${
+      modalStep === 2 && paymentMethod === "card"
+        ? "bg-white border-gray-300"
+        : "bg-[#111827] border-gray-700"
+    }
+  `}
+          >
             <button
               onClick={resetPaymentState}
-              className="absolute top-3 right-4 text-gray-400 hover:text-white"
+              className={`absolute top-3 right-4 cursor-pointer
+                ${
+                  modalStep === 2 && paymentMethod === "card"
+                  ? "text-gray-400 hover:text-gray-800":" text-gray-400 hover:text-white"
+                } `}
             >
               ✕
             </button>
@@ -252,7 +274,12 @@ export default function Pricing() {
                 </div>
 
                 <div className="flex justify-between mt-6">
-                  <button className="cursor-pointer" onClick={resetPaymentState}>Close</button>
+                  <button
+                    className="cursor-pointer"
+                    onClick={resetPaymentState}
+                  >
+                    Close
+                  </button>
                   <button
                     disabled={!paymentMethod}
                     onClick={() => {
@@ -312,7 +339,12 @@ export default function Pricing() {
                 ))}
 
                 <div className="flex justify-between mt-6">
-                  <button className="cursor-pointer" onClick={() => setModalStep(1)}>Back</button>
+                  <button
+                    className="cursor-pointer"
+                    onClick={() => setModalStep(1)}
+                  >
+                    Back
+                  </button>
                   <button
                     disabled={!network}
                     onClick={() => setModalStep(3)}
@@ -327,10 +359,15 @@ export default function Pricing() {
             {/* STEP 2 - CARD */}
             {modalStep === 2 && paymentMethod === "card" && (
               <>
-                <PayPalIntegration cart={payload} />
-                <button className="mt-6 cursor-pointer" onClick={() => setModalStep(1)}>
-                  Back
-                </button>
+                <div className="bg-white">
+                  <PayPalIntegration cart={payload} />
+                  <button
+                    className="mt-6 cursor-pointer py-1 px-3 rounded-md bg-[#009cde]"
+                    onClick={() => setModalStep(1)}
+                  >
+                    Back
+                  </button>
+                </div>
               </>
             )}
 
@@ -481,7 +518,7 @@ export default function Pricing() {
                 </p>
 
                 <button
-                  onClick={resetPaymentState}
+                  onClick={resetPaymentState1}
                   className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg cursor-pointer"
                 >
                   OK

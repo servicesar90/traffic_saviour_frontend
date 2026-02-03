@@ -240,12 +240,22 @@ try {
 
         {/* RIGHT PANEL */}
         <div className="hidden xl:flex w-1/2 bg-[#0B0E2A] text-white items-center justify-center relative overflow-hidden">
+
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05)_1px,_transparent_1px)] bg-[length:40px_40px]" />
           <div className="relative text-center px-10">
-            <h2 className="text-2xl font-semibold mb-4">Click Stopper</h2>
+            <div className="flex items-center justify-center ">
+             
+                <img
+    src="/logo1.svg"
+    alt="Click Stopper Logo"
+    className="w-30 h-30"
+  />
+              
+              <h2 className=" text-4xl font-semibold text-[#a855f7] mt-[30px]">Click Stopper</h2>
+            </div>
             <p className="text-gray-300 text-sm max-w-sm mx-auto">
-              Protect your campaigns with advanced cloaking and smart traffic
-              controls.
+              Shield your campaigns. Boost your performance. Experience smart
+              traffic cloaking — secure, optimized, and effortless.
             </p>
           </div>
         </div>

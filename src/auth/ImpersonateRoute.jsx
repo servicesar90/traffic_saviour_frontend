@@ -32,7 +32,7 @@ const Impersonate = () => {
         } catch (error) {
             console.log("Impersonate login error:", error);
         }
-    }
+    } 
 
     useEffect(() => {
         loginAsUser();

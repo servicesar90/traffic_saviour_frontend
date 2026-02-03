@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { LoginProtector, RoutesProtector } from "./routesProtector";
 import UpdatePassword from "../auth/updatePassword";
 import DashboardGuard from "./DashboardGuard";
+import DevToolsBlocked from "../utils/devtools-blocked";
 
 // ✅ Lazy imports
 const LandingPage = lazy(() => import("../pages/home/landingPage"));
@@ -57,6 +58,8 @@ export default function Routess() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
+
+           <Route path="/devtools-blocked" element={<DevToolsBlocked />} />
 
           <Route path="/socket" element={<Socket />} />
           <Route path="/paypal" element={<PaypalIntegration />} />

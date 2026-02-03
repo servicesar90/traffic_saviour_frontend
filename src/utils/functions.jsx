@@ -12,7 +12,7 @@ export const javascriptIntegration = async (camp) => {
     "post",
     javascriptIntegrationCheckApi, null, data
   );
-  console.log(res);
+  
 
   if (res.status === 200) {
     const data = {
@@ -35,7 +35,7 @@ export async function checkIntegration(camp) {
     
   
     const text = await res.text();
-    console.log("result", camp, "text", text,camp?.id);
+   
   
     let status = "failed";
     if (text.trim() != camp?.cid) {
@@ -46,7 +46,7 @@ export async function checkIntegration(camp) {
       integrationUrl: null,
       integrationType: null
     }
-    console.log("cyc",camp.id);
+  
     const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data);
     
       return
@@ -59,9 +59,9 @@ export async function checkIntegration(camp) {
       integrationUrl: url,
       integrationType: "php"
     }
-    console.log("cyc",camp.id);
+   
     const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data)
-    console.log(integrate.status,"ghfshg");
+   
     
     if (integrate.status === 200) return showSuccessToast("Integration Status: " + status);
     showErrorToast("Integration Error try again" + status);
