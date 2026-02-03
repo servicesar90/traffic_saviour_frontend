@@ -1,6 +1,5 @@
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useState } from "react";
-import { apiFunction } from "../api/ApiFunction";
 import { useNavigate } from "react-router-dom";
 import {
   paypalCreateOrder,
@@ -8,6 +7,7 @@ import {
   cryptoPayment,
   getSubscription,
 } from "../api/Apis";
+import { apiFunction } from "../api/ApiFunction";
 
 
 function PayPalIntegration(cart) {

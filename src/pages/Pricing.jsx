@@ -257,6 +257,8 @@ export default function Pricing() {
                     disabled={!paymentMethod}
                     onClick={() => {
                       setModalStep(2);
+                      console.log(paymentMethod);
+                      
                       if (paymentMethod === "card") {
                         const { start_date, end_date } =
                           calculateStartEndDates(billing);
