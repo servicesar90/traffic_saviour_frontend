@@ -3,6 +3,11 @@ import { apiFunction, createApiFunction } from "../api/ApiFunction";
 import { cryptoPayment, getPlans } from "../api/Apis";
 import PayPalIntegration from "./paypalIntegration";
 import { useNavigate } from "react-router-dom";
+import { Elements } from "@stripe/react-stripe-js";
+import Checkout from "../components/Stripe/Checkout";
+import { stripePromise } from "../utils/stripe";
+import Subscribe from "./Stripe/StripeSubscription";
+
 
 /* ===================== PAYMENT DETAILS ===================== */
 
@@ -51,6 +56,29 @@ export default function Pricing() {
 
     fetchPlans();
   }, []);
+
+
+  // ====================== STRIPE PAYMENT =====================
+   /* ===================== PAYMENT HANDLERS ===================== */
+const handleSubscribe = async (priceId) => {
+  if (!priceId) return alert("Price ID is required for subscription");
+  try {
+    const response = await fetch("http://localhost:2000/api/v2/payment/stripe/checkout-subscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({ planId: selectedPlan?.id, priceId: priceId }), // ₹500
+    });
+    const data = await response.json();
+    console.log("Subscription Response:", data); 
+    window.location.href = data.url; // Redirect to Stripe Checkout   
+  } catch (error) {
+    console.log("Error",error);  
+    
+  }
+}
+
 
   /* ===================== HELPERS ===================== */
 
@@ -246,7 +274,8 @@ export default function Pricing() {
               className={`absolute top-3 right-4 cursor-pointer
                 ${
                   modalStep === 2 && paymentMethod === "card"
-                  ? "text-gray-400 hover:text-gray-800":" text-gray-400 hover:text-white"
+                    ? "text-gray-400 hover:text-gray-800"
+                    : " text-gray-400 hover:text-white"
                 } `}
             >
               ✕
@@ -285,8 +314,11 @@ export default function Pricing() {
                     onClick={() => {
                       setModalStep(2);
                       console.log(paymentMethod);
-                      
-                      if (paymentMethod === "card") {
+
+                  
+
+                      if (paymentMethod === "card" || selectedPlan.stripePriceId) {
+                        handleSubscribe(selectedPlan.stripePriceId);
                         const { start_date, end_date } =
                           calculateStartEndDates(billing);
                         setPayload({
@@ -347,7 +379,8 @@ export default function Pricing() {
                   </button>
                   <button
                     disabled={!network}
-                    onClick={() => setModalStep(3)}
+                    onClick={() =>{
+                      setModalStep(3)}}
                     className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
                   >
                     Continue
@@ -360,7 +393,21 @@ export default function Pricing() {
             {modalStep === 2 && paymentMethod === "card" && (
               <>
                 <div className="bg-white">
-                  <PayPalIntegration cart={payload} />
+                  {/* {clientSecret && (
+                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                      <Checkout />
+                    </Elements>
+                  )} */}
+                  {clientSecret &&
+                     (
+                      <Elements stripe={stripePromise} options={{ clientSecret }}>
+                      //   {/* <Checkout /> */}
+                        <Subscribe/>
+                      </Elements>
+                    )
+                  }
+
+                  {/* <PayPalIntegration cart={payload} /> */}
                   <button
                     className="mt-6 cursor-pointer py-1 px-3 rounded-md bg-[#009cde]"
                     onClick={() => setModalStep(1)}

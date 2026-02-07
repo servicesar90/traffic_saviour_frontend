@@ -39,18 +39,6 @@ function PayPalIntegration(cart) {
           }}
           createOrder={async () => {
             try {
-              // const response = await fetch(`${serverUrl}api/v2/payment/create-order`, {
-              //     method: "POST",
-              //     headers: {
-              //         "Content-Type": "application/json",
-              //         "Authorization": `Bearer ${token}`,
-              //     },
-              //     // use the "body" param to optionally pass additional order information
-              //     // like product ids and quantities
-              //     body: JSON.stringify({
-              //         cart: cart?.cart,
-              //     }),
-              // });
               const response = await apiFunction(
                 "post",
                 paypalCreateOrder,

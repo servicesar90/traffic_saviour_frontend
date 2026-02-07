@@ -35,6 +35,7 @@ const ResetPassword = lazy(() => import("../auth/ResetPassword"));
 const RealtimeAnalytics = lazy(() => import("../pages/RealtimeAnalytics"));
 const Socket = lazy(() => import("../pages/socket"));
 const PaypalIntegration = lazy(() => import("../pages/paypalIntegration"));
+const StripeTest = lazy(() => import("../pages/SrtipeTest"));
 const Billing = lazy(() => import("../pages/Billing"));
 const Verifyotp = lazy(()=> import("../auth/VerifyOtp"));
 
@@ -63,6 +64,7 @@ export default function Routess() {
 
           <Route path="/socket" element={<Socket />} />
           <Route path="/paypal" element={<PaypalIntegration />} />
+          <Route path="/stripe-test" element={<StripeTest />} />
           <Route path="/impersonate" element={<Impersonate />} />
 
           {/* Guest Only Routes */}
