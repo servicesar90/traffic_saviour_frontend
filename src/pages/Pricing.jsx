@@ -63,7 +63,7 @@ export default function Pricing() {
 const handleSubscribe = async (priceId) => {
   if (!priceId) return alert("Price ID is required for subscription");
   try {
-    const response = await fetch("http://localhost:2000/api/v2/payment/stripe/checkout-subscription", {
+    const response = await fetch("https://api.clickstopper.com/api/v2/payment/stripe/checkout-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json",
         "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -398,22 +398,24 @@ const handleSubscribe = async (priceId) => {
                       <Checkout />
                     </Elements>
                   )} */}
-                  {clientSecret &&
+                  {/* {clientSecret &&
                      (
                       <Elements stripe={stripePromise} options={{ clientSecret }}>
-                      //   {/* <Checkout /> */}
+                       <Checkout />
                         <Subscribe/>
                       </Elements>
                     )
-                  }
+                  } */}
+                                <h2 className="text-center text-black">Redirecting to stripe payment gateway...</h2>
+
 
                   {/* <PayPalIntegration cart={payload} /> */}
-                  <button
+                  {/* <button
                     className="mt-6 cursor-pointer py-1 px-3 rounded-md bg-[#009cde]"
                     onClick={() => setModalStep(1)}
                   >
                     Back
-                  </button>
+                  </button> */}
                 </div>
               </>
             )}

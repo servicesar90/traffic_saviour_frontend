@@ -22,6 +22,8 @@ const Analytics = lazy(() => import("../pages/Analytics"));
 const SignupPage = lazy(() => import("../auth/SignUpForm"));
 const LoginPage = lazy(() => import("../auth/SignInForm"));
 const Impersonate = lazy(() => import("../auth/ImpersonateRoute"));
+const Success = lazy(() => import("../pages/success"));
+const PaymentCancel = lazy(() => import("../pages/cancel"));
 const Test = lazy(() => import("../pages/test"));
 // const ClickLogs = lazy(() => import("../pages/clickLogs"));
 const AllCampaignsDashboard = lazy(() => import("../pages/AllCampaign"));
@@ -66,6 +68,8 @@ export default function Routess() {
           <Route path="/paypal" element={<PaypalIntegration />} />
           <Route path="/stripe-test" element={<StripeTest />} />
           <Route path="/impersonate" element={<Impersonate />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<PaymentCancel />} />
 
           {/* Guest Only Routes */}
           <Route
