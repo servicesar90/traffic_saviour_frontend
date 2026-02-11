@@ -62,7 +62,7 @@ export default function PaymentCancel() {
           color="error"
           size="large"
           sx={{ mb: 1.5 }}
-          onClick={() => navigate("/pricing")}
+          onClick={() => navigate("/Dashboard/Pricing")}
         >
           Try Payment Again
         </Button>
@@ -70,7 +70,7 @@ export default function PaymentCancel() {
         <Button
           fullWidth
           variant="outlined"
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/Dashboard/allStats")}
         >
           Go to Dashboard
         </Button>
