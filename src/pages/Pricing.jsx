@@ -317,7 +317,7 @@ const handleSubscribe = async (priceId) => {
 
                   
 
-                      if (paymentMethod === "card" || selectedPlan.stripePriceId) {
+                      if (paymentMethod === "card" && selectedPlan.stripePriceId) {
                         handleSubscribe(selectedPlan.stripePriceId);
                         const { start_date, end_date } =
                           calculateStartEndDates(billing);
@@ -350,6 +350,48 @@ const handleSubscribe = async (priceId) => {
                     className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
                   >
                     Continue
+                  </button>
+                  <button
+                    disabled={!paymentMethod}
+                    onClick={() => {
+                      setModalStep(2);
+                      console.log(paymentMethod);
+
+                  
+
+                      if (paymentMethod === "card" && selectedPlan.stripePriceId) {
+                        handleSubscribe("price_1SzaS9QxKOqwXPnDFn4PFBb9");
+                        const { start_date, end_date } =
+                          calculateStartEndDates(billing);
+                        setPayload({
+                          plan_id: selectedPlan.id,
+                          plan_name: selectedPlan.name,
+                          billing_cycle: billing,
+
+                          method:
+                            paymentMethod === "USDT"
+                              ? "cryptocurrency"
+                              : "card",
+
+                          amount: totalAmount,
+
+                          currency:
+                            paymentMethod === "USDT"
+                              ? network === "ERC20"
+                                ? "USDT (ERC20)"
+                                : "USDT (TRC20)"
+                              : "USD",
+
+                          start_date,
+                          end_date,
+
+                          payment_id: null,
+                        });
+                      }
+                    }}
+                    className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
+                  >
+                    Test
                   </button>
                 </div>
               </>
