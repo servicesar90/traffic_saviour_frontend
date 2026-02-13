@@ -360,7 +360,7 @@ const handleSubscribe = async (priceId) => {
                   
 
                       if (paymentMethod === "card" && selectedPlan.stripePriceId) {
-                        handleSubscribe("price_1SzaS9QxKOqwXPnDFn4PFBb9");
+                        handleSubscribe("price_1T0JW1QxKOqwXPnDTxMeHFB6");
                         const { start_date, end_date } =
                           calculateStartEndDates(billing);
                         setPayload({
