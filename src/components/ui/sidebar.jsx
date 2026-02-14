@@ -19,6 +19,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList, faBan, faChartPie, faChartSimple, faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import { CreditCard, Layers } from "lucide-react";
 import { Layer } from "recharts";
+import { apiFunction } from "../../api/ApiFunction";
+import { signOutApi } from "../../api/Apis";
 
 
 // import { useSelector } from "react-redux";
@@ -106,11 +108,17 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
     if (mobileVisible) onCloseMobile(); // auto-close sidebar on mobile 
   };
 
-  const logout = () => {
-    localStorage.removeItem("TokenId");
-    localStorage.removeItem("User");
-    navigate("/");
-  };
+  const handleLogout = async () => {
+      const response = await apiFunction("get", signOutApi, null, null);
+      if (response) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("plan");
+        localStorage.removeItem("todo_tasks");
+  
+        navigate("/");
+      }
+    };
 
   const isDatabaseActive = databaseSubItems.some(
     (sub) => location.pathname === sub.route
@@ -263,7 +271,9 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
             </button> */}
           </div>
           
-            <button class="flex items-center justify-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-red-400  rounded transition cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out w-4 h-4 mr-2" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg> {!isCollapsed && "Logout"}</button>
+            <button
+              onClick={handleLogout} 
+             class="flex items-center justify-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-red-400  rounded transition cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out w-4 h-4 mr-2" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg> {!isCollapsed && "Logout"}</button>
           
         </div>
 

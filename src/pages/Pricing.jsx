@@ -351,7 +351,7 @@ const handleSubscribe = async (priceId) => {
                   >
                     Continue
                   </button>
-                  <button
+                  {/* <button
                     disabled={!paymentMethod}
                     onClick={() => {
                       setModalStep(2);
@@ -392,7 +392,7 @@ const handleSubscribe = async (priceId) => {
                     className="bg-blue-600 px-4 py-2 rounded cursor-pointer"
                   >
                     Test
-                  </button>
+                  </button> */}
                 </div>
               </>
             )}
