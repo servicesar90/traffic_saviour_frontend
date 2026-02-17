@@ -5,9 +5,9 @@ import { Outlet } from "react-router-dom";
 import { Steps, Hints } from "intro.js-react";
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
-import {  Briefcase, Home } from "lucide-react";
+import { Briefcase, Home } from "lucide-react";
 import { PhoneCall } from "lucide-react";
-import {motion} from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Box } from "@mui/joy";
 
 const Dashboard = () => {
@@ -18,12 +18,12 @@ const Dashboard = () => {
 
   const handleMenuClick = () => {
     if (window.innerWidth < 768) {
-     
+
 
       setMobileVisible(!mobileVisible);
       setIsCollapsed(!isCollapsed);
     } else {
-  
+
 
       setIsCollapsed(!isCollapsed);
     }
@@ -166,50 +166,50 @@ const Dashboard = () => {
     },
   ];
 
- useEffect(() => {
+  useEffect(() => {
 
-  
-  const hasSeenIntro = localStorage.getItem("introExit") === "true";
- 
-   const stepsReady = () => {
-    return steps.every((step) => {
-      const el = document.querySelector(step.element);
-      if (!el) return false;
-      const rect = el.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    });
-  };
 
-  if (hasSeenIntro){
-    setStepsDone(false);
-    return
-  }else{
+    const hasSeenIntro = localStorage.getItem("introExit") === "true";
 
-    const startIntroWhenReady = () => {
-      if (stepsReady()) {
-        setStepsDone(true); 
-        observer.disconnect();
-      } else {
-        setTimeout(startIntroWhenReady, 200);
-      }
+    const stepsReady = () => {
+      return steps.every((step) => {
+        const el = document.querySelector(step.element);
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      });
     };
-  
-    const observer = new MutationObserver(() => {
-      if (stepsReady()) {
-        setStepsDone(true);
-        observer.disconnect();
-      }
-    });
-  
-    observer.observe(document.body, { childList: true, subtree: true });
-  
-    setTimeout(startIntroWhenReady, 300);
-  
-    return () => observer.disconnect();
-  }
- 
 
-}, []);
+    if (hasSeenIntro) {
+      setStepsDone(false);
+      return
+    } else {
+
+      const startIntroWhenReady = () => {
+        if (stepsReady()) {
+          setStepsDone(true);
+          observer.disconnect();
+        } else {
+          setTimeout(startIntroWhenReady, 200);
+        }
+      };
+
+      const observer = new MutationObserver(() => {
+        if (stepsReady()) {
+          setStepsDone(true);
+          observer.disconnect();
+        }
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      setTimeout(startIntroWhenReady, 300);
+
+      return () => observer.disconnect();
+    }
+
+
+  }, []);
 
   return (
     <>
@@ -247,10 +247,29 @@ const Dashboard = () => {
             }}
           >
             <Outlet context={{ onIntroReady: () => setStepEnable(true) }} />
+
+
           </div>
         </div>
       </div>
-       {/* <Box
+      {/* TELEGRAM SUPPORT BUTTON */}
+
+      <a
+        href="https://t.me/ClickStopper"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat on Telegram"
+        className="fixed bottom-[22px] right-[22px] z-[9999] flex items-center gap-[10px] rounded-[50px] bg-[#229ED9] px-[18px] py-3 text-sm font-semibold text-white no-underline shadow-[0_10px_25px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-[1.08] hover:shadow-[0_18px_35px_rgba(0,0,0,0.35)]"
+      >
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
+          alt="Telegram"
+          className="h-[26px] w-[26px] block"
+        />
+        Support
+      </a>
+
+      {/* <Box
         sx={{
           position: "fixed",
           right: "5vw",

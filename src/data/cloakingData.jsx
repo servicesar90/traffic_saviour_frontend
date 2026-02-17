@@ -336,6 +336,12 @@ error_reporting(0);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Expires: Tue, 01 Jan 2000 00:00:00 GMT"); // Past date
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache"); // For HTTP/1.0
+header("X-Accel-Expires: 0"); // Nginx proxy caching disable
 
 // integration check
 function _check() { 

@@ -109,16 +109,16 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
   };
 
   const handleLogout = async () => {
-      const response = await apiFunction("get", signOutApi, null, null);
-      if (response) {
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        localStorage.removeItem("plan");
-        localStorage.removeItem("todo_tasks");
-  
-        navigate("/");
-      }
-    };
+    const response = await apiFunction("get", signOutApi, null, null);
+    if (response) {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      localStorage.removeItem("plan");
+      localStorage.removeItem("todo_tasks");
+
+      navigate("/");
+    }
+  };
 
   const isDatabaseActive = databaseSubItems.some(
     (sub) => location.pathname === sub.route
@@ -234,17 +234,17 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
             <div className="flex items-center gap-3 overflow-hidden">
               {/* Avatar */}
               <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-gray-300">
-                 {user?.company?.logoUrl ? (
-          <img
-            src={employer?.company.logoUrl}
-            alt="Logo"
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-8 h-8 text-white rounded-full bg-purple-700 text-white flex items-center justify-center text-sm font-semibold">
-            {user?.name.charAt(0).toUpperCase()}
-          </div>
-        )}
+                {user?.company?.logoUrl ? (
+                  <img
+                    src={employer?.company.logoUrl}
+                    alt="Logo"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 text-white rounded-full bg-purple-700 text-white flex items-center justify-center text-sm font-semibold">
+                    {user?.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
 
               {/* Name + Email (hide when collapsed) */}
@@ -270,11 +270,11 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
               <LogOut size={18} />
             </button> */}
           </div>
-          
-            <button
-              onClick={handleLogout} 
-             class="flex items-center justify-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-red-400  rounded transition cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out w-4 h-4 mr-2" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg> {!isCollapsed && "Logout"}</button>
-          
+
+          <button
+            onClick={handleLogout}
+            class="flex items-center justify-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-red-400  rounded transition cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out w-4 h-4 mr-2" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg> {!isCollapsed && "Logout"}</button>
+
         </div>
 
       </div>
