@@ -224,10 +224,10 @@ const handleSubscribe = async (priceId) => {
               </div>
 
               <p className="mt-3 text-gray-400 text-sm">
-                {plan.maxCampaigns} Campaigns •{" "}
+                {plan.maxCampaigns === -1 ? "Unlimited Campaigns" : `${plan.maxCampaigns} Campaigns`} •{" "}
                 {plan.clicksPerCampaign === -1
                   ? "Unlimited Clicks"
-                  : `${plan.clicksPerCampaign} Clicks/Campaign`}
+                  : `${plan.clicksPerCampaign} Clicks/day`}
               </p>
 
               <ul className="mt-6 space-y-2 text-sm">
