@@ -108,11 +108,11 @@ function PayPalIntegration(cart) {
                 setMessage(
                   `Transaction ${transaction.status}: ${transaction.id}. See console for all available details`,
                 );
-                // console.log(
-                //   "Capture result",
-                //   orderData,
-                //   JSON.stringify(orderData, null, 2),
-                // );
+                console.log(
+                  "Capture result",
+                  orderData,
+                  JSON.stringify(orderData, null, 2),
+                );
                 // console.log("cart.cart", cart?.cart);
 
                 if (orderData.status === "COMPLETED") {

@@ -1,6 +1,8 @@
 
 // const base_url=import.meta.env.VITE_SERVER_URL;
-const base_url= import.meta.env.VITE_SERVER_URL;
+// const base_url= import.meta.env.VITE_SERVER_URL;
+const base_url= "http://localhost:2000";
+
 
 
 

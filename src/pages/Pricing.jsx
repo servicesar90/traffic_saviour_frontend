@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { apiFunction, createApiFunction } from "../api/ApiFunction";
 import { cryptoPayment, getPlans } from "../api/Apis";
 import PayPalIntegration from "./paypalIntegration";
+import PayPalSubscription from "../components/paypalComponents/PayPalSubscription";
 import { useNavigate } from "react-router-dom";
 import { Elements } from "@stripe/react-stripe-js";
 import Checkout from "../components/Stripe/Checkout";
@@ -148,6 +149,9 @@ const handleSubscribe = async (priceId) => {
       </div>
     );
   }
+
+  console.log("hfdhsu",payload);
+  
 
   /* ===================== UI ===================== */
 
@@ -317,8 +321,8 @@ const handleSubscribe = async (priceId) => {
 
                   
 
-                      if (paymentMethod === "card" && selectedPlan.stripePriceId) {
-                        handleSubscribe(selectedPlan.stripePriceId);
+                      if (paymentMethod === "card") {
+                        // handleSubscribe(selectedPlan.stripePriceId);
                         const { start_date, end_date } =
                           calculateStartEndDates(billing);
                         setPayload({
@@ -448,16 +452,19 @@ const handleSubscribe = async (priceId) => {
                       </Elements>
                     )
                   } */}
-                                <h2 className="text-center text-black">Redirecting to stripe payment gateway...</h2>
+
+
+                                {/* <h2 className="text-center text-black">Redirecting to stripe payment gateway...</h2> */}
 
 
                   {/* <PayPalIntegration cart={payload} /> */}
-                  {/* <button
+                  <PayPalSubscription cart={payload} />
+                  <button
                     className="mt-6 cursor-pointer py-1 px-3 rounded-md bg-[#009cde]"
                     onClick={() => setModalStep(1)}
                   >
                     Back
-                  </button> */}
+                  </button>
                 </div>
               </>
             )}
