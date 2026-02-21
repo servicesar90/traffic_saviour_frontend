@@ -71,6 +71,8 @@ export const apiFunction = async (
 
     return response;
   } catch (error) {
+    console.log(error.response);
+    
     // ✅ abort case silently ignore
     if (
       error.name === "CanceledError" ||
@@ -82,7 +84,6 @@ export const apiFunction = async (
 
     // 👇 existing 401 logic untouched
     if (error?.response?.status === 401) {
-      
 
       localStorage.removeItem("token");
       localStorage.clear();
@@ -91,6 +92,7 @@ export const apiFunction = async (
     }
 
     throw error;
+  
   }
 };
 
