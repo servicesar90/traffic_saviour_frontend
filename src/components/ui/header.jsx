@@ -71,6 +71,13 @@ const Header = ({ onMenuClick }) => {
       localStorage.removeItem("todo_tasks");
 
       navigate("/");
+    }else{
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      localStorage.removeItem("plan");
+      localStorage.removeItem("todo_tasks");
+
+      navigate("/");
     }
   };
 

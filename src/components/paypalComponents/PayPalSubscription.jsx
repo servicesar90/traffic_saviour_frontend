@@ -1,22 +1,15 @@
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useState } from "react";
-// import { apiFunction } from "../../utils/apiFunction";
 import { useNavigate } from "react-router-dom";
-import { cryptoPayment, getSubscription } from "../../api/Apis";
+import { cryptoPayment, getSubscription, getUpdatedPlan } from "../../api/Apis";
 import { apiFunction } from "../../api/ApiFunction";
-// import {
-//   paypalCreateOrder,
-//   paypalCaptureOrder,
-//   cryptoPayment,
-//   getSubscription,
-// } from "../api/Apis";
 
 function PayPalSubscription(cart) {
   console.log("cart data", cart);
 
   const navigate = useNavigate();
   const initialOptions = {
-    "client-id":"AZWazeIjFlmn-Z7WPWIUJi1pmuScHU2PbjymElppK4PvVCTYaZAY8NAfGGpoXB2EIws4RwRETRLTPO2u",
+    "client-id": "AZWazeIjFlmn-Z7WPWIUJi1pmuScHU2PbjymElppK4PvVCTYaZAY8NAfGGpoXB2EIws4RwRETRLTPO2u",
     vault: true,
     intent: "subscription",
   };
@@ -26,13 +19,17 @@ function PayPalSubscription(cart) {
   const [openCancelModal, setOpenCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [paymentInfo, setPaymentInfo] = useState(null);
+  const [showPaypalButtons, setShowPaypalButtons] = useState(true);
 
   return (
     <div className="paypal-integration mt-6">
+      {showPaypalButtons &&
+      
       <PayPalScriptProvider options={initialOptions}>
 
         {/* button for subcription */}
         <PayPalButtons
+
           style={{
             shape: "rect",
             color: "gold",
@@ -41,34 +38,44 @@ function PayPalSubscription(cart) {
           }}
           createSubscription={(data, actions) => {
             return actions.subscription.create({
-                plan_id: "P-0DD08373AM9704330NGLNZ2A"
-            //   plan_id: cart?.cart?.price_id, // pass the plan ID from your backend or state
+              // plan_id: "P-0DD08373AM9704330NGLNZ2A"
+              plan_id: cart?.cart?.price_id,
             });
           }}
           onApprove={async (data) => {
-            alert("Subscription ID: " + data.subscriptionID);
-
-            // backend ko bhejo
             await apiFunction("post", cryptoPayment, null, {
               ...cart?.cart,
               payment_id: data.subscriptionID,
               status: "Paid",
             });
-            const res = await apiFunction("get", getSubscription, null, null);
+            const res = await apiFunction("get", getUpdatedPlan, null, null);
             if (res?.data?.success && res?.data?.plan) {
               const subscriptionData = res.data?.data;
               localStorage.setItem("plan", JSON.stringify(subscriptionData));
             }
 
             setPaymentInfo({
-                    paymentId: data.subscriptionID,
-                    amount: cart?.cart?.amount,
-                    currency: "USD",
-                  });
-            
+              paymentId: data.subscriptionID,
+              amount: cart?.cart?.amount,
+              currency: "USD",
+            });
+            setOpenSuccessModal(true);
+            setShowPaypalButtons(false);
+
+          }}
+          onCancel={(data) => {
+            setCancelReason("You cancelled the payment process.");
+            setOpenCancelModal(true);
+            setShowPaypalButtons(false);
+          }}
+          onError={(err) => {
+            setCancelReason("An error occurred during the payment process. Please try again.");
+            setOpenCancelModal(true);
+            setShowPaypalButtons(false);
           }}
         />
       </PayPalScriptProvider>
+      }
 
       {openSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">

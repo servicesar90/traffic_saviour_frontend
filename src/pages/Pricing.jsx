@@ -149,8 +149,6 @@ const handleSubscribe = async (priceId) => {
       </div>
     );
   }
-
-  console.log("hfdhsu",payload);
   
 
   /* ===================== UI ===================== */
@@ -327,6 +325,7 @@ const handleSubscribe = async (priceId) => {
                           calculateStartEndDates(billing);
                         setPayload({
                           plan_id: selectedPlan.id,
+                          price_id: selectedPlan.stripePriceId, 
                           plan_name: selectedPlan.name,
                           billing_cycle: billing,
 
