@@ -8,9 +8,9 @@ function App() {
 
   
 
-  // if (process.env.NODE_ENV === "productionnhg" ) {
-  //   useDevToolsBlocker();
-  // }
+  if (process.env.NODE_ENV === "production" ) {
+    useDevToolsBlocker();
+  }
 
   return <Routess />;
 }
