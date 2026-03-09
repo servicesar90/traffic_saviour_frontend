@@ -21,6 +21,8 @@ const getDeviceIcon = (deviceName) => {
 
 const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
   const [startDate, endDate] = dateRange;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <div className="flex-grow max-w-xs min-w-s">
@@ -32,6 +34,17 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
         selectsRange
         startDate={startDate}
         endDate={endDate}
+        showMonthDropdown
+        showYearDropdown
+        dropdownMode="select"
+        maxDate={today}
+        dayClassName={(date) => {
+          const day = new Date(date);
+          day.setHours(0, 0, 0, 0);
+          return day.getTime() === today.getTime()
+            ? "!bg-blue-600 !text-white rounded-full"
+            : "";
+        }}
         onChange={(update) => {
           const normalize = (d) =>
             d ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12) : null;
@@ -41,7 +54,10 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
         isClearable
         dateFormat="dd/MM/yyyy"
         placeholderText="dd/MM/yyyy to dd/MM/yyyy"
-        className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded cursor-pointer"
+        wrapperClassName="w-full"
+        popperClassName="dashboard-datepicker-popper"
+        calendarClassName="dashboard-datepicker-calendar"
+        className="dashboard-datepicker-input w-full text-sm py-2 px-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white cursor-pointer"
       />
     </div>
   );
@@ -259,7 +275,7 @@ const tableControllerRef = useRef(null);
           </div>
         </header>
         <div className="flex flex-col border  border-gray-700 rounded-xl p-5 m-5">
-          <div className="flex flex-row p-5">
+          <div className="flex flex-row items-end gap-4 p-5">
             <DateRangePicker
               dateRange={dateRange}
               setDateRange={setDateRange}

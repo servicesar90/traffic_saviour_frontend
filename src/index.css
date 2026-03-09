@@ -62,9 +62,124 @@
   animation: slideDownGlow 0.45s ease-out;
 }
 
+.dashboard-datepicker-popper {
+  z-index: 60;
+}
 
+.dashboard-datepicker-input {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
 
+.dashboard-datepicker-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
 
+.dashboard-datepicker-calendar.react-datepicker {
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  color: #e5e7eb;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.6);
+  overflow: hidden;
+}
 
+.dashboard-datepicker-calendar .react-datepicker__header {
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
 
- 
+.dashboard-datepicker-calendar .react-datepicker__current-month,
+.dashboard-datepicker-calendar .react-datepicker-time__header,
+.dashboard-datepicker-calendar .react-datepicker-year-header,
+.dashboard-datepicker-calendar .react-datepicker__day-name {
+  color: #cbd5e1;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__day,
+.dashboard-datepicker-calendar .react-datepicker__month-text,
+.dashboard-datepicker-calendar .react-datepicker__quarter-text,
+.dashboard-datepicker-calendar .react-datepicker__year-text {
+  color: #e5e7eb;
+  border-radius: 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__day:hover,
+.dashboard-datepicker-calendar .react-datepicker__month-text:hover,
+.dashboard-datepicker-calendar .react-datepicker__quarter-text:hover,
+.dashboard-datepicker-calendar .react-datepicker__year-text:hover {
+  background: #1f2937;
+  color: #60a5fa;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__day--outside-month {
+  color: #64748b;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__day--keyboard-selected,
+.dashboard-datepicker-calendar .react-datepicker__month-text--keyboard-selected,
+.dashboard-datepicker-calendar .react-datepicker__quarter-text--keyboard-selected,
+.dashboard-datepicker-calendar .react-datepicker__year-text--keyboard-selected {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__day--selected,
+.dashboard-datepicker-calendar .react-datepicker__day--in-selecting-range,
+.dashboard-datepicker-calendar .react-datepicker__day--in-range,
+.dashboard-datepicker-calendar .react-datepicker__month-text--selected,
+.dashboard-datepicker-calendar .react-datepicker__quarter-text--selected,
+.dashboard-datepicker-calendar .react-datepicker__year-text--selected {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__day--today {
+  border: 1px solid #3b82f6;
+  font-weight: 600;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__day--disabled {
+  color: #475569;
+  cursor: not-allowed;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__navigation-icon::before {
+  border-color: #cbd5e1;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__month-dropdown,
+.dashboard-datepicker-calendar .react-datepicker__year-dropdown,
+.dashboard-datepicker-calendar .react-datepicker__month-read-view--down-arrow,
+.dashboard-datepicker-calendar .react-datepicker__year-read-view--down-arrow {
+  color: #e5e7eb;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__month-select,
+.dashboard-datepicker-calendar .react-datepicker__year-select {
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__header__dropdown {
+  margin-top: 8px;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__month-dropdown-container--select,
+.dashboard-datepicker-calendar .react-datepicker__year-dropdown-container--select {
+  margin: 0 4px;
+}
+
+.dashboard-datepicker-calendar .react-datepicker__day--selected:hover,
+.dashboard-datepicker-calendar .react-datepicker__day--in-range:hover,
+.dashboard-datepicker-calendar .react-datepicker__day--in-selecting-range:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+}

@@ -40,6 +40,7 @@ const PaypalIntegration = lazy(() => import("../pages/paypalIntegration"));
 const StripeTest = lazy(() => import("../pages/SrtipeTest"));
 const Billing = lazy(() => import("../pages/Billing"));
 const Verifyotp = lazy(()=> import("../auth/VerifyOtp"));
+const Statistics = lazy(()=>import("../pages/Statistics"))
 
 const Layout = () => (
   <div className="w-[100vw] h-[100vh] bg-[#0b0d14]">
@@ -140,6 +141,7 @@ export default function Routess() {
               {/* <Route path="clickLogs" element={<ClickLogs />} /> */}
 
               <Route path="reports" element={<Clicklog />} />
+              <Route path="stats" element = {<Statistics/>}/>
               <Route
                 path="real-time-analytics/:id"
                 element={<RealtimeAnalytics />}

@@ -77,6 +77,10 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
       label: "Click Logs",
       route: "/Dashboard/reports",
     },
+     {
+      label: "Stats Overview",
+      route: "/Dashboard/stats",
+    },
     // {
     //   label: "Stats Overview",
     //   route: "/Dashboard/clicklogs",
