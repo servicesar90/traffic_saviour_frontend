@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { apiFunction, createApiFunction } from "../api/ApiFunction";
 import { cryptoPayment, getPlans } from "../api/Apis";
 import PayPalIntegration from "./paypalIntegration";
+import PayPalSubscription from "../components/paypalComponents/PayPalSubscription";
 import { useNavigate } from "react-router-dom";
 import { Elements } from "@stripe/react-stripe-js";
 import Checkout from "../components/Stripe/Checkout";
@@ -79,6 +80,27 @@ const handleSubscribe = async (priceId) => {
   }
 }
 
+  // ====================== STRIPE PAYMENT =====================
+   /* ===================== PAYMENT HANDLERS ===================== */
+const dodoPaymentCheckout = async (priceId) => {
+  if (!priceId) return alert("Price ID is required for subscription");
+  try {
+    const response = await fetch("http://localhost:2000/api/v2/dodo/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({ planId: selectedPlan?.id, priceId: priceId }), // ₹500
+    });
+    const data = await response.json();
+    console.log("Subscription Response:", data); 
+    window.location.href = data.checkout_url; // Redirect to Stripe Checkout   
+  } catch (error) {
+    console.log("Error",error);  
+    
+  }
+}
+
 
   /* ===================== HELPERS ===================== */
 
@@ -148,6 +170,7 @@ const handleSubscribe = async (priceId) => {
       </div>
     );
   }
+  
 
   /* ===================== UI ===================== */
 
@@ -290,7 +313,7 @@ const handleSubscribe = async (priceId) => {
                 </p>
 
                 <div className="mt-6 space-y-3">
-                  {["USDT", "card"].map((m) => (
+                  {["USDT", "card","dodo"].map((m) => (
                     <label key={m} className="flex gap-3 cursor-pointer">
                       <input
                         type="radio"
@@ -317,12 +340,13 @@ const handleSubscribe = async (priceId) => {
 
                   
 
-                      if (paymentMethod === "card" && selectedPlan.stripePriceId) {
-                        handleSubscribe(selectedPlan.stripePriceId);
+                      if (paymentMethod === "card" || paymentMethod === "dodo") {
+                        // handleSubscribe(selectedPlan.stripePriceId);
                         const { start_date, end_date } =
                           calculateStartEndDates(billing);
                         setPayload({
                           plan_id: selectedPlan.id,
+                          price_id: selectedPlan.stripePriceId, 
                           plan_name: selectedPlan.name,
                           billing_cycle: billing,
 
@@ -448,16 +472,40 @@ const handleSubscribe = async (priceId) => {
                       </Elements>
                     )
                   } */}
-                                <h2 className="text-center text-black">Redirecting to stripe payment gateway...</h2>
+
+
+                                {/* <h2 className="text-center text-black">Redirecting to stripe payment gateway...</h2> */}
 
 
                   {/* <PayPalIntegration cart={payload} /> */}
-                  {/* <button
+                  <PayPalSubscription cart={payload} />
+                  <button
                     className="mt-6 cursor-pointer py-1 px-3 rounded-md bg-[#009cde]"
                     onClick={() => setModalStep(1)}
                   >
                     Back
-                  </button> */}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* dodpayment */}
+             {modalStep === 2 && paymentMethod === "dodo" && (
+              <>
+                <div className="">
+                 <h2>Continue to redirect to Dodo payment gateway</h2>
+                 <button
+                    className="mt-6 cursor-pointer py-1 px-3  mr-2 rounded-md bg-green-600"
+                    onClick={() => dodoPaymentCheckout("fdsjdghdfu")}
+                  >
+                    continue to pay
+                  </button>
+                  <button
+                    className="mt-6 cursor-pointer py-1 px-3 rounded-md bg-[#009cde]"
+                    onClick={() => setModalStep(1)}
+                  >
+                    Back
+                  </button>
                 </div>
               </>
             )}

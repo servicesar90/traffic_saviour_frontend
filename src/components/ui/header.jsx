@@ -63,15 +63,26 @@ const Header = ({ onMenuClick }) => {
   },[]);
 
   const handleLogout = async () => {
-    const response = await apiFunction("get", signOutApi, null, null);
-    if (response) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      localStorage.removeItem("plan");
-      localStorage.removeItem("todo_tasks");
-
-      navigate("/");
-    }
+    try {
+         const response = await apiFunction("get", signOutApi, null, null);
+         
+         if (response) {
+           localStorage.removeItem("user");
+           localStorage.removeItem("token");
+           localStorage.removeItem("plan");
+           localStorage.removeItem("todo_tasks");
+     
+           navigate("/");
+         }
+       } catch (error) {
+          localStorage.removeItem("user");
+           localStorage.removeItem("token");
+           localStorage.removeItem("plan");
+           localStorage.removeItem("todo_tasks");
+     
+           navigate("/");
+         
+       }
   };
 
 
