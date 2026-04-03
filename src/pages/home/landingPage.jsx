@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { showErrorToast, showSuccessToast } from "../../components/toast/toast";
 import { googleLoginApi } from "../../api/Apis";
@@ -21,12 +20,7 @@ export default function LandingActions() {
     navigate("/signin");
   };
 
-  // ✅ Google Login Handler
   const loginWithGoogle = async (googleToken) => {
-
-    // if (isSubmitting) return;
-    // setIsSubmitting(true);
-
     try {
       const response = await createApiFunction("post", googleLoginApi, null, {
         token: googleToken,
@@ -38,7 +32,7 @@ export default function LandingActions() {
 
         localStorage.setItem("user", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("plan",JSON.stringify(response?.data?.plan));
+        localStorage.setItem("plan", JSON.stringify(response?.data?.plan));
         showSuccessToast("Signin successful!");
 
         await new Promise((res) => setTimeout(res, 400));
@@ -47,7 +41,6 @@ export default function LandingActions() {
         showErrorToast("Unexpected response from server. Please try again.");
       }
     } catch (err) {
-      // console.error("❌ Google login error:", err);
       const msg =
         err.response?.data?.message ||
         "Google login failed. Please try again.";
@@ -56,52 +49,84 @@ export default function LandingActions() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* ================= LEFT PANEL ================= */}
-      <div className="flex-1 bg-white flex items-center justify-center px-4">
-        <div className="w-full max-w-[420px]">
-          <h1 className="text-[28px] font-bold text-slate-900 mb-1">
-            {user ? "Welcome back" : "Sign In"}
-          </h1>
+    <div className="min-h-[100svh] w-full font-['Manrope'] bg-white flex flex-col md:flex-row overflow-hidden relative">
+      {/* Left Panel */}
+      <div
+        className="absolute inset-0 w-full min-h-[100svh] md:static md:w-2/5 md:min-h-screen rounded-none md:rounded-tr-[40px] md:overflow-hidden relative"
+        style={{
+          backgroundImage:
+            "linear-gradient(135deg, rgba(11,26,74,0.9), rgba(11,26,74,0.8), rgba(11,26,74,0.6)), url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1600&auto=format&fit=crop')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute bottom-8 left-8 rounded-full bg-white/15 px-4 py-2 text-[12px] uppercase tracking-[0.34em] text-white/85 backdrop-blur">
+          TrafficSaviour
+        </div>
+      </div>
 
-          <p className="text-slate-500 text-sm mb-6">
-            {user
-              ? "Continue to your dashboard"
-              : "Enter your email and password to access your dashboard."}
-          </p>
+      {/* Right Panel */}
+      <div className="absolute inset-0 z-10 w-full md:w-3/5 md:static bg-transparent md:bg-white flex items-center justify-center px-6 py-8 md:py-0 min-h-[100svh]">
+        <div className="w-full max-w-[480px] bg-white/95 backdrop-blur-sm rounded-2xl shadow-[0_28px_80px_rgba(15,23,42,0.16)] ring-1 ring-slate-100/80 px-6 sm:px-9 py-8 sm:py-10 relative">
+          <div className="absolute left-6 right-6 top-0 h-[3px] bg-gradient-to-r from-[#0066FF] via-[#60a5fa] to-[#22c55e] rounded-b-full overflow-hidden">
+            <span className="absolute -left-1/2 top-0 h-full w-1/2 bg-white/70 blur-[1px] animate-[shine_1.4s_ease-in-out_infinite]" />
+          </div>
+
+          <div className="mb-5">
+            <div className="inline-flex items-center rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-slate-500 shadow-sm">
+              TrafficSaviour
+            </div>
+            <h1 className="mt-1.5 text-[27px] md:text-[32px] font-semibold tracking-[-0.02em] text-slate-900">
+              {user ? "Welcome back" : "Sign in to your account"}
+            </h1>
+            <p className="text-[14px] text-slate-500/90 mt-1.5 leading-6">
+              {user
+                ? "Continue to your dashboard."
+                : "Enter your email and password to access your dashboard."}
+            </p>
+          </div>
 
           {!user && (
             <>
-              <div className="flex justify-center items-center gap-4 mb-6">
-                {/* <button
-                          type="button"
-                          className="flex items-center justify-center w-1/2 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition cursor-pointer"
-                          onClick={() => showErrorToast("Google login is not yet implemented.")}
-                        >
-                          <img
-                            src="https://www.svgrepo.com/show/475656/google-color.svg"
-                            alt="Google"
-                            className="w-5 h-5 mr-2"
-                          />
-                          <span className="text-sm text-gray-700 font-medium">
-                            Sign in with Google
-                          </span>
-                        </button> */}
-                <GoogleOAuthProvider clientId="841461646285-9dimu89k2vjo4cbdj69ound7s0j7jm2s.apps.googleusercontent.com">
-                  <GoogleLogin
-                    onSuccess={(credentialResponse) => {
-
-                      loginWithGoogle(credentialResponse.credential);
-                    }}
-                    onError={() => console.log("Login Failed")}
-                  />
-                </GoogleOAuthProvider>
+              <div className="mb-5">
+                <div className="flex items-center justify-center w-full">
+                  <GoogleOAuthProvider clientId="841461646285-9dimu89k2vjo4cbdj69ound7s0j7jm2s.apps.googleusercontent.com">
+                    <div className="w-full max-w-[320px] mx-auto md:hidden">
+                      <GoogleLogin
+                        theme="filled_blue"
+                        size="large"
+                        shape="rectangular"
+                        text="signin_with"
+                        width="280"
+                        onSuccess={(credentialResponse) => {
+                          loginWithGoogle(credentialResponse.credential);
+                        }}
+                        onError={() => console.log("Login Failed")}
+                      />
+                    </div>
+                    <div className="hidden md:block w-full max-w-[380px] mx-auto">
+                      <GoogleLogin
+                        theme="filled_blue"
+                        size="large"
+                        shape="rectangular"
+                        text="signin_with"
+                        width="380"
+                        onSuccess={(credentialResponse) => {
+                          loginWithGoogle(credentialResponse.credential);
+                        }}
+                        onError={() => console.log("Login Failed")}
+                      />
+                    </div>
+                  </GoogleOAuthProvider>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3 my-6">
-                <div className="flex-1 h-px bg-slate-200" />
-                <span className="text-xs text-slate-400">OR</span>
-                <div className="flex-1 h-px bg-slate-200" />
+              <div className="flex items-center mb-5">
+                <hr className="flex-grow border-slate-100" />
+                <span className="px-3 text-slate-300 text-xs uppercase tracking-widest">
+                  Or
+                </span>
+                <hr className="flex-grow border-slate-100" />
               </div>
             </>
           )}
@@ -110,28 +135,24 @@ export default function LandingActions() {
             <>
               <PrimaryButton
                 label="Go to Dashboard"
-                onClick={() => navigate("/dashboard/allStats")}
+                onClick={() => navigate("/Dashboard/allStats")}
               />
-
               <button
                 onClick={handleLogout}
-                className="w-full mt-4 py-3 rounded-lg border border-red-500 text-red-500 font-medium hover:bg-red-50 transition cursor-pointer"
+                className="w-full mt-4 py-2.5 rounded-lg border border-red-200 text-red-600 font-semibold hover:bg-red-50 transition cursor-pointer"
               >
                 Sign Out
               </button>
             </>
           ) : (
             <>
-              <PrimaryButton
-                label="Sign In"
-                onClick={() => navigate("/signin")}
-              />
+              <PrimaryButton label="Sign In" onClick={() => navigate("/signin")} />
 
               <p className="text-center text-sm text-slate-600 mt-4">
-                Don’t have an account?{" "}
+                Donâ€™t have an account?{" "}
                 <span
                   onClick={() => navigate("/signup")}
-                  className="text-indigo-600 font-semibold cursor-pointer hover:underline"
+                  className="text-[#0066FF] font-semibold cursor-pointer hover:underline"
                 >
                   Sign Up
                 </span>
@@ -140,76 +161,19 @@ export default function LandingActions() {
           )}
         </div>
       </div>
-
-      {/* ================= RIGHT PANEL ================= */}
-      {/* <div className="hidden md:flex flex-1 items-center justify-center relative overflow-hidden bg-[radial-gradient(circle_at_top,#3a1c71_0%,#0b1024_65%,#050814_100%)]">
-     
-        <motion.div
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 4, repeat: Infinity }}
-          className="absolute w-[380px] h-[380px] rounded-full blur-xl bg-[radial-gradient(circle,rgba(99,102,241,0.45),transparent_65%)]"
-        />
-
-       
-        <motion.div
-          animate={{ y: [0, -18, 0] }}
-          transition={{ duration: 5, repeat: Infinity }}
-          className="w-[84px] h-[84px] rounded-2xl bg-gradient-to-br from-[#1b1f3b] to-[#0f1226] flex items-center justify-center shadow-[0_0_35px_rgba(99,102,241,0.8)] z-10"
-        >
-          <svg width="24" height="26">
-            <path
-              fill="white"
-              d="M10.55 15.91H.442L14.153.826 12.856 9.91h10.107L9.253 24.991l1.297-9.082Z"
-            />
-          </svg>
-        </motion.div>
-
-       
-        <div className="absolute bottom-[28%] text-center px-4">
-          <h2 className="text-white text-[22px] font-bold mb-1">
-            Click Stopper
-          </h2>
-
-          <p className="text-white/75 text-sm max-w-[320px] mx-auto leading-relaxed">
-            Shield your campaigns. Boost performance.
-            <br />
-            Smart ad cloaking & traffic protection.
-          </p>
-        </div>
-      </div> */}
-
-      <div className="hidden xl:flex w-1/2 bg-[#0B0E2A] text-white items-center justify-center relative overflow-hidden">
-
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05)_1px,_transparent_1px)] bg-[length:40px_40px]" />
-          <div className="relative text-center px-10">
-            <div className="flex items-center justify-center ">
-             
-                <img
-    src="/logo1.svg"
-    alt="Click Stopper Logo"
-    className="w-30 h-30"
-  />
-              
-              <h2 className=" text-4xl font-semibold text-[#a855f7] mt-[30px]">Click Stopper</h2>
-            </div>
-            <p className="text-gray-300 text-sm max-w-sm mx-auto">
-              Shield your campaigns. Boost your performance. Experience smart
-              traffic cloaking — secure, optimized, and effortless.
-            </p>
-          </div>
-        </div>
     </div>
   );
 }
 
-/* ================= BUTTON ================= */
 function PrimaryButton({ label, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full py-[14px] rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition cursor-pointer"
+      className="w-full py-2.5 rounded-lg bg-[#0066FF] text-white font-semibold hover:brightness-95 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0066FF]/30 focus-visible:ring-offset-2"
     >
       {label}
     </button>
   );
 }
+
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+﻿import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   createCampaignApi,
   getAllCampaign,
@@ -50,13 +50,20 @@ const statsAbortRef = useRef(null);
      allowed_campaigns: 0,
    });
 
-  // ⭐ NEW STATE for Dropdown
+  //  NEW STATE for Dropdown
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [dropdownPos, setDropdownPos] = useState(null);
 
-  // ⭐ useRef for Click Outside logic
+  // useRef for Click Outside logic
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const formattedDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
 
   // --- API Fetch Function (Unchanged, except for the console.log) ---
   const fetchCampaigns = useCallback(async (page=1) => {
@@ -174,14 +181,14 @@ const statsAbortRef = useRef(null);
 
   const handleStatusChange = async (uid, newStatus) => {
   try {
-    // 🔎 current campaign find karo
+    //  current campaign find karo
     const currentItem = campaigns.find(item => item.uid === uid);
     const oldStatus = currentItem?.status;
 
     // agar same status pe click hua to kuch mat karo
     if (!currentItem || oldStatus === newStatus) return;
 
-    // ⏳ loading UI
+    //  loading UI
     setCampaigns(prev =>
       prev.map(item =>
         item.uid === uid ? { ...item, statusLoading: true } : item
@@ -190,7 +197,7 @@ const statsAbortRef = useRef(null);
 
     const data = { status: newStatus };
 
-    // 🔗 PATCH API
+    //  PATCH API
     const res = await apiFunction( 
       "patch",
       createCampaignApi,
@@ -203,7 +210,7 @@ const statsAbortRef = useRef(null);
       return;
     }
 
-    // ✅ update campaigns list
+    //  update campaigns list
     setCampaigns(prev =>
       prev.map(item =>
         item.uid === uid
@@ -212,7 +219,7 @@ const statsAbortRef = useRef(null);
       )
     );
 
-    // 🔥 UPDATE STATS WITHOUT RELOAD
+    //  UPDATE STATS WITHOUT RELOAD
     setStats(prev => {
       const updated = { ...prev };
 
@@ -229,13 +236,13 @@ const statsAbortRef = useRef(null);
       return updated;
     });
 
-    showSuccessToast(`Status updated ✔ : ${newStatus}`);
+    showSuccessToast(`Status updated  : ${newStatus}`);
 
   } catch (err) {
     // console.error("Status update error:", err);
     showErrorToast("Something went wrong!");
 
-    // ❌ loading hatao
+    //  loading hatao
     setCampaigns(prev =>
       prev.map(item =>
         item.uid === uid ? { ...item, statusLoading: false } : item
@@ -293,7 +300,7 @@ const statsAbortRef = useRef(null);
 
 
   const handleActionSelect = async (action, campaignId, row) => {
-     setOpenDropdownId(null); // मेनू बंद करें
+     setOpenDropdownId(null); //   
      switch (action) {
        case "edit":
          // alert(`Editing campaign ID: ${campaignId}`);
@@ -311,18 +318,18 @@ const statsAbortRef = useRef(null);
            if (!row) return;
           //  console.log(row);
  
-           // 🔁 deep clone campaign
+           //  deep clone campaign
            const payload = JSON.parse(JSON.stringify(row));
         
  
-           // ❌ backend generated fields hatao
+           //  backend generated fields hatao
            delete payload.uid;
            delete payload._id;
            delete payload.createdAt;
            delete payload.updatedAt;
            delete payload.date_time;
  
-           // 📝 campaign name modify
+           //  campaign name modify
            const data = {
              ...payload,
  
@@ -334,13 +341,13 @@ const statsAbortRef = useRef(null);
            // optional default status
  
  
-           // 🚀 CREATE API CALL (same API as create)
+           //  CREATE API CALL (same API as create)
            const res = await apiFunction("post", createCampaignApi, null, data);
  
            if (res?.data?.status || res?.data?.success) {
              const newCampaign = res.data.data;
  
-             // ✅ UI update (top me add)
+             //  UI update (top me add)
              setCampaigns((prev) => [newCampaign, ...prev]);
              
  
@@ -447,11 +454,11 @@ const endItem = Math.min(
 
 
 
-  // ⭐ NEW Render Function: Action Dropdown Menu
+  //  NEW Render Function: Action Dropdown Menu
   const renderActionDropdown = (campaignId, row) => (
-    // ref को सीधे dropdownRef के बजाय किसी wrapper div को दें ताकि click outside काम करे
+    // ref   dropdownRef    wrapper div    click outside  
     <div
-      className="fixed right-0 top-full mt-2 w-48 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-20"
+      className="fixed right-0 top-full mt-2 w-48 rounded-xl shadow-lg bg-white border border-slate-200 z-20"
       style={{
         zIndex: 9999999, // over ALL elements
         left: dropdownPos.left,
@@ -461,19 +468,19 @@ const endItem = Math.min(
       <div className="py-1">
         <button
           onClick={() => handleActionSelect("edit", campaignId, row)}
-          className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 hover:text-white transition duration-100 cursor-pointer"
+          className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition duration-100 cursor-pointer"
         >
           Edit Campaign
         </button>
         <button
           onClick={() => handleActionSelect("duplicate", campaignId, row)}
-          className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 hover:text-white transition duration-100 cursor-pointer"
+          className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition duration-100 cursor-pointer"
         >
           Duplicate Campaign
         </button>
         <button
           onClick={() => handleActionSelect("delete", campaignId, null)}
-          className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-600 hover:text-red-300 transition duration-100 cursor-pointer"
+          className="block w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition duration-100 cursor-pointer"
         >
           Delete Campaign
         </button>
@@ -514,7 +521,7 @@ const endItem = Math.min(
     return (
       <tbody>
         <tr>
-          <td colSpan="10" className="text-center py-10 text-gray-500">
+          <td colSpan="10" className="text-center py-10 text-slate-400">
             No campaigns found.
           </td>
         </tr>
@@ -523,16 +530,16 @@ const endItem = Math.min(
   }
 
   return (
-    <tbody className="bg-gray-900 divide-y divide-gray-800">
+    <tbody className="bg-white divide-y divide-slate-200">
       {campaigns.map((item, index) => {
         const campaignId = item.campaign_info?.campaign_id || index;
         const isDropdownOpen = openDropdownId === item?.uid;
         return(
           <>
           <tr key={item.campaignId}>
-          <td className="px-3 py-3 text-sm  text-left text-gray-300">{index + 1}</td>
-          <td className="px-3 py-3 text-sm text-left text-blue-400">{item.campaign_info?.campaignName}</td>
-          <td className="px-3 py-3 text-sm text-left text-gray-300">{item.campaign_info?.trafficSource}</td>
+          <td className="px-3 py-3 text-sm text-left text-slate-600">{index + 1}</td>
+          <td className="px-3 py-3 text-sm text-left text-slate-900 font-medium">{item.campaign_info?.campaignName}</td>
+          <td className="px-3 py-3 text-sm text-left text-slate-600">{item.campaign_info?.trafficSource}</td>
           <td className="px-3 py-3 text-left">
              <button
       disabled={item.statusLoading}
@@ -541,7 +548,7 @@ const endItem = Math.min(
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
         ${item.status === "Active"
           ? "text-green-500 drop-shadow-[0_0_6px_rgba(16,185,129,.8)]"
-          : "text-gray-500 hover:text-gray-300"
+          : "text-slate-400 hover:text-slate-600"
         }`}
     >
       <svg xmlns="http://www.w3.org/2000/svg" 
@@ -550,7 +557,7 @@ const endItem = Math.min(
       </svg>
     </button>
 
-    {/* ⚡ Boost */}
+    {/*  Boost */}
     <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Allow")}
@@ -558,7 +565,7 @@ const endItem = Math.min(
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
         ${item.status === "Allow"
           ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
-          : "text-gray-500 hover:text-gray-300"
+          : "text-slate-400 hover:text-slate-600"
         }`}
     >
       <svg xmlns="http://www.w3.org/2000/svg" 
@@ -567,7 +574,7 @@ const endItem = Math.min(
       </svg>
     </button>
 
-    {/* 🚫 Block */}
+    {/*  Block */}
     <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Block")}
@@ -575,7 +582,7 @@ const endItem = Math.min(
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
         ${item.status === "Block"
           ? "text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,.8)]"
-          : "text-gray-500 hover:text-gray-300"
+          : "text-slate-400 hover:text-slate-600"
         }`}
     >
       <svg xmlns="http://www.w3.org/2000/svg" 
@@ -605,8 +612,8 @@ const endItem = Math.min(
                       />
                     </svg>
 
-                    {/* ⭐ Tooltip container */}
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 ">
+                    {/*  Tooltip container */}
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white text-slate-700 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
                       {item.integrationUrl || "No URL Found"}
                     </div>
                   </div>
@@ -627,8 +634,8 @@ const endItem = Math.min(
                     </svg>
                   </div>
                 )}</td>
-          <td className="px-3 py-3 text-gray-300 text-center">{item?.campclicks?.total_t_clicks || 0}</td>
-          <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-16">
+          <td className="px-3 py-3 text-slate-600 text-center">{item?.campclicks?.total_t_clicks || 0}</td>
+          <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right w-16">
   <div className="flex items-center gap-1 relative group">
     {/* i Icon */}
     <svg
@@ -650,14 +657,14 @@ const endItem = Math.min(
 
     {/* Tooltip */}
     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
-      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
-      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50">
+      hidden group-hover:block bg-white text-slate-700 text-xs 
+      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
       {item?.safe_page || "No URL Found"}
     </div>
   </div>
 </td>
 
-        <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-20">
+        <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right w-20">
   <div className="flex items-center gap-1 relative group">
     {/* i Icon */}
     <svg
@@ -679,14 +686,14 @@ const endItem = Math.min(
 
     {/* Tooltip */}
     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
-      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
-      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50">
+      hidden group-hover:block bg-white text-slate-700 text-xs 
+      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
       {item?.money_page?.[0]?.url || "No URL Found"}
     </div>
   </div>
 </td>
 
-          <td className="px-3 py-3 text-gray-300 text-left">
+          <td className="px-3 py-3 text-slate-600 text-left">
             {new Date(item.date_time).toLocaleString()}
           </td>
           <td
@@ -695,11 +702,12 @@ const endItem = Math.min(
                   onClick={(e) => handleActionClick(e, item?.uid)}
                   className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
                     isDropdownOpen
-                      ? "bg-gray-600 text-white"
-                      : "hover:bg-gray-700"
+                      ? "bg-slate-900 text-white"
+                      : "hover:bg-slate-100"
                   }`}
                 >
-                  ⋯ {/* Vertical three dots */}
+                  ...
+                  {/* Vertical three dots */}
                 </button>
                  {isDropdownOpen && renderActionDropdown(item?.uid, item)}</td>
         </tr>
@@ -711,107 +719,96 @@ const endItem = Math.min(
 };
 
   return (
-    <div className="min-h-screen bg-[#0b0d14] text-white p-6">
-      {/* Header Section (Unchanged) */}
-      <header className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">All Campaigns ({totalItems})</h1>
-        <div className="flex space-x-3">
-          <button
-            onClick={handleAddNewCampaign}
-            className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-medium text-sm shadow-lg transition duration-150 cursor-pointer"
-          >
-            <svg
-              className="h-5 w-5 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{formattedDate}</p>
+            <h1 className="text-2xl font-semibold">Campaigns</h1>
+            <p className="text-slate-500 text-sm">
+              Manage, refresh, and review all campaigns in one place.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleAddNewCampaign}
+              className="flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 rounded-full font-medium text-sm text-white shadow-sm transition cursor-pointer"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Add New Campaign
-          </button>
-          <button
-  onClick={handleRefresh}
-  disabled={isRefreshing}
-  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm shadow-lg transition-all duration-200
-    ${
-      isRefreshing
-        ? "bg-gray-600 cursor-not-allowed opacity-80"
-        : "bg-gray-700 hover:bg-gray-600 cursor-pointer"
-    }
-  `}
->
-  <svg
-    className={`h-5 w-5 transition-transform ${
-      isRefreshing ? "animate-spin" : ""
-    }`}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-    />
-  </svg>
-
-  <span>
-    {isRefreshing ? "Refreshing..." : "Refresh"}
-  </span>
-</button>
-
+              <svg
+                className="h-4 w-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              New Campaign
+            </button>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm border transition-all duration-200 cursor-pointer
+                ${
+                  isRefreshing
+                    ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                }
+              `}
+            >
+              <svg
+                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              {isRefreshing ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
         </div>
-      </header>
+      </div>
 
-      <h2 className="text-lg text-gray-400 mb-4">
-        Create/Edit/Delete Campaigns
-      </h2>
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+          <div className="flex flex-wrap gap-2 text-sm">
+            <div className="px-3 py-1.5 rounded-full bg-slate-900 text-white font-medium">
+              All ({stats.total_campaigns || "0"})
+            </div>
+            <div className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
+              Active ({stats.active_campaigns || "0"})
+            </div>
+            <div className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
+              Allow All ({stats.allowed_campaigns || "0"})
+            </div>
+            <div className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
+              Block All ({stats.blocked_campaigns || "0"})
+            </div>
+          </div>
+          <div className="text-xs text-slate-400">Total: {totalItems}</div>
+        </div>
 
-      {/* Filter and Control Bar (Unchanged) */}
-      <div className="bg-gray-800 p-4 rounded-lg shadow-xl mb-6">
-        <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
-
-  <div className="flex space-x-6 text-sm">
-
-    <div className="font-medium py-1 text-blue-500 border-b-2 border-blue-500 cursor-default">
-      All ({stats.total_campaigns || '0'})
-    </div>
-
-    <div className="font-medium py-1 text-gray-400">
-      Active({stats.active_campaigns || '0'})
-    </div>
-
-    <div className="font-medium py-1 text-gray-400">
-      Allow All({stats.allowed_campaigns || '0'})
-    </div>
-
-    <div className="font-medium py-1 text-gray-400">
-      Block All({stats.blocked_campaigns || '0'})
-    </div>
-
-  </div>
-
-</div>
-
-
-        <div className="flex items-center space-x-4">
+        <div className="mt-4 flex flex-wrap items-center gap-3">
           <div className="relative flex-grow max-w-sm">
             <input
               type="text"
-              placeholder="Search"
+              placeholder="Search campaigns"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full py-2 pl-10 pr-4 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full py-2 pl-10 pr-4 border border-slate-200 rounded-lg shadow-sm bg-slate-50 text-slate-700 focus:outline-none focus:ring-slate-200 focus:border-slate-300 text-sm"
             />
             <svg
-              className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+              className="absolute left-3 top-2.5 h-5 w-5 text-slate-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -829,38 +826,38 @@ const endItem = Math.min(
             placeholder="d/m/y to d/m/y"
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="py-2 px-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm max-w-[200px]"
+            className="py-2 px-3 border border-slate-200 rounded-lg shadow-sm bg-slate-50 text-slate-700 focus:outline-none focus:ring-slate-200 focus:border-slate-300 text-sm max-w-[200px]"
           />
           <button
             onClick={handleApplyFilter}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-medium cursor-pointer text-sm shadow-lg transition duration-150"
+            className="px-6 py-2 bg-slate-900 hover:bg-slate-800 rounded-lg font-medium cursor-pointer text-sm text-white transition"
           >
             Apply
           </button>
         </div>
       </div>
 
-      {/* Campaign Table Container (Unchanged) */}
-           <div className="mt-4 border border-gray-700 rounded-lg overflow-hidden">
-  <div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
+      {/* Campaign Table Container */}
+      <div className="mt-4 border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+  <div className="flex flex-col border border-slate-200 rounded-2xl bg-white overflow-hidden">
 
     {/* ===== FIXED HEADER ===== */}
-    <div className="flex-none overflow-x-auto bg-gray-800">
+    <div className="flex-none overflow-x-auto bg-slate-50">
       <table className="min-w-full table-fixed">
         <TableColGroup />
 
-        <thead className="bg-gray-800">
+        <thead className="bg-slate-50">
           <tr>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Sn</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Campaign Name</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Source</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Integration</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Clicks</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Safe</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Money</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Created on</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">Action</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Sn</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Campaign Name</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Source</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Status</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Integration</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Clicks</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Safe</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Money</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Created on</th>
+            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Action</th>
           </tr>
         </thead>
       </table>
@@ -868,28 +865,28 @@ const endItem = Math.min(
 
     {/* ===== SCROLLABLE BODY ===== */}
     <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
-      <table className="min-w-full table-fixed divide-y divide-gray-800 border-t border-gray-700">
+      <table className="min-w-full table-fixed divide-y divide-slate-200 border-t border-slate-200">
         <TableColGroup />
         {renderTableContent()}
       </table>
     </div>
 
     {/* ===== FIXED FOOTER ===== */}
-    <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between">
+    <div className="flex-none bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between">
   {/* LEFT */}
-  <span className="text-sm text-gray-400">
+  <span className="text-sm text-slate-500">
     Showing{" "}
-    <span className="text-gray-200 font-medium">
-      {startItem}–{endItem}
+    <span className="text-slate-900 font-medium">
+      {startItem}-{endItem}
     </span>{" "}
     of{" "}
-    <span className="text-gray-200 font-medium">
+    <span className="text-slate-900 font-medium">
       {totalRecords}
     </span>{" "}
     campaigns
   </span>
 
-  {/* RIGHT – Numbered Pagination */}
+  {/* RIGHT  Numbered Pagination */}
   <div className="flex items-center gap-1">
     {/* Prev */}
     <button
@@ -897,8 +894,8 @@ const endItem = Math.min(
       onClick={() => handlePageChange(currentPage - 1)}
       className={`px-3 py-1 text-sm rounded border ${
         currentPage === 1
-          ? "text-gray-500 border-gray-600 cursor-not-allowed"
-          : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
+          ? "text-slate-400 border-slate-200 cursor-not-allowed"
+          : "text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
       }`}
     >
       Prev
@@ -912,8 +909,8 @@ const endItem = Math.min(
     onClick={() => handlePageChange(page)}
     className={`px-3 py-1 text-sm rounded border cursor-pointer ${
       page === currentPage
-        ? "bg-blue-600 text-white border-blue-600"
-        : "text-gray-300 border-gray-600 hover:bg-gray-700"
+        ? "bg-slate-900 text-white border-slate-900"
+        : "text-slate-600 border-slate-200 hover:bg-slate-100"
     }`}
   >
     {page}
@@ -927,8 +924,8 @@ const endItem = Math.min(
       onClick={() => handlePageChange(currentPage + 1)}
       className={`px-3 py-1 text-sm rounded border ${
         currentPage === totalPages
-          ? "text-gray-500 border-gray-600 cursor-not-allowed"
-          : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
+          ? "text-slate-400 border-slate-200 cursor-not-allowed"
+          : "text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
       }`}
     >
       Next
@@ -944,7 +941,7 @@ const endItem = Math.min(
           {campaigns.length > 0
             ? `1 to ${campaigns.length} Items of ${totalItems}`
             : `0 Items of 0`}
-          —{" "}
+          {" "}
           <a href="#" className="text-blue-500 hover:text-blue-400">
             View all
           </a>
@@ -967,3 +964,5 @@ const endItem = Math.min(
 }
 
 export default AllCampaignsDashboard;
+
+

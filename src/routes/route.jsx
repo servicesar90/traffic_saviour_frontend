@@ -16,6 +16,7 @@ import DevToolsBlocked from "../utils/devtools-blocked";
 const LandingPage = lazy(() => import("../pages/home/landingPage"));
 const Dashboard = lazy(() => import("../pages/dashboard"));
 const Campaign = lazy(() => import("../pages/campaignCreation"));
+const CampaignNew = lazy(() => import("../pages/new"));
 const CloakingIntegration = lazy(() => import("../pages/CampaignIntegration"));
 const IpListings = lazy(() => import("../pages/IpListings"));
 const Analytics = lazy(() => import("../pages/Analytics"));
@@ -131,6 +132,7 @@ export default function Routess() {
               <Route path="allStats" element={<AllStats />} />
               <Route path="allCampaign" element={<AllCampaignsDashboard />} />
               <Route path="create-campaign" element={<Campaign />} />
+              <Route path="create-campaign-v2" element={<CampaignNew />} />
               <Route
                 path="campaign-integration"
                 element={<CloakingIntegration />}

@@ -1,14 +1,15 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 @import "../node_modules/flag-icons/css/flag-icons.min.css";
+body { font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0b0d14;
+  color-scheme: light;
+  color: #0f172a;
+  background-color: #f8fafc;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -183,3 +184,183 @@
   background: #1d4ed8;
   color: #ffffff;
 }
+
+@keyframes shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* Dashboard light theme overrides */
+.dashboard-light {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.dashboard-light .bg-\[\#0b0d14\],
+.dashboard-light .bg-\[\#111827\],
+.dashboard-light .bg-\[\#1e293b\],
+.dashboard-light .bg-\[\#1e2939\],
+.dashboard-light .bg-\[\#0f172a\],
+.dashboard-light .bg-\[\#0b1120\],
+.dashboard-light .bg-gray-900,
+.dashboard-light .bg-gray-800,
+.dashboard-light .bg-gray-700,
+.dashboard-light .bg-slate-950,
+.dashboard-light .bg-slate-900,
+.dashboard-light .bg-slate-800,
+.dashboard-light .bg-slate-700,
+.dashboard-light .bg-gray-850\/40 {
+  background-color: #ffffff !important;
+}
+
+.dashboard-light .border-gray-700,
+.dashboard-light .border-gray-800,
+.dashboard-light .border-gray-600,
+.dashboard-light .border-gray-500,
+.dashboard-light .border-slate-700 {
+  border-color: #e2e8f0 !important;
+}
+
+.dashboard-light .text-gray-100 { color: #0f172a !important; }
+.dashboard-light .text-gray-200 { color: #334155 !important; }
+.dashboard-light .text-gray-300 { color: #475569 !important; }
+.dashboard-light .text-gray-400 { color: #64748b !important; }
+.dashboard-light .text-gray-500 { color: #94a3b8 !important; }
+
+.dashboard-light .text-white { color: #0f172a !important; }
+.dashboard-light .bg-slate-900.text-white,
+.dashboard-light .bg-blue-600.text-white,
+.dashboard-light .bg-blue-700.text-white,
+.dashboard-light .bg-emerald-600.text-white,
+.dashboard-light .bg-green-600.text-white,
+.dashboard-light .bg-red-600.text-white,
+.dashboard-light .bg-rose-600.text-white,
+.dashboard-light .bg-amber-600.text-white,
+.dashboard-light .bg-gray-700.text-white,
+.dashboard-light .bg-gray-600.text-white {
+  color: #ffffff !important;
+}
+
+.dashboard-light .bg-gray-50 { background-color: #f8fafc !important; }
+.dashboard-light .bg-gray-100 { background-color: #f1f5f9 !important; }
+
+.dashboard-light input.bg-gray-700,
+.dashboard-light input.bg-gray-800,
+.dashboard-light select.bg-gray-700,
+.dashboard-light select.bg-gray-800,
+.dashboard-light textarea.bg-gray-700,
+.dashboard-light textarea.bg-gray-800 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+.dashboard-light .placeholder-gray-500,
+.dashboard-light .placeholder-gray-400 {
+  color: #94a3b8 !important;
+}
+
+/* Sidebar hover flicker fix */
+.sidebar-collapsed .sidebar-text {
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.15s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.sidebar-expanded .sidebar-text {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.2s ease 0.12s, transform 0.2s ease 0.12s;
+}
+
+/* Campaign Builder (v2) light theme overrides */
+.campaign-new .bg-slate-950,
+.campaign-new .bg-slate-900,
+.campaign-new .bg-slate-800,
+.campaign-new .bg-slate-700,
+.campaign-new .bg-gray-900,
+.campaign-new .bg-gray-800,
+.campaign-new .bg-\[\#0b0d14\],
+.campaign-new .bg-\[\#0b1120\] {
+  background-color: #ffffff !important;
+}
+
+.campaign-new .border-slate-700,
+.campaign-new .border-slate-800,
+.campaign-new .border-gray-700,
+.campaign-new .border-gray-800 {
+  border-color: #e2e8f0 !important;
+}
+
+.campaign-new .text-white { color: #0f172a !important; }
+.campaign-new .text-slate-300 { color: #64748b !important; }
+.campaign-new .text-slate-400 { color: #94a3b8 !important; }
+.campaign-new .text-slate-500 { color: #94a3b8 !important; }
+.campaign-new .text-gray-300 { color: #64748b !important; }
+.campaign-new .text-gray-400 { color: #94a3b8 !important; }
+
+.campaign-new input.bg-slate-800,
+.campaign-new select.bg-slate-800,
+.campaign-new textarea.bg-slate-800 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+.campaign-new {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(148, 163, 184, 0.12), transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(15, 23, 42, 0.06), transparent 40%),
+    #f8fafc;
+}
+
+/* Square card corners */
+.rounded-3xl,
+.rounded-2xl,
+.rounded-xl,
+.rounded-lg {
+  border-radius: 0 !important;
+}
+
+
+
+
+.auth-left {
+  background:
+    radial-gradient(circle at 25% 20%, rgba(59, 130, 246, 0.18), transparent 45%),
+    radial-gradient(circle at 70% 30%, rgba(34, 197, 94, 0.16), transparent 45%),
+    linear-gradient(135deg, #0b1433 0%, #0b1a3d 50%, #0a1a2b 100%);
+}
+
+.auth-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.5) 1.1px, transparent 0),
+    radial-gradient(circle at 9px 6px, rgba(255, 255, 255, 0.35) 1px, transparent 0),
+    radial-gradient(circle at 4px 12px, rgba(255, 255, 255, 0.22) 1px, transparent 0);
+  background-size: 18px 18px;
+  animation: starDrift 40s linear infinite, starTwinkle 6s ease-in-out infinite alternate;
+  will-change: background-position, opacity, filter;
+  opacity: 0.8;
+}
+
+@keyframes patternShift {
+  0% { background-position: 0 0, 0 0; }
+  50% { background-position: 40px 24px, -20px 18px; }
+  100% { background-position: 0 0, 0 0; }
+}
+
+@keyframes starDrift {
+  0% { background-position: 0 0; }
+  100% { background-position: -180px 120px; }
+}
+
+@keyframes starTwinkle {
+  0% { opacity: 0.65; filter: brightness(0.95); }
+  100% { opacity: 0.95; filter: brightness(1.1); }
+}
+
+

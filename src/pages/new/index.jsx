@@ -1,13 +1,26 @@
-
+﻿
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Tooltip from "@mui/material/Tooltip";
 import { useLocation, useNavigate } from "react-router-dom";
-import { apiFunction } from "../api/ApiFunction";
-import { createCampaignApi } from "../api/Apis";
-import { BROWSER_LIST, COUNTRY_LIST, DEVICE_LIST } from "../data/dataList";
-import { showErrorToast, showSuccessToast } from "../components/toast/toast";
+import { BROWSER_LIST, COUNTRY_LIST, DEVICE_LIST } from "../../data/dataList";
+import { showErrorToast, showSuccessToast } from "../../components/toast/toast";
+import { adPlatforms, fixedOptions, OPTIONS } from "./constants";
+import { defaultValues } from "./defaultValues";
+import {
+  CustomAlertModal,
+  InputField,
+  SelectField,
+  StatusButton,
+  DashboardLayout,
+} from "./components/Fields";
+import {
+  useCampaignQuery,
+  useCreateCampaign,
+  useUpdateCampaign,
+} from "./hooks/useCampaignApi";
 
 /* ===========================
    Icon components (inline SVG)
@@ -170,18 +183,6 @@ const CalendarDays = ({ className }) => (
     <path d="M16 18h.01" />
   </svg>
 );
-const ChevronDown = ({ className }) => (
-  <svg
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-);
 const MessageCircle = ({ className }) => (
   <svg
     className={className}
@@ -222,158 +223,12 @@ const XIcon = ({ className }) => (
 );
 
 /* ===========================
-   Small reusable UI pieces
-   (restyled to match Dark Steel theme)
-   =========================== */
-
-const CustomAlertModal = ({ message, onClose }) => {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="bg-slate-800 p-6 rounded-xl shadow-2xl max-w-sm w-full border border-slate-700">
-        <h3 className="text-lg font-semibold text-white mb-3">Information</h3>
-        <p className="text-slate-300 mb-6">{message}</p>
-        <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition"
-          >
-            OK
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* InputField - styled */
-const InputField = ({
-  label,
-  name,
-  register,
-  error,
-  required,
-  placeholder,
-  type = "text",
-  icon,
-  defaultValue,
-  tooltip,
-  pattern,
-  step,
-}) => (
-  <div>
-    <label className="flex items-center text-xs font-semibold text-slate-400 tracking-wider mb-2">
-      {label} {required && <span className="text-red-500 ml-1">*</span>}
-      {tooltip && (
-        <Tooltip title={tooltip} placement="top">
-          <span className="ml-2 cursor-pointer">
-            <Info className="w-4 h-4 text-slate-500" />
-          </span>
-        </Tooltip>
-      )}
-    </label>
-
-    <div className="relative">
-      {icon && (
-        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-          {icon}
-        </span>
-      )}
-      <input
-        type={type}
-        placeholder={placeholder}
-        defaultValue={defaultValue}
-        step={step}
-        className={`w-full bg-slate-800 border text-sm rounded-lg py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${icon ? "pl-10" : "px-4"
-          } ${error ? "border-red-500" : "border-slate-700"}`}
-        {...register(name, {
-          required: required ? `${label} is required.` : false,
-          pattern: pattern || undefined,
-          valueAsNumber: type === "number" ? true : undefined,
-        })}
-      />
-    </div>
-    {error && <p className="mt-1 text-xs text-red-400">{error.message}</p>}
-  </div>
-);
-
-/* SelectField - styled */
-const SelectField = ({
-  label,
-  name,
-  register,
-  error,
-  required,
-  tooltip,
-  options = [],
-}) => (
-  <div>
-    <label className="flex items-center text-xs font-semibold text-slate-400 tracking-wider mb-2">
-      {label} {required && <span className="text-red-500 ml-1">*</span>}
-      {tooltip && (
-        <Tooltip title={tooltip}>
-          <span className="ml-2 cursor-pointer">
-            <Info className="w-4 h-4 text-slate-500" />
-          </span>
-        </Tooltip>
-      )}
-    </label>
-    <div className="relative">
-      <select
-        className={`w-full appearance-none bg-slate-800 border rounded-lg py-2 px-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${error ? "border-red-500" : "border-slate-700"
-          }`}
-        {...register(name, { required: required && `${label} is required.` })}
-      >
-        {options.map((opt, i) => (
-          <option key={i} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
-    </div>
-    {error && <p className="mt-1 text-xs text-red-400">{error.message}</p>}
-  </div>
-);
-
-/* StatusButton - styled card button */
-const StatusButton = ({ label, Icon, isActive, onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-200 h-20 w-full cursor-pointer ${isActive
-        ? "border-blue-500 bg-blue-500/10"
-        : "border-slate-700 bg-slate-800 hover:bg-slate-700/50"
-      }`}
-  >
-    <Icon
-      className={`w-5 h-5 ${isActive ? "text-blue-400" : "text-slate-400"}`}
-    />
-    <span
-      className={`text-sm font-medium mt-2 ${isActive ? "text-white" : "text-slate-300"
-        }`}
-    >
-      {label}
-    </span>
-  </button>
-);
-
-/* Dashboard Layout wrapper */
-const DashboardLayout = ({ children }) => (
-  <div
-    className="min-h-screen bg-slate-950 text-white font-sans"
-  >
-    <div className="max-w-7xl mx-auto p-6">{children}</div>
-    <div className="fixed bottom-6 right-6">
-   
-    </div>
-  </div>
-);
-
-/* ===========================
    Main Combined Component
    =========================== */
 
-export default function CampaignBuilder() {
+const queryClient = new QueryClient();
+
+function CampaignBuilderInner() {
   // useState: UI state (needs re-render on change)
   const [step, setStep] = useState(1);
   const [moneyPages, setMoneyPages] = useState([
@@ -392,6 +247,28 @@ export default function CampaignBuilder() {
   const [editCampaignId, setEditCampaignId] = useState(null);
 
   const [activeStatus, setActiveStatus] = useState("Active");
+
+  /* ---------------------------
+     Form (react-hook-form)
+     --------------------------- */
+  const {
+    register,
+    handleSubmit,
+    control,
+    getValues,
+    setValue,
+    reset,
+    trigger,
+    clearErrors,
+    setError,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+  });
+
+  const createMutation = useCreateCampaign();
+  const updateMutation = useUpdateCampaign();
 
 
 
@@ -427,43 +304,7 @@ export default function CampaignBuilder() {
   //   }
   // }, []);
 
-  const fetchCampaignById = async (id) => {
-  try {
-    const res = await apiFunction("get", `${createCampaignApi}/${id}`, null, null);
-   
-    
-    const c = res.data.data;
-
-    
-
-    reset({
-      campaignName: c?.campaign_info?.campaignName,
-      comment: c?.campaign_info?.comment,
-      epc: c?.campaign_info?.epc,
-      cpc: c?.campaign_info?.cpc,
-      trafficSource: c?.campaign_info?.trafficSource,
-      money_page: c?.money_page,
-      safe_page: c?.safe_page,
-      conditions: c?.conditions,
-      filters: c?.filters,
-      afterX:c?.afterX,
-      automate: c?.automate,
-      page_guard: c?.page_guard,
-      http_code: c?.http_code,
-    });
-
-    setMoneyPages(
-      c?.money_page || [
-        { description: "", url: "", weight: 100 },
-      ]
-    );
-
-    setDynamicVariables(c?.dynamicVariables || []);
-    setActiveStatus(c?.status);
-  } catch (err) {
-    // console.error("Failed to fetch campaign", err);
-  }
-};
+  const { data: campaignData } = useCampaignQuery(editCampaignId);
 
 
   // useEffect required: edit mode detection -> set id
@@ -475,152 +316,39 @@ export default function CampaignBuilder() {
 
   // useEffect required: fetch data when id is set (side-effect)
   useEffect(() => {
-    if (editCampaignId) {
-      fetchCampaignById(editCampaignId);
-    }
-  }, [editCampaignId]);
+    if (!campaignData) return;
+    const c = campaignData;
+
+    reset({
+      campaignName: c?.campaign_info?.campaignName,
+      comment: c?.campaign_info?.comment,
+      epc: c?.campaign_info?.epc,
+      cpc: c?.campaign_info?.cpc,
+      trafficSource: c?.campaign_info?.trafficSource,
+      money_page: c?.money_page,
+      safe_page: c?.safe_page,
+      conditions: c?.conditions,
+      filters: c?.filters,
+      afterX: c?.afterX,
+      automate: c?.automate,
+      page_guard: c?.page_guard,
+      http_code: c?.http_code,
+    });
+
+    setMoneyPages(
+      c?.money_page || [{ description: "", url: "", weight: 100 }]
+    );
+    setDynamicVariables(c?.dynamicVariables || []);
+    setActiveStatus(c?.status);
+  }, [campaignData, reset]);
 
 
 
 
   // options copied from parts
   // useMemo candidate: large static list
-  const adPlatforms = [
-    "Google Adwords",
-    "Binge Ads",
-    "Yahoo Gemini",
-    "Taboola",
-    "Facebook Adverts",
-    "TikTok Ads",
-    "50onRed",
-    "ADAMO",
-    "AdRoll",
-    "AdSupply",
-    "Adblade",
-    "Adcash",
-    "Admob",
-    "Adnium",
-    "Adsterra",
-    "Advertise.com",
-    "Airpush",
-    "Amazon Ads",
-    "Bidvertiser",
-    "Blindclick",
-    "CNET",
-    "CPMOZ",
-    "DNTX",
-    "Dianomi",
-    "DoublePimp",
-    "Earnify",
-    "EPOM Market",
-    "Etrag.ru",
-    "Exoclicks",
-    "Flix Media",
-    "Go2Mobi",
-    "Gravity",
-    "Gunggo Ads",
-    "InMobi",
-    "Instagram",
-    "Juicy Ads",
-    "Lead Impact",
-    "LeadBolt",
-    "LeadSense",
-    "Ligatus",
-    "Linkedin",
-    "MGID",
-    "MarketGid",
-    "Media Traffic",
-    "Millennial Media",
-    "MoPub",
-    "MobiAds",
-    "NTENT",
-    "Native Ads",
-    "NewsCred",
-    "Octobird",
-    "OpenX",
-    "Others",
-    "Outbrain",
-    "Pinterest Ads",
-    "Plista",
-    "Plugrush",
-    "PocketMath",
-    "PopAds",
-    "PopCash",
-    "PopMyAds",
-    "Popwin",
-    "Popunder.net",
-    "PropelMedia",
-    "Propeller Ads",
-    "Qwaya Ads",
-    "Rapsio",
-    "RealGravity",
-    "Redirect.com",
-    "Recontent",
-    "Revenue Hits",
-    "Simple Reach",
-    "Skyword",
-    "SiteScout (Basis)",
-    "StackAdapt",
-    "StartApp",
-    "SynupMedia",
-    "TapSense",
-    "Traffic Broker",
-    "Target.my.com",
-    "Traffic Factory",
-    "Traffic Force",
-    "Traffic Holder",
-    "Traffic Junky",
-    "Traffic Hunt",
-    "Traflow",
-    "Trellian",
-    "Twitter",
-    "Unity Ads",
-    "Vk.com",
-    "WebCollage",
-    "Widget Media",
-    "Yandex",
-    "Zemanta",
-    "ZeroPark",
-    "MaxVisits",
-    "Revisitors",
-    "Snapchat Ads",
-    "Organic Traffic",
-    "Galaksion",
-    "Traffic Stars",
-    "Snackvideo",
-  ];
-
   // useMemo candidate: static list
-  const fixedOptions = [
-    { id: 1, label: "BUSINESS" },
-    { id: 2, label: "GOVERNMENT" },
-    { id: 3, label: "Wireless" },
-    { id: 4, label: "ASN TS" },
-    { id: 5, label: "BIPS" },
-    { id: 6, label: "BOT" },
-    { id: 7, label: "DATA CENTER" },
-    { id: 8, label: "HRIP" },
-    { id: 9, label: "ISP TS" },
-    { id: 10, label: "LRIP" },
-    { id: 11, label: "PROXY/VPN" },
-    { id: 12, label: "TIME ZONE" },
-    { id: 13, label: "TSIF" },
-  ];
-
   // useMemo candidate: static list
-  const OPTIONS = [
-    { value: "country", label: "Country" },
-    { value: "state", label: "State" },
-    { value: "zip", label: "Zip Code" },
-    { value: "browser", label: "Browser" },
-    { value: "Device", label: "Device" },
-    { value: "ASN", label: "ASN" },
-    { value: "referrer", label: "Referrer" },
-    { value: "IP", label: "IP" },
-    { value: "userAgent", label: "User Agent" },
-    { value: "isp", label: "ISP" },
-  ];
-
   // useMemo candidate: static list
   const steps = [
     { id: 1, name: "Campaign info", icon: ListChecks },
@@ -638,45 +366,6 @@ export default function CampaignBuilder() {
     { name: "Block", icon: CircleSlash },
     // { name: "Schedule", icon: CalendarDays },
   ];
-
-  /* ---------------------------
-     Form (react-hook-form)
-     --------------------------- */
-  const {
-    register,
-    handleSubmit,
-    control,
-    getValues,
-    setValue,
-    reset,
-    trigger,
-    clearErrors,
-    setError,
-    watch,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      campaignName: null,
-      comment: null,
-      epc: null,
-      cpc: null,
-      trafficSource: adPlatforms[0],
-      money_page: [{ description: "", url: "", weight: 100 }],
-      safe_page: null,
-      conditions: [],
-      filters: [],
-       afterX: null,
-      automate: {
-       
-        frequencyCap: { value: "" },
-        zeroRedirect: { curl: false, iframe: false },
-        gclid: false,
-        ipCap: false,
-      },
-      page_guard: { key: "", url: "", second: "" },
-      http_code: "301",
-    },
-  });
 
   // useMemo candidate: derived value (or keep as direct watch)
   const afterXValue = watch("afterX");
@@ -763,13 +452,13 @@ export default function CampaignBuilder() {
 
 
   const handleStepClick = async (targetStep) => {
-  // 🔙 Backward movement → always allowed
+  //  Backward movement  always allowed
   if (targetStep <= step) {
     setStep(targetStep);
     return;
   }
 
-  // 👉 Forward movement → validate CURRENT step only
+  //  Forward movement  validate CURRENT step only
   if (step === 1) {
     const fieldsToValidate = ["campaignName", "trafficSource"];
     const valid = await trigger(fieldsToValidate);
@@ -789,7 +478,7 @@ export default function CampaignBuilder() {
     if (!valid) return;
   }
 
-  // ✅ validation passed → go to clicked step
+  //  validation passed  go to clicked step
   setStep(targetStep);
 };
 
@@ -813,7 +502,7 @@ export default function CampaignBuilder() {
         }};
         
 
-        const res = await apiFunction("patch", `${createCampaignApi}/${uid}`, null, payload);
+        await updateMutation.mutateAsync({ id: uid, payload });
     
         
         showSuccessToast("Campaign updated successfully!");
@@ -827,12 +516,7 @@ export default function CampaignBuilder() {
       } else {
   
         
-        const response = await apiFunction(
-          "post",
-          createCampaignApi,
-          null,
-          data
-        );
+        const response = await createMutation.mutateAsync(data);
 
 
 
@@ -851,7 +535,7 @@ export default function CampaignBuilder() {
       }
     } catch (err) {
        if (err?.response?.status === 403) {
-    showErrorToast("Campaign limit reached. Upgrade your plan 🚀");
+    showErrorToast("Campaign limit reached. Upgrade your plan ");
     navigate('/Dashboard/pricing')
   } else {
     showErrorToast(
@@ -866,67 +550,119 @@ export default function CampaignBuilder() {
      Visual: stepper and card layout
      =========================== */
 
+  const summaryCampaignName = watch("campaignName");
+  const summaryTrafficSource = watch("trafficSource");
+  const summarySafePage = watch("safe_page");
+  const summaryMoneyPages = watch("money_page") || [];
+  const summaryConditions = watch("conditions") || [];
+  const summaryFilters = watch("filters") || [];
+  const errorCount = Object.keys(errors || {}).length;
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-left justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-left text-white">
-              {location?.state?.mode === "edit" ? "Update" : "Create"} Campaign
-            </h1>
-            <p className="text-slate-400 mt-1 text-left max-w-xl">
-              Transform your traffic into a success story — multi-step campaign
-              builder with advanced cloaking controls.
-            </p>
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-[0.28em] text-slate-400">Campaign Builder</div>
+              <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">
+                {location?.state?.mode === "edit" ? "Update" : "Create"} Campaign
+              </h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Build a cloaking-safe flow with smart routing, filters, and automation.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" className="rounded-full border border-slate-200 px-4 py-2 text-xs text-slate-500">
+                Save Draft
+              </button>
+              <button type="button" className="rounded-full bg-slate-900 px-4 py-2 text-xs text-white">
+                Validate
+              </button>
+            </div>
           </div>
-          
         </div>
 
-        {/* Stepper */}
-        <nav aria-label="Progress" className="mb-8">
-          <ol role="list" className="flex items-center gap-4">
-            {steps.map((s, idx) => {
-              const active = idx + 1 <= step;
-              return (
-                <li key={s.name} className="flex items-center">
-                  <div
-  onClick={() => handleStepClick(idx + 1)}
-  className={`flex items-center justify-center h-10 w-10 rounded-full
-    ${active ? "bg-blue-600" : "bg-slate-800"}
-    cursor-pointer`}
->
-                    <s.icon
-                      className={`w-5 h-5 cursor-pointer ${active ? "text-white" : "text-slate-400"
-                        }`}
-                    />
-                  </div>
-                  <div
-                    className={`ml-2 text-sm ${active ? "text-white font-medium" : "text-slate-500"
-                      }`}
-                  >
-                    {s.name}
-                  </div>
-                  {idx !== steps.length - 1 && (
-                    <div
-                      className={`mx-4 h-[2px] w-14 ${idx + 1 < step ? "bg-blue-600" : "bg-slate-800"
-                        }`}
-                    />
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
+        {/* Summary + Validation */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="text-xs uppercase tracking-[0.28em] text-slate-400">Live Summary</div>
+            <h3 className="mt-3 text-lg font-semibold text-slate-900">Campaign Snapshot</h3>
+            <div className="mt-4 grid gap-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Name</span>
+                <span className="font-medium text-slate-900 truncate max-w-[220px]">
+                  {summaryCampaignName || "Untitled"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Source</span>
+                <span className="font-medium text-slate-900">{summaryTrafficSource || "N/A"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Status</span>
+                <span className="rounded-full bg-slate-900 px-3 py-1 text-xs text-white">
+                  {activeStatus}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Money Pages</span>
+                <span className="font-medium text-slate-900">{summaryMoneyPages.length}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Safe Page</span>
+                <span className="font-medium text-slate-900 truncate max-w-[220px]">
+                  {summarySafePage || "Not set"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Conditions</span>
+                <span className="font-medium text-slate-900">{summaryConditions.length}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Filters</span>
+                <span className="font-medium text-slate-900">{summaryFilters.length}</span>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="text-xs uppercase tracking-[0.28em] text-slate-400">Validation</div>
+              <div className={`rounded-full px-3 py-1 text-xs ${errorCount ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"}`}>
+                {errorCount ? `${errorCount} issues` : "All good"}
+              </div>
+            </div>
+            <div className="mt-4 text-sm text-slate-600">
+              {errorCount ? "Resolve the highlighted fields before final submit." : "You can proceed safely."}
+            </div>
+          </div>
+        </div>
 
-        {/* Form container */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Step 1: Campaign Info */}
-          {step === 1 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="w-full px-6 py-4 flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${step === 1 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}>
+                  1
+                </div>
+                <div>
+                  <div className="text-sm uppercase tracking-[0.2em] text-slate-400">Step 1</div>
+                  <div className="text-lg font-semibold text-slate-900">Campaign Info</div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">{step === 1 ? "Expanded" : "Click to edit"}</div>
+            </button>
+            {step === 1 && (
+              <div className="border-t border-slate-200 p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-white">
+                  <h2 className="text-lg font-semibold text-slate-900">
                     Campaign Details
                   </h2>
                   <InputField
@@ -958,7 +694,7 @@ export default function CampaignBuilder() {
                 </div>
 
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-white">
+                  <h2 className="text-lg font-semibold text-slate-900">
                     Financials & Status
                   </h2>
                   <div className="grid grid-cols-2 gap-4">
@@ -989,8 +725,8 @@ export default function CampaignBuilder() {
                     />
                   </div>
 
-                  <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
-                    <label className="flex items-center text-sm font-medium text-gray-300 mb-3">
+                  <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200">
+                    <label className="flex items-center text-sm font-medium text-slate-600 mb-3">
                       Campaign Status{" "}
                       <span className="text-red-500 ml-1">*</span>
                     </label>
@@ -1020,7 +756,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
+                      className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -1031,28 +767,46 @@ export default function CampaignBuilder() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition cursor-pointer"
+                  className="bg-blue-600 hover:bg-blue-700 text-slate-900 font-bold py-2 px-4 rounded-lg shadow transition cursor-pointer"
                 >
                   Proceed <span className="ml-2">&rarr;</span>
                 </button>
               </div>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           {/* Step 2: Money Pages */}
-          {step === 2 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+          <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <button
+              type="button"
+              onClick={() => setStep(2)}
+              className="w-full px-6 py-4 flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${step === 2 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}>
+                  2
+                </div>
+                <div>
+                  <div className="text-sm uppercase tracking-[0.2em] text-slate-400">Step 2</div>
+                  <div className="text-lg font-semibold text-slate-900">Money Pages</div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">{step === 2 ? "Expanded" : "Click to edit"}</div>
+            </button>
+            {step === 2 && (
+              <div className="border-t border-slate-200 p-6">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-white">
+                  <h2 className="text-lg font-semibold text-slate-900">
                     Where do we send legit visitors (money pages)?
                   </h2>
                   <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-slate-300">
+                    <label className="flex items-center gap-2 text-slate-600">
                       <span className="text-sm">Append URL</span>
                       <input
                         type="checkbox"
-                        className="h-4 w-4 rounded bg-slate-700"
+                        className="h-4 w-4 rounded bg-slate-100"
                         checked={appendUrl}
                         onChange={() => setAppendUrl((v) => !v)}
                       />
@@ -1075,7 +829,7 @@ export default function CampaignBuilder() {
                     moneyPages.map((page, index) => (
                       <div
                         key={index}
-                        className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-slate-800 border border-slate-700 p-4 rounded-lg"
+                        className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-slate-50 border border-slate-200 p-4 rounded-lg"
                       >
                         <InputField
                           label="Description"
@@ -1115,7 +869,7 @@ export default function CampaignBuilder() {
                             <button
                               type="button"
                               onClick={() => removeMoneyPage(index)}
-                              className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition"
+                              className="bg-red-600 hover:bg-red-700 text-slate-900 p-2 rounded-md transition"
                             >
                               <XIcon className="w-4 h-4" />
                             </button>
@@ -1124,7 +878,7 @@ export default function CampaignBuilder() {
                             <button
                               type="button"
                               onClick={addMoneyPage}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 transition cursor-pointer"
+                              className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-3 py-2 rounded-md flex items-center gap-2 transition cursor-pointer"
                             >
                               <Plus className="w-4 h-4" /> Add
                             </button>
@@ -1140,7 +894,7 @@ export default function CampaignBuilder() {
                       <button
                         type="button"
                         onClick={addMoneyPage}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 transition cursor-pointer"
+                        className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-3 py-2 rounded-md flex items-center gap-2 transition cursor-pointer"
                       >
                         <Plus className="w-4 h-4" /> Add
                       </button>
@@ -1148,8 +902,8 @@ export default function CampaignBuilder() {
                   )}
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                  <h3 className="text-md font-semibold text-white mb-2 flex items-center gap-2">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <h3 className="text-md font-semibold text-slate-900 mb-2 flex items-center gap-2">
                     Dynamic variables
                     <Tooltip title="Dynamic variables are used to track custom parameters of money page">
                       <span className="text-slate-400">
@@ -1184,7 +938,7 @@ export default function CampaignBuilder() {
                         <button
                           type="button"
                           onClick={() => removeDynamicVariable(idx)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md cursor-pointer"
+                          className="bg-red-600 hover:bg-red-700 text-slate-900 px-3 py-2 rounded-md cursor-pointer"
                         >
                           <XIcon className="w-4 h-4" />
                         </button>
@@ -1195,7 +949,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={addDynamicVariable}
-                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 cursor-pointer"
+                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-slate-900 px-3 py-2 rounded-md flex items-center gap-2 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" /> Add variable
                   </button>
@@ -1205,9 +959,9 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                    className="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-md cursor-pointer"
                   >
-                    ‹ Previous
+                    &lt; Previous
                   </button>
                   {location?.state?.mode === "edit" ? (
                     <button
@@ -1218,7 +972,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
+                      className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -1230,9 +984,9 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
+                      className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-4 py-2 rounded-md cursor-pointer"
                     >
-                      Next ›
+                      Next &gt;
                     </button>
 
                   </div>
@@ -1244,15 +998,33 @@ export default function CampaignBuilder() {
                   onClose={hideCustomAlert}
                 />
               )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           {/* Step 3: Safe Page */}
-          {step === 3 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+          <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <button
+              type="button"
+              onClick={() => setStep(3)}
+              className="w-full px-6 py-4 flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${step === 3 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}>
+                  3
+                </div>
+                <div>
+                  <div className="text-sm uppercase tracking-[0.2em] text-slate-400">Step 3</div>
+                  <div className="text-lg font-semibold text-slate-900">Safe Page</div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">{step === 3 ? "Expanded" : "Click to edit"}</div>
+            </button>
+            {step === 3 && (
+              <div className="border-t border-slate-200 p-6">
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-white">Safe Page</h2>
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                <h2 className="text-lg font-semibold text-slate-900">Safe Page</h2>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                   <InputField
                     label="Safe Page Url"
                     name="safe_page"
@@ -1269,8 +1041,8 @@ export default function CampaignBuilder() {
                   />
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                  <h3 className="text-md font-semibold text-white mb-2 flex items-center gap-2">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <h3 className="text-md font-semibold text-slate-900 mb-2 flex items-center gap-2">
                     Dynamic variables for Safe Page{" "}
                     <Tooltip title="Dynamic variables are used to track custom parameters of safe page">
                       <span className="text-slate-400">
@@ -1305,7 +1077,7 @@ export default function CampaignBuilder() {
                         <button
                           type="button"
                           onClick={() => removeDynamicVariable(idx)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md cursor-pointer"
+                          className="bg-red-600 hover:bg-red-700 text-slate-900 px-3 py-2 rounded-md cursor-pointer"
                         >
                           <XIcon className="w-4 h-4" />
                         </button>
@@ -1316,7 +1088,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={addDynamicVariable}
-                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 cursor-pointer"
+                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-slate-900 px-3 py-2 rounded-md flex items-center gap-2 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" /> Add variable
                   </button>
@@ -1326,9 +1098,9 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                    className="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-md cursor-pointer"
                   >
-                    ‹ Previous
+                    &lt; Previous
                   </button>
                   {location?.state?.mode === "edit" ? (
                     <button
@@ -1339,7 +1111,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
+                      className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -1351,20 +1123,38 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
+                      className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-4 py-2 rounded-md cursor-pointer"
                     >
-                      Next ›
+                      Next &gt;
                     </button>
                     
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           {/* Step 4: Conditions */}
-          {step === 4 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+          <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <button
+              type="button"
+              onClick={() => setStep(4)}
+              className="w-full px-6 py-4 flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${step === 4 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}>
+                  4
+                </div>
+                <div>
+                  <div className="text-sm uppercase tracking-[0.2em] text-slate-400">Step 4</div>
+                  <div className="text-lg font-semibold text-slate-900">Conditions</div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">{step === 4 ? "Expanded" : "Click to edit"}</div>
+            </button>
+            {step === 4 && (
+              <div className="border-t border-slate-200 p-6">
               <div className="space-y-6">
                 {/* ADD CONDITION DROPDOWN */}
                 <div>
@@ -1375,7 +1165,7 @@ export default function CampaignBuilder() {
                         e.target.value = "";
                       }
                     }}
-                    className="w-56 bg-slate-800 text-white text-sm px-3 py-2 rounded-md border border-slate-700"
+                    className="w-56 bg-slate-50 text-slate-900 text-sm px-3 py-2 rounded-md border border-slate-200"
                   >
                     <option value="">+ Add condition</option>
 
@@ -1410,11 +1200,11 @@ export default function CampaignBuilder() {
                     return (
                       <div
                         key={fieldItem.id}
-                        className="bg-slate-800 border border-slate-700 rounded-lg p-4"
+                        className="bg-slate-50 border border-slate-200 rounded-lg p-4"
                       >
                         {/* HEADER */}
                         <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-semibold text-white">
+                          <h4 className="text-sm font-semibold text-slate-900">
                             {currentType.toUpperCase()}
                           </h4>
                           <button
@@ -1439,9 +1229,9 @@ export default function CampaignBuilder() {
                                   onClick={() => field.onChange(mode)}
                                   className={`px-3 py-1.5 text-sm rounded-md border cursor-pointer ${field.value === mode
                                       ? mode === "allow"
-                                        ? "bg-blue-600 text-white border-blue-600"
-                                        : "bg-red-600 text-white border-red-600"
-                                      : "bg-slate-700 text-slate-300 border-slate-700 hover:bg-slate-700/50"
+                                        ? "bg-blue-600 text-slate-900 border-blue-600"
+                                        : "bg-red-600 text-slate-900 border-red-600"
+                                      : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-100/50"
                                     }`}
                                 >
                                   {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -1462,7 +1252,7 @@ export default function CampaignBuilder() {
                                 {field.value?.map((val, i) => (
                                   <span
                                     key={i}
-                                    className="inline-flex items-center bg-slate-700 text-slate-100 px-2.5 py-1 text-xs rounded-full border border-slate-600"
+                                    className="inline-flex items-center bg-slate-100 text-slate-700 px-2.5 py-1 text-xs rounded-full border border-slate-200"
                                   >
                                     {val}
                                     <button
@@ -1476,7 +1266,7 @@ export default function CampaignBuilder() {
                                       }
                                       className="ml-1 text-slate-400 hover:text-slate-200 cursor-pointer"
                                     >
-                                      ×
+                                      
                                     </button>
                                   </span>
                                 ))}
@@ -1485,7 +1275,7 @@ export default function CampaignBuilder() {
                               {/* DROPDOWN OR TEXT INPUT */}
                               {isDropdown ? (
                                 <select
-                                  className="w-full bg-slate-800 text-white text-sm px-3 py-2 rounded-md border border-slate-700"
+                                  className="w-full bg-slate-50 text-slate-900 text-sm px-3 py-2 rounded-md border border-slate-200"
                                   onChange={(e) => {
                                     const val = e.target.value;
                                     if (val && !field.value.includes(val)) {
@@ -1519,7 +1309,7 @@ export default function CampaignBuilder() {
                                 <input
                                   type="text"
                                   placeholder={`Enter ${currentType}...`}
-                                  className="w-full text-sm bg-slate-800 text-white px-3 py-2 rounded-md border border-slate-700"
+                                  className="w-full text-sm bg-slate-50 text-slate-900 px-3 py-2 rounded-md border border-slate-200"
                                   onKeyDown={(e) => {
                                     if (
                                       e.key === "Enter" &&
@@ -1548,9 +1338,9 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                    className="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-md cursor-pointer"
                   >
-                    ‹ Previous
+                    &lt; Previous
                   </button>
                   {location?.state?.mode === "edit" ? (
                     <button
@@ -1561,7 +1351,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
+                      className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -1574,20 +1364,38 @@ export default function CampaignBuilder() {
                       <button
                         type="button"
                         onClick={nextStep}
-                        className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                        className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-slate-900 px-4 py-2 rounded-md"
                       >
-                        Next ›
+                        Next &gt;
                       </button>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           {/* Step 5: Filters */}
-          {step === 5 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl w-full">
+          <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)] w-full">
+            <button
+              type="button"
+              onClick={() => setStep(5)}
+              className="w-full px-6 py-4 flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${step === 5 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}>
+                  5
+                </div>
+                <div>
+                  <div className="text-sm uppercase tracking-[0.2em] text-slate-400">Step 5</div>
+                  <div className="text-lg font-semibold text-slate-900">Filters</div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">{step === 5 ? "Expanded" : "Click to edit"}</div>
+            </button>
+            {step === 5 && (
+              <div className="border-t border-slate-200 p-6">
               <div className="space-y-4">
                 <div className="flex justify-center">
                   <Controller
@@ -1670,7 +1478,7 @@ export default function CampaignBuilder() {
                               alignItems: "center",
                             }}
                           >
-                            <label className="text-white font-semibold mb-2">
+                            <label className="text-slate-900 font-semibold mb-2">
                               Available Filters
                             </label>
 
@@ -1721,15 +1529,15 @@ export default function CampaignBuilder() {
                               onClick={moveRight}
                               className="
       w-7     h-7 flex items-center justify-center text-lg
-      rounded-md border border-slate-600 
-      bg-slate-800 hover:bg-slate-700 
+      rounded-md border border-slate-200 
+      bg-white hover:bg-slate-50 border border-slate-200 
       hover:border-slate-500 hover:scale-105 
       active:scale-95 transition-all duration-200
-      text-slate-200  cursor-pointer
+      text-slate-600 cursor-pointer
     "
                               title="Move selected to right"
                             >
-                              ›
+                              &gt;
                             </button>
 
                             <button
@@ -1737,15 +1545,15 @@ export default function CampaignBuilder() {
                               onClick={moveLeft}
                               className="
       w-7 h-7 flex items-center justify-center text-lg
-      rounded-md border border-slate-600 
-      bg-slate-800 hover:bg-slate-700 
+      rounded-md border border-slate-200 
+      bg-white hover:bg-slate-50 border border-slate-200 
       hover:border-slate-500 hover:scale-105 
       active:scale-95 transition-all duration-200
-      text-slate-200  cursor-pointer
+      text-slate-600 cursor-pointer
     "
                               title="Move selected to left"
                             >
-                              ‹
+                              &lt;
                             </button>
 
                             <button
@@ -1753,15 +1561,15 @@ export default function CampaignBuilder() {
                               onClick={moveAllRight}
                               className="
       w-7 h-7 flex items-center justify-center text-lg
-      rounded-md border border-slate-600 
-      bg-slate-800 hover:bg-slate-700 
+      rounded-md border border-slate-200 
+      bg-white hover:bg-slate-50 border border-slate-200 
       hover:border-slate-500 hover:scale-105 
       active:scale-95 transition-all duration-200
-      text-slate-200  cursor-pointer
+      text-slate-600 cursor-pointer
     "
                               title="Move all right"
                             >
-                              »
+                              &gt;&gt;
                             </button>
 
                             <button
@@ -1769,15 +1577,15 @@ export default function CampaignBuilder() {
                               onClick={moveAllLeft}
                               className="
       w-7 h-7 flex items-center justify-center text-lg
-      rounded-md border border-slate-600 
-      bg-slate-800 hover:bg-slate-700 
+      rounded-md border border-slate-200 
+      bg-white hover:bg-slate-50 border border-slate-200 
       hover:border-slate-500 hover:scale-105 
       active:scale-95 transition-all duration-200
-      text-slate-200  cursor-pointer
+      text-slate-600 cursor-pointer
     "
                               title="Move all left"
                             >
-                              «
+                              &lt;&lt;
                             </button>
                           </div>
 
@@ -1790,7 +1598,7 @@ export default function CampaignBuilder() {
                               alignItems: "center",
                             }}
                           >
-                            <label className="text-white font-semibold mb-2">
+                            <label className="text-slate-900 font-semibold mb-2">
                               Enabled Filters
                             </label>
 
@@ -1836,9 +1644,9 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer "
+                    className="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-md cursor-pointer "
                   >
-                    ‹ Previous
+                    &lt; Previous
                   </button>
                   {location?.state?.mode === "edit" ? (
                     <button
@@ -1849,7 +1657,7 @@ export default function CampaignBuilder() {
                       //   );
                       // }}
                       onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md  cursor-pointer"
+                      className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-4 py-1 rounded-md  cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -1861,23 +1669,41 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={nextStep}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
+                      className="bg-blue-600 hover:bg-blue-700 text-slate-900 px-4 py-2 rounded-md cursor-pointer"
                     >
-                      Next ›
+                      Next &gt;
                     </button>
                     
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           {/* Step 6: Automate */}
-          {step === 6 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+          <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <button
+              type="button"
+              onClick={() => setStep(6)}
+              className="w-full px-6 py-4 flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${step === 6 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}>
+                  6
+                </div>
+                <div>
+                  <div className="text-sm uppercase tracking-[0.2em] text-slate-400">Step 6</div>
+                  <div className="text-lg font-semibold text-slate-900">Automate</div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">{step === 6 ? "Expanded" : "Click to edit"}</div>
+            </button>
+            {step === 6 && (
+              <div className="border-t border-slate-200 p-6">
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
+                  <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200">
   <label className="flex items-center gap-2">
     <input
       type="checkbox"
@@ -1889,7 +1715,7 @@ export default function CampaignBuilder() {
         }))
       }
     />
-    <span className="text-white">
+    <span className="text-slate-900">
       Activate after X unique real visitors
     </span>
   </label>
@@ -1906,7 +1732,7 @@ export default function CampaignBuilder() {
 </div>
 
 
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
+                  <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -1918,7 +1744,7 @@ export default function CampaignBuilder() {
                           }))
                         }
                       />
-                      <span className="text-white">Frequency Cap</span>
+                      <span className="text-slate-900">Frequency Cap</span>
                     </label>
                     {showInputs.frequencyCap && (
                       <InputField
@@ -1931,7 +1757,7 @@ export default function CampaignBuilder() {
                     )}
                   </div>
 
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
+                  <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -1943,11 +1769,11 @@ export default function CampaignBuilder() {
                           }))
                         }
                       />
-                      <span className="text-white">Zero Redirect Cloaking</span>
+                      <span className="text-slate-900">Zero Redirect Cloaking</span>
                     </label>
                     {showInputs.zeroRedirect && (
                       <div className="flex gap-4 mt-2">
-                        <label className="flex items-center gap-2 text-slate-300">
+                        <label className="flex items-center gap-2 text-slate-600">
                           <input
                             type="checkbox"
                             checked={watch("automate.zeroRedirect.curl")}
@@ -1962,7 +1788,7 @@ export default function CampaignBuilder() {
                           />{" "}
                           CURL
                         </label>
-                        <label className="flex items-center gap-2 text-slate-300">
+                        <label className="flex items-center gap-2 text-slate-600">
                           <input
                             type="checkbox"
                             checked={watch("automate.zeroRedirect.iframe")}
@@ -1981,23 +1807,23 @@ export default function CampaignBuilder() {
                     )}
                   </div>
 
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
+                  <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200">
                     <label className="flex items-center gap-2">
                       <input type="checkbox" {...register("automate.gclid")} />
-                      <span className="text-white">
+                      <span className="text-slate-900">
                         GCLID (Google Click ID)
                       </span>
                     </label>
                   </div>
 
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
+                  <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200">
                     <label className="flex items-center gap-2">
                       <input type="checkbox" {...register("automate.ipCap")} />
-                      <span className="text-white">IP Cap</span>
+                      <span className="text-slate-900">IP Cap</span>
                     </label>
                   </div>
 
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
+                  <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -2009,7 +1835,7 @@ export default function CampaignBuilder() {
                           }))
                         }
                       />
-                      <span className="text-white">Page Guard Key</span>
+                      <span className="text-slate-900">Page Guard Key</span>
                     </label>
                     {showInputs.pageGuard && (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
@@ -2041,20 +1867,20 @@ export default function CampaignBuilder() {
                   </div>
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded border border-slate-700">
+                <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200">
                   <label className="flex items-center gap-4">
                     <input
                       type="radio"
                       value="301"
                       {...register("http_code")}
                     />
-                    <span className="text-white">301</span>
+                    <span className="text-slate-900">301</span>
                     <input
                       type="radio"
                       value="302"
                       {...register("http_code")}
                     />
-                    <span className="text-white">302</span>
+                    <span className="text-slate-900">302</span>
                   </label>
                 </div>
 
@@ -2062,21 +1888,22 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                    className="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-md cursor-pointer"
                   >
-                    ‹ Previous
+                    &lt; Previous
                   </button>
                   <button
                     type="submit"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-md shadow cursor-pointer"
+                    className="bg-slate-900 hover:bg-slate-50 text-white px-5 py-2 rounded-md shadow cursor-pointer"
                   >
                     {location?.state?.mode === "edit" ? "Update" : "Create"}{" "}
                     Campaign
                   </button>
                 </div>
               </div>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </form>
 
         {/* small footer note */}
@@ -2092,3 +1919,22 @@ export default function CampaignBuilder() {
     </DashboardLayout>
   );
 }
+
+export default function CampaignBuilderNew() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <CampaignBuilderInner />
+    </QueryClientProvider>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+

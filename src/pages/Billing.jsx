@@ -41,7 +41,7 @@ const InvoiceTemplate = ({ item }) => {
         padding: "40px",
         backgroundColor: "#ffffff",
         color: "#111827",
-        fontFamily: "Outfit, Arial, sans-serif",
+        fontFamily: "Manrope, Arial, sans-serif",
         boxSizing: "border-box",
       }}
     >
@@ -292,10 +292,7 @@ const handleDownloadInvoice = async (item) => {
   }, []);
 
   return (
-    <div
-      style={{ fontFamily: "Outfit, sans-serif" }}
-      className="min-h-screen bg-[#0b0d14] text-gray-100 p-4 md:p-8"
-    >
+    <div className="min-h-screen bg-[#0b0d14] text-gray-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <div className="mb-8">

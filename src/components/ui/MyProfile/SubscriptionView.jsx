@@ -30,7 +30,7 @@ export const SubscriptionView = () => {
           padding: "40px",
           backgroundColor: "#ffffff",
           color: "#111827",
-          fontFamily: "Outfit, Arial, sans-serif",
+          fontFamily: "Manrope, Arial, sans-serif",
           boxSizing: "border-box",
         }}
       >

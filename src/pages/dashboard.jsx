@@ -228,28 +228,24 @@ const Dashboard = () => {
           }}
         />
       )}
-      <div className="flex flex-col w-[100vw] h-[100vh]">
-        <div className="flex flex-col w-full">
+      <div className="dashboard-light min-h-screen w-full bg-slate-50">
+        <div className="sticky top-0 z-40">
           <Header onMenuClick={handleMenuClick} />
         </div>
 
-        <div className="flex flex-row w-full fixed top-[50px] md:top-[56px]">
-          <Sidebar
-            collapsed={isCollapsed}
-            mobileVisible={mobileVisible}
-            onCloseMobile={handleMenuClick}
-          />
-          <div
-            style={{
-              height: "calc(100vh - 50px)",
-              width: "100%",
-              overflow: "auto",
-            }}
-          >
-            <Outlet context={{ onIntroReady: () => setStepEnable(true) }} />
-
-
+        <div className="flex w-full h-[calc(100vh-72px)] overflow-hidden">
+          <div className="h-full sticky top-0 self-start">
+            <Sidebar
+              collapsed={isCollapsed}
+              mobileVisible={mobileVisible}
+              onCloseMobile={handleMenuClick}
+            />
           </div>
+          <main className="flex-1 h-full overflow-y-auto">
+            <div className="px-6 py-6 min-h-full">
+              <Outlet context={{ onIntroReady: () => setStepEnable(true) }} />
+            </div>
+          </main>
         </div>
       </div>
       {/* TELEGRAM SUPPORT BUTTON */}

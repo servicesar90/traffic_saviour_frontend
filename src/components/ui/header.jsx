@@ -3,7 +3,10 @@ import {
   LogOut,
   User,
   HelpCircle,
-  DollarSign
+  DollarSign,
+  Search,
+  Bell,
+  Settings,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -89,44 +92,50 @@ const Header = ({ onMenuClick }) => {
   
 
   return (
-    <header className="w-full flex items-center justify-between bg-[#1e2939] px-6 py-3 shadow-sm  border-gray-200 text-white ">
-      {/* Left: Logo + Menu */}
-      <div className="flex items-center gap-4 text-white">
-  <img
-     src="/logo2.svg"
-  alt="Click Stopper"
-  role="button"
-  tabIndex={0}
-  onClick={onMenuClick}
- 
-  className="w-10 h-10 cursor-pointer"
-  />
-  <span className="text-[#a855f7] font-semibold text-xl ml-[-10px]">
-    Click Stopper
-  </span>
-</div>
+    <header className="w-full flex items-center justify-between bg-white px-6 py-4 border-b border-slate-200 text-slate-900">
+      {/* Left: Brand + Collapse */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onMenuClick}
+          className="h-9 w-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 transition"
+          aria-label="Toggle sidebar"
+        >
+          <Menu size={18} />
+        </button>
+        <div className="flex items-center gap-2">
+          <img src="/logo2.svg" alt="TrafficSaviour" className="w-8 h-8" />
+          <div className="leading-tight">
+            <p className="text-sm font-semibold text-slate-900">TrafficSaviour</p>
+            <p className="text-xs text-slate-500">Agency Dashboard</p>
+          </div>
+        </div>
+      </div>
 
+      {/* Right: Search + Actions + Avatar */}
+      <div className="flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-500 w-[280px]">
+          <Search size={16} />
+          <input
+            className="bg-transparent outline-none w-full text-slate-600 placeholder:text-slate-400"
+            placeholder="Search campaigns, reports..."
+          />
+        </div>
 
-      {/* Right: Plan Info + Avatar */}
-      <div className="flex items-center gap-6">
-        {/* Plan Info (side by side with labels) */}
-       {/* <button onClick={()=>}></button> */}
-        <div className="flex items-center gap-4 text-sm font-medium text-gray-700">
-          <span>
-            <span className="text-white mr-1 font-normal">Plan Name:</span>
-            <span className="text-green-600">{planName || "N/A"}
-          </span></span>
-          <span>
-            <span className="text-white mr-1 font-normal">Status:</span>
-            <span
-              className={`font-semibold ${
-                planStatus === "Active"
-                  ? "text-green-600"
-                  : "text-red-600"
-              }`}
-            >
-              {planStatus || "N/A"}
-            </span>
+        <div className="hidden md:flex items-center gap-2">
+          <button className="h-9 w-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition">
+            <Bell size={16} />
+          </button>
+          <button className="h-9 w-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition">
+            <Settings size={16} />
+          </button>
+        </div>
+
+        <div className="hidden md:flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="font-medium">{planName || "Starter"}</span>
+          <span className="text-slate-400">•</span>
+          <span className={planStatus === "Active" ? "text-emerald-600" : "text-rose-500"}>
+            {planStatus || "Active"}
           </span>
         </div>
 
@@ -140,10 +149,10 @@ const Header = ({ onMenuClick }) => {
               <img
                 src={user.image}
                 alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-9 h-9 rounded-full object-cover"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-purple-700 text-white flex items-center justify-center font-bold text-sm">
+              <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-semibold text-sm">
                 {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
               </div>
             )}
@@ -151,38 +160,32 @@ const Header = ({ onMenuClick }) => {
 
           {/* Dropdown Menu */}
           {showProfileModal && (
-            <div className="absolute right-0 mt-2 w-44 rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-              <div className="py-1">
-                {/* My Profile */}
-             
+            <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black/5 z-50 border border-slate-200">
+              <div className="py-2">
                 <button
                   onClick={() => navigate("/myProfile")}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 cursor-pointer"
+                  className="flex items-center w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
-                  <User className="w-4 h-4 mr-2" />My Profile
+                  <User className="w-4 h-4 mr-2" /> My Profile
                 </button>
-
-                {/* billing */}
 
                 <button
                   onClick={() => navigate("/Dashboard/pricing")}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 cursor-pointer"
+                  className="flex items-center w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
-                  <DollarSign className="w-4 h-4 mr-2" />Pricing
+                  <DollarSign className="w-4 h-4 mr-2" /> Pricing
                 </button>
 
-                {/* Help */}
                 <button
                   onClick={() => navigate("/help")}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 cursor-pointer"
+                  className="flex items-center w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
                   <HelpCircle className="w-4 h-4 mr-2" /> Help
                 </button>
 
-                {/* Logout */}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 cursor-pointer"
+                  className="flex items-center w-full px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 cursor-pointer"
                 >
                   <LogOut className="w-4 h-4 mr-2" /> Logout
                 </button>

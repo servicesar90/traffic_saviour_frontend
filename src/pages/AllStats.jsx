@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+﻿import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   BarChart,
   Bar,
@@ -26,6 +26,7 @@ import {
   showInfoToast,
   showSuccessToast,
 } from "../components/toast/toast.jsx";
+import { cryptoPayment } from "../api/Apis.js";
 
 
 const Dashboard = () => {
@@ -55,6 +56,15 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const formattedDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+  const [billingList, setBillingList] = useState([]);
+  const [billingLoading, setBillingLoading] = useState(false);
   
 
   const ITEMS_PER_PAGE = 5;
@@ -92,7 +102,7 @@ const Dashboard = () => {
       const res = await apiFunction("get", ipClicks);
       const rawData = res?.data?.data || [];
 
-      // 👉 Only latest 10 days
+      //  Only latest 10 days
       const last10DaysData = rawData.slice(-10);
 
       // Chart data
@@ -179,6 +189,20 @@ const Dashboard = () => {
     }
   };
 
+  const fetchBillingData = async (signal) => {
+    try {
+      setBillingLoading(true);
+      const res = await apiFunction("get", cryptoPayment, null, null, signal);
+      setBillingList(res?.data?.data || []);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        // silent: billing panel is non-blocking
+      }
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
   const handleAddTask = () => {
     if (!newTask.trim()) return;
 
@@ -192,7 +216,7 @@ const Dashboard = () => {
     setNewTask("");
   };
 
-  // ✅ Toggle complete/incomplete
+  //  Toggle complete/incomplete
   const handleToggleComplete = (id) => {
     setTasks((prev) =>
       prev.map((task) =>
@@ -201,12 +225,12 @@ const Dashboard = () => {
     );
   };
 
-  // ✅ Delete task
+  //  Delete task
   const handleDeleteTask = (id) => {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   };
 
-  // ✅ Filtered tasks by search
+  //  Filtered tasks by search
   const filteredTasks = tasks.filter((task) =>
     task.text.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -222,7 +246,7 @@ const Dashboard = () => {
   };
 
   const handleActionSelect = async (action, campaignId, row) => {
-    setOpenDropdownId(null); // मेनू बंद करें
+    setOpenDropdownId(null); //   
     switch (action) {
       case "edit":
         // alert(`Editing campaign ID: ${campaignId}`);
@@ -240,18 +264,18 @@ const Dashboard = () => {
           if (!row) return;
           // console.log(row);
 
-          // 🔁 deep clone campaign
+          //  deep clone campaign
           const payload = JSON.parse(JSON.stringify(row));
        
 
-          // ❌ backend generated fields hatao
+          //  backend generated fields hatao
           delete payload.uid;
           delete payload._id;
           delete payload.createdAt;
           delete payload.updatedAt;
           delete payload.date_time;
 
-          // 📝 campaign name modify
+          //  campaign name modify
           const data = {
             ...payload,
 
@@ -263,13 +287,13 @@ const Dashboard = () => {
           // optional default status
 
 
-          // 🚀 CREATE API CALL (same API as create)
+          //  CREATE API CALL (same API as create)
           const res = await apiFunction("post", createCampaignApi, null, data);
 
           if (res?.data?.status || res?.data?.success) {
             const newCampaign = res.data.data;
 
-            // ✅ UI update (top me add)
+            //  UI update (top me add)
             setCampaigns((prev) => [newCampaign, ...prev]);
             
 
@@ -318,14 +342,14 @@ const Dashboard = () => {
 
   const handleStatusChange = async (uid, newStatus) => {
     try {
-      // 🔎 current campaign find karo
+      //  current campaign find karo
       const currentItem = campaigns.find((item) => item.uid === uid);
       const oldStatus = currentItem?.status;
 
       // agar same status pe click hua to kuch mat karo
       if (!currentItem || oldStatus === newStatus) return;
 
-      // ⏳ loading UI
+      //  loading UI
       setCampaigns((prev) =>
         prev.map((item) =>
           item.uid === uid ? { ...item, statusLoading: true } : item
@@ -334,7 +358,7 @@ const Dashboard = () => {
 
       const data = { status: newStatus };
 
-      // 🔗 PATCH API
+      //  PATCH API
       const res = await apiFunction("patch", createCampaignApi, uid, data);
 
       if (!res?.data?.success) {
@@ -342,7 +366,7 @@ const Dashboard = () => {
         return;
       }
 
-      // ✅ update campaigns list
+      //  update campaigns list
       setCampaigns((prev) =>
         prev.map((item) =>
           item.uid === uid
@@ -351,7 +375,7 @@ const Dashboard = () => {
         )
       );
 
-      // 🔥 UPDATE STATS WITHOUT RELOAD
+      //  UPDATE STATS WITHOUT RELOAD
       setStats((prev) => {
         const updated = { ...prev };
 
@@ -368,12 +392,12 @@ const Dashboard = () => {
         return updated;
       });
 
-      showSuccessToast(`Status updated ✔ : ${newStatus}`);
+      showSuccessToast(`Status updated OK: ${newStatus}`);
     } catch (err) {
       // console.error("Status update error:", err);
       showErrorToast("Something went wrong!");
 
-      // ❌ loading hatao
+      //  loading hatao
       setCampaigns((prev) =>
         prev.map((item) =>
           item.uid === uid ? { ...item, statusLoading: false } : item
@@ -404,6 +428,9 @@ const Dashboard = () => {
     fetchIpClicks();
     fetchStats();
     fetchCampaigns();
+    const controller = new AbortController();
+    fetchBillingData(controller.signal);
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -418,7 +445,7 @@ const Dashboard = () => {
     };
   }, []);
 
-  // ✅ Load Todos from LocalStorage on page load
+  //  Load Todos from LocalStorage on page load
   useEffect(() => {
     const savedTasks = localStorage.getItem("todo_tasks");
     if (savedTasks) {
@@ -426,20 +453,22 @@ const Dashboard = () => {
     }
   }, []);
 
-  // ✅ Auto Save Todos to LocalStorage
+  //  Auto Save Todos to LocalStorage
   useEffect(() => {
     localStorage.setItem("todo_tasks", JSON.stringify(tasks));
   }, [tasks]);
 
   // Small reusable StatCard
   const StatCard = ({ icon, value, title, subtitle }) => (
-    <div className="bg-gray-850/40 border border-gray-700 rounded-lg p-4 flex flex-col justify-between">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-md bg-slate-800 text-lg">{icon}</div>
+          <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center text-lg">
+            {icon}
+          </div>
           <div>
-            <div className="text-2xl font-semibold text-white">{value}</div>
-            <div className="text-xs text-slate-400">{title}</div>
+            <div className="text-2xl font-semibold text-slate-900">{value}</div>
+            <div className="text-xs text-slate-500">{title}</div>
           </div>
         </div>
         <div className="text-xs text-slate-400">{subtitle}</div>
@@ -447,10 +476,73 @@ const Dashboard = () => {
     </div>
   );
 
+  const currency = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+
+  const paidTotal = billingList
+    .filter((item) => (item.status || "").toLowerCase() === "paid")
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const unpaidTotal = billingList
+    .filter((item) => (item.status || "").toLowerCase() !== "paid")
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const monthTotal = billingList
+    .filter((item) => {
+      const date = item.start_date ? new Date(item.start_date) : null;
+      return date && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    })
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+  const paidCount = billingList.filter(
+    (item) => (item.status || "").toLowerCase() === "paid"
+  ).length;
+
+  const accountCards = [
+    {
+      title: "Total Paid",
+      number: `${paidCount} invoices`,
+      balance: currency.format(paidTotal),
+      color: "from-indigo-500 to-indigo-400",
+    },
+    {
+      title: "Outstanding",
+      number: "Pending invoices",
+      balance: currency.format(unpaidTotal),
+      color: "from-rose-500 to-orange-400",
+    },
+    {
+      title: "This Month",
+      number: "Current billing",
+      balance: currency.format(monthTotal),
+      color: "from-emerald-500 to-lime-400",
+    },
+  ];
+
+  const invoiceRows = [...billingList]
+    .sort((a, b) => new Date(b.start_date || 0) - new Date(a.start_date || 0))
+    .slice(0, 3)
+    .map((item) => ({
+      title: item.plan_name || "Subscription",
+      status: item.status || "Processing",
+      amount: currency.format(Number(item.amount || 0)),
+      date: item.start_date ? new Date(item.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }) : "N/A",
+    }));
+
+  const safePercent = clickSummary.totalClicks
+    ? Math.round((clickSummary.safeClicks / clickSummary.totalClicks) * 100)
+    : 0;
+  const moneyPercent = clickSummary.totalClicks
+    ? Math.round((clickSummary.moneyClicks / clickSummary.totalClicks) * 100)
+    : 0;
+
   const renderActionDropdown = (campaignId, row) => (
-    // ref को सीधे dropdownRef के बजाय किसी wrapper div को दें ताकि click outside काम करे
+    // ref   dropdownRef    wrapper div    click outside  
     <div
-      className="fixed right-0 top-full mt-2 w-48 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-20"
+      className="fixed right-0 top-full mt-2 w-48 rounded-xl shadow-lg bg-white border border-slate-200 z-20"
       style={{
         zIndex: 9999999, // over ALL elements
         left: dropdownPos?.left,
@@ -460,19 +552,19 @@ const Dashboard = () => {
       <div className="py-1">
         <button
           onClick={() => handleActionSelect("edit", campaignId, row)}
-          className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 hover:text-white transition duration-100 cursor-pointer"
+          className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition duration-100 cursor-pointer"
         >
           Edit Campaign
         </button>
         <button
           onClick={() => handleActionSelect("duplicate", campaignId, row)}
-          className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-600 hover:text-white transition duration-100 cursor-pointer"
+          className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition duration-100 cursor-pointer"
         >
           Duplicate Campaign
         </button>
         <button
           onClick={() => handleActionSelect("delete", campaignId, null)}
-          className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-600 hover:text-red-300 transition duration-100 cursor-pointer"
+          className="block w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition duration-100 cursor-pointer"
         >
           Delete Campaign
         </button>
@@ -512,7 +604,7 @@ const Dashboard = () => {
       return (
         <tbody>
           <tr>
-            <td colSpan="10" className="text-center py-10 text-gray-500">
+            <td colSpan="10" className="text-center py-10 text-slate-400">
               No campaigns found.
             </td>
           </tr>
@@ -521,20 +613,20 @@ const Dashboard = () => {
     }
 
     return (
-      <tbody className="bg-gray-900 divide-y divide-gray-800">
+      <tbody className="bg-white divide-y divide-slate-200">
         {campaigns.map((item, index) => {
           const campaignId = item.campaign_info?.campaign_id || index;
           const isDropdownOpen = openDropdownId === item?.uid;
           return (
             <>
               <tr key={item.campaignId}>
-                <td className="px-3 py-3 text-sm  text-left text-gray-300">
+                <td className="px-3 py-3 text-sm  text-left text-slate-600">
                   {index + 1}
                 </td>
-                <td className="px-3 py-3 text-sm text-left text-blue-400">
+                <td className="px-3 py-3 text-sm text-left text-slate-900 font-medium">
                   {item.campaign_info?.campaignName}
                 </td>
-                <td className="px-3 py-3 text-sm text-left text-gray-300">
+                <td className="px-3 py-3 text-sm text-left text-slate-600">
                   {item.campaign_info?.trafficSource}
                 </td>
                 <td className="px-3 py-3 text-left">
@@ -550,7 +642,7 @@ const Dashboard = () => {
         ${
           item.status === "Active"
             ? "text-green-500 drop-shadow-[0_0_6px_rgba(16,185,129,.8)]"
-            : "text-gray-500 hover:text-gray-300"
+            : "text-slate-400 hover:text-slate-600"
         }`}
                   >
                     <svg
@@ -563,7 +655,7 @@ const Dashboard = () => {
                     </svg>
                   </button>
 
-                  {/* ⚡ Boost */}
+                  {/*  Boost */}
                   <button
                     disabled={item.statusLoading}
                     onClick={() => handleStatusChange(item.uid, "Allow")}
@@ -576,7 +668,7 @@ const Dashboard = () => {
         ${
           item.status === "Allow"
             ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
-            : "text-gray-500 hover:text-gray-300"
+            : "text-slate-400 hover:text-slate-600"
         }`}
                   >
                     <svg
@@ -589,7 +681,7 @@ const Dashboard = () => {
                     </svg>
                   </button>
 
-                  {/* 🚫 Block */}
+                  {/*  Block */}
                   <button
                     disabled={item.statusLoading}
                     onClick={() => handleStatusChange(item.uid, "Block")}
@@ -602,7 +694,7 @@ const Dashboard = () => {
         ${
           item.status === "Block"
             ? "text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,.8)]"
-            : "text-gray-500 hover:text-gray-300"
+            : "text-slate-400 hover:text-slate-600"
         }`}
                   >
                     <svg
@@ -636,8 +728,8 @@ const Dashboard = () => {
                         />
                       </svg>
 
-                      {/* ⭐ Tooltip container */}
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 ">
+                      {/*  Tooltip container */}
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white text-slate-700 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
                         {item.integrationUrl || "No URL Found"}
                       </div>
                     </div>
@@ -659,10 +751,10 @@ const Dashboard = () => {
                     </div>
                   )}
                 </td>
-                <td className="px-3 py-3 text-gray-300 text-center">
+                <td className="px-3 py-3 text-slate-600 text-center">
                   {item?.campclicks?.total_t_clicks || 0}
                 </td>
-                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-16">
+                <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right w-16">
                   <div className="flex items-center gap-1 relative group">
                     {/* i Icon */}
                     <svg
@@ -685,15 +777,15 @@ const Dashboard = () => {
                     {/* Tooltip */}
                     <div
                       className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
-      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
-      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50"
+      hidden group-hover:block bg-white text-slate-700 text-xs 
+      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200"
                     >
                       {item?.safe_page || "No URL Found"}
                     </div>
                   </div>
                 </td>
 
-                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-300 text-right w-20">
+                <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right w-20">
                   <div className="flex items-center gap-1 relative group">
                     {/* i Icon */}
                     <svg
@@ -716,15 +808,15 @@ const Dashboard = () => {
                     {/* Tooltip */}
                     <div
                       className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
-      hidden group-hover:block bg-gray-800 text-gray-200 text-xs 
-      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50"
+      hidden group-hover:block bg-white text-slate-700 text-xs 
+      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200"
                     >
                       {item?.money_page?.[0]?.url || "No URL Found"}
                     </div>
                   </div>
                 </td>
 
-                <td className="px-3 py-3 text-gray-300 text-left">
+                <td className="px-3 py-3 text-slate-600 text-left">
                   {new Date(item.date_time).toLocaleString()}
                 </td>
                 <td
@@ -735,11 +827,11 @@ const Dashboard = () => {
                     onClick={(e) => handleActionClick(e, item?.uid)}
                     className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
                       isDropdownOpen
-                        ? "bg-gray-600 text-white"
-                        : "hover:bg-gray-700"
+                        ? "bg-slate-900 text-white"
+                        : "hover:bg-slate-100"
                     }`}
                   >
-                    ⋯ {/* Vertical three dots */}
+                    ... {/* Vertical three dots */}
                   </button>
                   {isDropdownOpen && renderActionDropdown(item?.uid, item)}
                 </td>
@@ -752,213 +844,341 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0d14] p-6 text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold">Dashboard</h2>
-          <p className="text-slate-400 text-sm">Let's do something new.</p>
-        </div>
-        <div className="flex space-x-3">
-          <button
-            onClick={handleAddNewCampaign}
-            className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-medium text-sm shadow-lg transition duration-150 cursor-pointer"
-          >
-            <svg
-              className="h-5 w-5 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+      <div className="flex flex-col gap-5 mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{formattedDate}</p>
+            <h2 className="text-2xl font-semibold">
+              Welcome Back, {user?.name ? user.name.split(" ")[0] : "Admin"}!
+            </h2>
+            <p className="text-slate-500 text-sm">
+              Here is a snapshot of campaign performance and traffic safety.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleAddNewCampaign}
+              className="flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 rounded-full font-medium text-sm text-white shadow-sm transition cursor-pointer"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Add New Campaign
-          </button>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm shadow-lg transition-all duration-200 cursor-pointer
-    ${
-      isRefreshing
-        ? "bg-gray-600 cursor-not-allowed opacity-80"
-        : "bg-gray-700 hover:bg-gray-600 cursor-pointer"
-    }
-  `}
-          >
-            <svg
-              className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+              <svg
+                className="h-4 w-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              New Campaign
+            </button>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm border transition-all duration-200 cursor-pointer
+                ${
+                  isRefreshing
+                    ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                }
+              `}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-
-            <span className="whitespace-nowrap">
-              {isRefreshing ? "Refreshing data..." : "Refresh"}
-            </span>
-          </button>
+              <svg
+                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              {isRefreshing ? "Refreshing..." : "Refresh"}
+            </button>
+            <div className="hidden lg:flex items-center gap-2">
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Send</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Request</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Transfer</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Deposit</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Pay Bill</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-slate-900 text-white hover:bg-slate-800">Create Invoice</button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Top Stats */}
-      <div className="mb-6 flex gap-6 flex-wrap">
-        <StatCard icon="📊" value={stats.total_campaigns} title="Campaigns" />
-        <StatCard icon="▶️" value={stats.active_campaigns} title="Active" />
-        <StatCard icon="⚡" value={stats.allowed_campaigns} title="Allow All" />
-        <StatCard icon="🚫" value={stats.blocked_campaigns} title="Block All" />
+      <div className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon="TC" value={stats.total_campaigns} title="Total Campaigns" />
+        <StatCard icon="AC" value={stats.active_campaigns} title="Active" />
+        <StatCard icon="AL" value={stats.allowed_campaigns} title="Allow All" />
+        <StatCard icon="BL" value={stats.blocked_campaigns} title="Blocked" />
       </div>
 
-      <div className="bg-gray-850/40 border border-gray-700 rounded-lg p-6">
-        <h3 className="text-white text-lg font-semibold mb-2">
-          Clicks Overview
-        </h3>
-        <p className="text-sm text-slate-400 mb-4">Cumulative Click Log</p>
-
-        <div style={{ width: "100%", height: 260 }}>
-          {loading ? (
-            <p style={{ textAlign: "center", marginTop: "20px" }}>Loading...</p>
-          ) : chartData?.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="text-4xl mb-2">📉</div>
-              <p className="text-slate-400 text-sm font-medium">
-                No IP Click Data Available
-              </p>
-              <p className="text-slate-500 text-xs mt-1">
-                Data will appear here once clicks are recorded.
-              </p>
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Overview</h3>
+              <p className="text-sm text-slate-500">Clicks performance across the last 10 days</p>
             </div>
-          ) : (
-            <ResponsiveContainer>
-              <BarChart
-                data={chartData}
-                margin={{ top: 10, right: 20, left: -8, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="safeGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.2} />
-                  </linearGradient>
+            <button className="h-9 w-9 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100">
+              ...
+            </button>
+          </div>
 
-                  <linearGradient
-                    id="moneyGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.9} />
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0.2} />
-                  </linearGradient>
-                </defs>
+          <div className="flex items-center gap-6 mb-6">
+            <div>
+              <p className="text-xs text-slate-400">Total Clicks</p>
+              <p className="text-2xl font-semibold text-slate-900">{clickSummary.totalClicks}</p>
+            </div>
+            <div className="text-sm text-emerald-500 font-medium">+5.8% this week</div>
+          </div>
 
-                <CartesianGrid
-                  stroke="#1e293b"
-                  vertical={false}
-                  strokeDasharray="3 3"
-                />
+          <div style={{ width: "100%", height: 260 }}>
+            {loading ? (
+              <p className="text-center text-slate-400 mt-6">Loading...</p>
+            ) : chartData?.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="text-2xl mb-2 text-slate-400">N/A</div>
+                <p className="text-slate-500 text-sm font-medium">
+                  No IP Click Data Available
+                </p>
+                <p className="text-slate-400 text-xs mt-1">
+                  Data will appear here once clicks are recorded.
+                </p>
+              </div>
+            ) : (
+              <ResponsiveContainer>
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 10, right: 20, left: -8, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="safeGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.9} />
+                      <stop offset="95%" stopColor="#93c5fd" stopOpacity={0.2} />
+                    </linearGradient>
 
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: "#9ca3af", fontSize: 12 }}
-                  tickLine={false}
-                  axisLine={false}
-                />
+                    <linearGradient
+                      id="moneyGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.9} />
+                      <stop offset="95%" stopColor="#6ee7b7" stopOpacity={0.2} />
+                    </linearGradient>
+                  </defs>
 
-                <YAxis
-                  tick={{ fill: "#9ca3af", fontSize: 12 }}
-                  tickLine={false}
-                  axisLine={false}
-                />
+                  <CartesianGrid stroke="#e2e8f0" vertical={false} strokeDasharray="3 3" />
 
-                <Tooltip
-                  contentStyle={{
-                    background: "#0f172a",
-                    border: "1px solid #1e293b",
-                    borderRadius: "6px",
-                    color: "#fff",
-                  }}
-                  cursor={{ fill: "rgba(255,255,255,0.05)" }}
-                />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: "#94a3b8", fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
 
-                <Legend
-                  wrapperStyle={{
-                    color: "#9ca3af",
-                    fontSize: 12,
-                  }}
-                  iconType="circle"
-                  verticalAlign="top"
-                  align="right"
-                />
+                  <YAxis
+                    tick={{ fill: "#94a3b8", fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
 
-                <Bar
-                  dataKey="Safe"
-                  stackId="a"
-                  fill="url(#safeGradient)"
-                  barSize={16}
-                  radius={[4, 4, 0, 0]}
-                />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#ffffff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "10px",
+                      color: "#0f172a",
+                    }}
+                    cursor={{ fill: "rgba(148, 163, 184, 0.2)" }}
+                  />
 
-                <Bar
-                  dataKey="Money"
-                  stackId="a"
-                  fill="url(#moneyGradient)"
-                  barSize={16}
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+                  <Legend
+                    wrapperStyle={{
+                      color: "#64748b",
+                      fontSize: 12,
+                    }}
+                    iconType="circle"
+                    verticalAlign="top"
+                    align="right"
+                  />
+
+                  <Bar
+                    dataKey="Safe"
+                    stackId="a"
+                    fill="url(#safeGradient)"
+                    barSize={16}
+                    radius={[6, 6, 0, 0]}
+                  />
+
+                  <Bar
+                    dataKey="Money"
+                    stackId="a"
+                    fill="url(#moneyGradient)"
+                    barSize={16}
+                    radius={[6, 6, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Accounts</h3>
+            <button className="h-9 w-9 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100">
+              ...
+            </button>
+          </div>
+          <div className="space-y-3">
+            {accountCards.map((card) => (
+              <div key={card.title} className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className={`h-11 w-16 rounded-2xl bg-gradient-to-br ${card.color}`} />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{card.title}</p>
+                    <p className="text-xs text-slate-400">{card.number}</p>
+                  </div>
+                </div>
+                <p className="text-sm font-semibold text-slate-900">{card.balance}</p>
+              </div>
+            ))}
+          </div>
+          <button className="mt-4 w-full rounded-2xl border border-dashed border-slate-200 px-4 py-2 text-sm text-slate-500 hover:bg-slate-100">
+            + Create account
+          </button>
+        </div>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] mt-6">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Money movement</h3>
+            <button className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-500">Aug 2026</button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-slate-500">Money in</p>
+                <button className="h-7 w-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-100">+</button>
+              </div>
+              <p className="text-2xl font-semibold text-slate-900">${clickSummary.safeClicks}</p>
+              <div className="mt-3 h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-full bg-emerald-500" style={{ width: `${safePercent}%` }} />
+              </div>
+              <p className="text-xs text-slate-400 mt-2">{safePercent}% from safe traffic</p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-slate-500">Money out</p>
+                <button className="h-7 w-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-100">+</button>
+              </div>
+              <p className="text-2xl font-semibold text-slate-900">${clickSummary.moneyClicks}</p>
+              <div className="mt-3 h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-full bg-rose-500" style={{ width: `${moneyPercent}%` }} />
+              </div>
+              <p className="text-xs text-slate-400 mt-2">{moneyPercent}% risk traffic</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Invoices</h3>
+            <button className="h-9 w-9 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100">...</button>
+          </div>
+          <div className="space-y-3">
+            {billingLoading ? (
+              <div className="text-sm text-slate-400">Loading invoices...</div>
+            ) : invoiceRows.length === 0 ? (
+              <div className="text-sm text-slate-400">No invoices yet</div>
+            ) : (
+              invoiceRows.map((row, index) => (
+                <div key={`${row.title}-${index}`} className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{row.title}</p>
+                    <p className="text-xs text-slate-400">{row.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-slate-900">{row.amount}</p>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        row.status === "Paid"
+                          ? "bg-emerald-50 text-emerald-600"
+                          : row.status === "Unpaid"
+                          ? "bg-rose-50 text-rose-600"
+                          : "bg-amber-50 text-amber-600"
+                      }`}
+                    >
+                      {row.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 border border-gray-700 rounded-lg overflow-hidden">
-        <div className="flex flex-col border border-gray-700 rounded-lg bg-gray-900 overflow-hidden">
+      <div className="mt-8 border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <div className="flex items-center gap-2 text-sm">
+            <button className="px-4 py-1.5 rounded-full bg-slate-900 text-white">Recent</button>
+            <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">My transactions</button>
+            <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">Monthly money in</button>
+            <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">Monthly money out</button>
+          </div>
+          <div className="text-xs text-slate-400">Transactions</div>
+        </div>
+        <div className="flex flex-col border border-slate-200 rounded-3xl bg-white overflow-hidden">
           {/* ===== FIXED HEADER ===== */}
-          <div className="flex-none overflow-x-auto bg-gray-800">
+          <div className="flex-none overflow-x-auto bg-slate-50">
             <table className="min-w-full table-fixed">
               <TableColGroup />
 
-              <thead className="bg-gray-800">
+              <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Sn
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Campaign Name
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Source
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Status
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Integration
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Clicks
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Safe
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Money
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Created on
                   </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase">
+                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Action
                   </th>
                 </tr>
@@ -968,26 +1188,26 @@ const Dashboard = () => {
 
           {/* ===== SCROLLABLE BODY ===== */}
           <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
-            <table className="min-w-full table-fixed divide-y divide-gray-800 border-t border-gray-700">
+            <table className="min-w-full table-fixed divide-y divide-slate-200 border-t border-slate-200">
               <TableColGroup />
               {renderTableContent()}
             </table>
           </div>
 
           {/* ===== FIXED FOOTER ===== */}
-          <div className="flex-none bg-gray-800 border-t border-gray-700 px-6 py-3 flex items-center justify-between">
+          <div className="flex-none bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between">
             {/* LEFT */}
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-slate-500">
               Showing{" "}
-              <span className="text-gray-200 font-medium">
-                {startItem}–{endItem}
+              <span className="text-slate-900 font-medium">
+                {startItem}-{endItem}
               </span>{" "}
               of{" "}
-              <span className="text-gray-200 font-medium">{totalRecords}</span>{" "}
+              <span className="text-slate-900 font-medium">{totalRecords}</span>{" "}
               campaigns
             </span>
 
-            {/* RIGHT – Numbered Pagination */}
+            {/* RIGHT  Numbered Pagination */}
             <div className="flex items-center gap-1">
               {/* Prev */}
               <button
@@ -995,8 +1215,8 @@ const Dashboard = () => {
                 onClick={() => handlePageChange(currentPage - 1)}
                 className={`px-3 py-1 text-sm rounded border ${
                   currentPage === 1
-                    ? "text-gray-500 border-gray-600 cursor-not-allowed"
-                    : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
+                    ? "text-slate-400 border-slate-200 cursor-not-allowed"
+                    : "text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
                 }`}
               >
                 Prev
@@ -1010,8 +1230,8 @@ const Dashboard = () => {
                     onClick={() => handlePageChange(page)}
                     className={`px-3 py-1 text-sm rounded border cursor-pointer ${
                       page === currentPage
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "text-gray-300 border-gray-600 hover:bg-gray-700"
+                        ? "bg-slate-900 text-white border-slate-900"
+                        : "text-slate-600 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
                     {page}
@@ -1025,8 +1245,8 @@ const Dashboard = () => {
                 onClick={() => handlePageChange(currentPage + 1)}
                 className={`px-3 py-1 text-sm rounded border ${
                   currentPage === totalPages
-                    ? "text-gray-500 border-gray-600 cursor-not-allowed"
-                    : "text-white border-gray-500 hover:bg-gray-700 cursor-pointer"
+                    ? "text-slate-400 border-slate-200 cursor-not-allowed"
+                    : "text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
                 }`}
               >
                 Next
@@ -1039,38 +1259,38 @@ const Dashboard = () => {
       {/* Bottom Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         {/* To-do */}
-        <div className="bg-gray-850/40 border border-gray-700 rounded-lg p-6 min-h-[220px]">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 min-h-[220px] shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-white font-semibold">To do</h4>
-            <div className="text-slate-400 text-sm">Reminders List for me</div>
+            <h4 className="text-slate-900 font-semibold">To do</h4>
+            <div className="text-slate-400 text-sm">Reminders list</div>
           </div>
 
-          <div className="bg-slate-900 border border-gray-800 rounded-md p-4 min-h-[120px]">
-            {/* ✅ Search */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 min-h-[120px]">
+            {/*  Search */}
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-transparent border border-gray-700 px-3 py-2 rounded-md text-slate-300 mb-3"
+              className="w-full bg-white border border-slate-200 px-3 py-2 rounded-lg text-slate-700 mb-3"
               placeholder="Search tasks"
             />
 
-            {/* ✅ Add Task */}
+            {/*  Add Task */}
             <div className="flex flex-wrap gap-2 mb-4">
               <input
                 value={newTask}
                 onChange={(e) => setNewTask(e.target.value)}
-                className="flex-1 w-full bg-transparent border border-gray-700 px-3 py-2 rounded-md text-slate-300"
+                className="flex-1 w-full bg-white border border-slate-200 px-3 py-2 rounded-lg text-slate-700"
                 placeholder="Write new task..."
               />
               <button
                 onClick={handleAddTask}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                className="bg-slate-900 text-white px-4 py-2 rounded-lg cursor-pointer"
               >
                 Add
               </button>
             </div>
 
-            {/* ✅ Task List */}
+            {/*  Task List */}
             <div className="space-y-2 max-h-[180px] overflow-y-auto">
               {filteredTasks.length === 0 ? (
                 <p className="text-slate-400 text-sm text-center">
@@ -1080,14 +1300,14 @@ const Dashboard = () => {
                 filteredTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between bg-slate-800 px-3 py-2 rounded-md"
+                    className="flex items-center justify-between bg-white border border-slate-200 px-3 py-2 rounded-lg"
                   >
                     <div
                       onClick={() => handleToggleComplete(task.id)}
                       className={`cursor-pointer text-sm ${
                         task.completed
-                          ? "line-through text-slate-500"
-                          : "text-white"
+                          ? "line-through text-slate-400"
+                          : "text-slate-900"
                       }`}
                     >
                       {task.text}
@@ -1095,16 +1315,16 @@ const Dashboard = () => {
 
                     <button
                       onClick={() => handleDeleteTask(task.id)}
-                      className="text-red-400 text-xs hover:text-red-300"
+                      className="text-rose-500 text-xs hover:text-rose-600"
                     >
-                      ❌
+                      X
                     </button>
                   </div>
                 ))
               )}
             </div>
 
-            {/* ✅ Task Count */}
+            {/*  Task Count */}
             <div className="mt-3 text-slate-400 text-xs text-right">
               {tasks.length} tasks
             </div>
@@ -1112,9 +1332,9 @@ const Dashboard = () => {
         </div>
 
         {/* Click Metrics */}
-        <div className="bg-gray-850/40 border border-gray-700 rounded-lg p-6 min-h-[220px]">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 min-h-[220px] shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-white font-semibold">
+            <h4 className="text-slate-900 font-semibold">
               Click Metrics - Realtime Logs
             </h4>
             <div className="text-slate-400 text-sm">
@@ -1122,15 +1342,15 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-slate-900 border border-gray-800 rounded-md p-6">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
             {loading ? (
               <p className="text-center text-slate-400">Loading...</p>
             ) : (
               <div className="grid grid-cols-2 gap-4">
-                {/* 🔥 Total Clicks */}
+                {/*  Total Clicks */}
                 <div className="text-center">
-                  <div className="bg-slate-800 p-4 rounded-md inline-block">
-                    <div className="text-2xl font-semibold text-white">
+                  <div className="bg-white border border-slate-200 p-4 rounded-xl inline-block">
+                    <div className="text-2xl font-semibold text-slate-900">
                       {clickSummary.totalClicks}
                     </div>
                   </div>
@@ -1139,10 +1359,10 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* 🔥 Safe Clicks */}
+                {/*  Safe Clicks */}
                 <div className="text-center">
-                  <div className="bg-slate-800 p-4 rounded-md inline-block">
-                    <div className="text-2xl font-semibold text-white">
+                  <div className="bg-white border border-slate-200 p-4 rounded-xl inline-block">
+                    <div className="text-2xl font-semibold text-slate-900">
                       {clickSummary.safeClicks}
                     </div>
                   </div>
@@ -1161,3 +1381,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+

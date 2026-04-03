@@ -271,7 +271,7 @@ useEffect(() => {
 
 
   return (
-    <div style={{ fontFamily: "Outfit, sans-serif", fontWeight: 400 }} className="min-h-screen bg-[#0b0d14] text-gray-100 p-8 font-sans">
+    <div className="min-h-screen bg-[#0b0d14] text-gray-100 p-8 font-sans">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">

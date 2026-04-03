@@ -1,24 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  Building,
-  Database,
-  Notebook,
-  UserSearch,
-  Save,
-  Unlock,
-  X,
-  ChevronDown,
-  ChevronUp,
-  Power,
-  HandCoins,
-  NotepadText,
-  LayoutDashboard,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, NotepadText } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faList, faBan, faChartPie, faChartSimple, faDollarSign } from "@fortawesome/free-solid-svg-icons";
+import { faList, faBan, faChartPie, faChartSimple } from "@fortawesome/free-solid-svg-icons";
 import { CreditCard, Layers } from "lucide-react";
-import { Layer } from "recharts";
 import { apiFunction } from "../../api/ApiFunction";
 import { signOutApi } from "../../api/Apis";
 
@@ -36,75 +21,48 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
 
   const navItems = [
     {
-      label: "Dashboard",
-      icon: <FontAwesomeIcon icon={faChartPie} size='lg' />,
+      label: "Home",
+      icon: <FontAwesomeIcon icon={faChartPie} size="sm" />,
       route: "/Dashboard/allStats",
     },
     {
-      label: "Campaign",
-      icon: <FontAwesomeIcon icon={faList} size="lg" />,
+      label: "Tasks",
+      icon: <FontAwesomeIcon icon={faList} size="sm" />,
       route: "/Dashboard/allCampaign",
     },
-
     {
-      label: "Blacklisted IP",
-      icon: <FontAwesomeIcon icon={faBan} size='lg' />,
-      route: "/Dashboard/IpListings",
-    },
-    {
-      label: "Analytics",
-      icon: <FontAwesomeIcon icon={faChartSimple} size='lg' />,
+      label: "Transactions",
+      icon: <FontAwesomeIcon icon={faChartSimple} size="sm" />,
       route: "/Dashboard/analytics",
     },
     {
-      label: "Report",
-      icon: <NotepadText size={24} />,
-    },
-    {
-      label: "Pricing",
-      icon: <CreditCard size={24} />,
+      label: "Payments",
+      icon: <CreditCard size={18} />,
       route: "/Dashboard/pricing",
+      collapsible: true,
     },
     {
-      label: "Billing",
-      icon: <Layers size={24} />,
+      label: "Cards",
+      icon: <Layers size={18} />,
       route: "/Dashboard/billing",
+    },
+    {
+      label: "Capital",
+      icon: <FontAwesomeIcon icon={faBan} size="sm" />,
+      route: "/Dashboard/IpListings",
+    },
+    {
+      label: "Accounts",
+      icon: <NotepadText size={16} />,
+      collapsible: true,
     },
   ];
 
-  const databaseSubItems = [
-    {
-      label: "Click Logs",
-      route: "/Dashboard/reports",
-    },
-     {
-      label: "Stats Overview",
-      route: "/Dashboard/stats",
-    },
-    // {
-    //   label: "Stats Overview",
-    //   route: "/Dashboard/clicklogs",
-    // },
-    // {
-    //   label: "Tracking",
-    //   route: "/employerHome/UnlockedCandidates",
-    // },
-    // {
-    //   label: "Group By Stats",
-    //   route: "/employerHome/UnlockedCandidates",
-    // },
-    // {
-    //   label: "Cost Management",
-    //   route: "/employerHome/UnlockedCandidates",
-    // },
-    // {
-    //   label: "Campaign Timeline",
-    //   route: "/employerHome/UnlockedCandidates",
-    // },
-    // {
-    //   label: "Delete Campaigns",
-    //   route: "/employerHome/UnlockedCandidates",
-    // },
+  const workflowItems = [
+    { label: "Bill Pay", icon: <NotepadText size={16} />, route: "/Dashboard/billing" },
+    { label: "Invoicing", icon: <NotepadText size={16} />, route: "/Dashboard/pricing" },
+    { label: "Reimbursements", icon: <NotepadText size={16} />, route: "/Dashboard/analytics" },
+    { label: "Accounting", icon: <NotepadText size={16} />, route: "/Dashboard/reports" },
   ];
 
   const handleNavigate = (route) => {
@@ -136,163 +94,143 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
     
   };
 
-  const isDatabaseActive = databaseSubItems.some(
-    (sub) => location.pathname === sub.route
-  );
+  const isDatabaseActive = false;
 
   return (
     <div
-      className={`h-full flex flex-col py-4 px-2 bg-[#1e2939] border-gray-300 ${isCollapsed ? "w-16" : "w-60"
+      className={`h-full flex flex-col py-4 px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed" : "w-64 sidebar-expanded"
         } transition-all duration-500 ease-in-out`}
     >
       {/* Logo & Avatar */}
       <div
-        className={`px-2 mb-4 flex items-center text-white ${showFull ? "gap-3" : "justify-center"
+        className={`px-1 mb-4 flex items-center ${showFull ? "gap-3" : "justify-center"
           }`}
       >
-        {user?.company?.logoUrl ? (
-          <img
-            src={employer?.company.logoUrl}
-            alt="Logo"
-            className="w-8 h-8 rounded-[8px] object-cover"
-          />
-        ) : (
-          <div className="w-8 h-8 text-white rounded-[8px] bg-green-500 text-white flex items-center justify-center text-sm font-semibold">
-            {user?.name.charAt(0).toUpperCase()}
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 px-2 py-2 w-full">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-900 text-white">
+            {user?.company?.logoUrl ? (
+              <img
+                src={user?.company?.logoUrl}
+                alt="Logo"
+                className="w-8 h-8 rounded-lg object-cover"
+              />
+            ) : (
+              <span className="text-xs font-semibold">
+                {user?.name ? user.name.charAt(0).toUpperCase() : "A"}
+              </span>
+            )}
           </div>
-        )}
-        {showFull && <p className="text-xl text-white text-gray-600 ">{user?.name}</p>}
+          {showFull && (
+            <div className="flex-1 leading-tight sidebar-text">
+              <p className="text-xs text-slate-400">Agency</p>
+              <p className="text-sm font-semibold text-slate-900 truncate">
+                {user?.name || "Orbix Studio Team"}
+              </p>
+            </div>
+          )}
+          {showFull && (
+            <div className="w-6 h-6 rounded-md border border-slate-200 flex items-center justify-center text-slate-400">
+              <span className="text-xs">⋯</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-1 text-white ">
+      <nav className="flex flex-col gap-1 text-slate-600">
         {navItems.map((item, index) => {
           const isActive = location.pathname === item.route;
-          const isDatabase = item.label === "Report";
-          const isItemActive = isActive || (isDatabase && isDatabaseActive);
+          const isItemActive = isActive || (item.collapsible && isDatabaseActive);
 
           return (
             <div key={index}>
               <div
                 id={item.label}
                 onClick={() => {
-                  if (isDatabase) {
+                  if (item.collapsible) {
                     setDatabaseOpen(!databaseOpen);
                   } else if (item.route) {
                     handleNavigate(item.route);
                   }
                 }}
-                className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors   ${isItemActive
-                  ? "bg-[#ECF3FF] text-[#465FFF] "
-                  : "text-white                                                                                                                                                                                                                hover:bg-gray-100 hover:text-[#465FFF]"
+                className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors ${isItemActive
+                  ? "bg-blue-100 text-blue-700 shadow-[0_6px_16px_rgba(148,163,184,0.25)]"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
               >
-                <div className="flex items-center gap-3 hover:text-[465FFF ]">
-                  <span
-                    className={`${isItemActive ? "text-[#465FFF]" : " "
-                      }`}
-                  >
+                <div className="flex items-center gap-3">
+                  <span className={`${isItemActive ? "text-blue-700" : "text-slate-500"}`}>
                     {item.icon}
                   </span>
                   {showFull && (
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className="text-sm font-medium sidebar-text">{item.label}</span>
                   )}
                 </div>
-                {isDatabase && showFull && (
-                  <span className="text-gray-600 hover:text-[#465FFF]">
+                {item.collapsible && showFull && (
+                  <span className="text-slate-400 sidebar-text">
                     {databaseOpen ? (
-                      <ChevronUp size={16} className="text-[#465FFF]" />
+                      <ChevronUp size={16} className="text-slate-500" />
                     ) : (
-                      <ChevronDown size={16} className="text-white" />
+                      <ChevronDown size={16} className="text-slate-500" />
                     )}
                   </span>
                 )}
               </div>
 
-              {/* Submenu */}
-              {isDatabase && (
-                <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${databaseOpen && showFull ? "max-h-96 mt-1" : "max-h-0"
-                    }`}
-                >
-                  <div className="ml-6 flex flex-col gap-1">
-                    {databaseSubItems.map((sub, subIndex) => {
-                      const isSubActive = location.pathname === sub.route;
-                      return (
-                        <div
-                          key={subIndex}
-                          onClick={() => handleNavigate(sub.route)}
-                          className={`flex items-center gap-2 px-2 py-1 rounded-md text-sm cursor-pointer transition-colors ${isSubActive
-                            ? "bg-[#ECF3FF] text-[#465FFF]"
-                            : "text-white hover:bg-gray-100 hover:text-[#465FFF]"
-                            }`}
-                        >
-                          {sub.icon}
-                          <span>{sub.label}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
       </nav>
-      {/* logout button */}
-      <div className="w-full h-[25vh] mt-auto flex justify-center items-center ">
-        <div className="border-t border-slate-700 bg-[#1e2939]">
-          <div
-            className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"
-              } px-3 py-4 transition-all duration-300`}
-          >
-            {/* User Info */}
-            <div className="flex items-center gap-3 overflow-hidden">
-              {/* Avatar */}
-              <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-gray-300">
-                {user?.company?.logoUrl ? (
-                  <img
-                    src={employer?.company.logoUrl}
-                    alt="Logo"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 text-white rounded-full bg-purple-700 text-white flex items-center justify-center text-sm font-semibold">
-                    {user?.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-
-              {/* Name + Email (hide when collapsed) */}
-              {!isCollapsed && (
-                <div className="leading-tight">
-                  <p className="text-sm font-medium text-gray-200 truncate">
-                    {user?.name || "Admin User"}
-                  </p>
-                  <p className="text-xs text-gray-400 truncate">
-                    {user?.email || "admin@example.com"}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Logout Button */}
-            {/* <button
-              // onClick={}
-              className={`text-gray-400 hover:text-red-400 transition ${isCollapsed ? "" : "ml-2"
-                }`}
-              title="Logout"
-            >
-              <LogOut size={18} />
-            </button> */}
-          </div>
-
-          <button
-            onClick={handleLogout}
-            class="flex items-center justify-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-red-400  rounded transition cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out w-4 h-4 mr-2" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg> {!isCollapsed && "Logout"}</button>
-
+      <div className="mt-4">
+        <div className={`px-2 ${showFull ? "block" : "hidden"}`}>
+          <div className="h-px w-full bg-slate-200" />
         </div>
+        <p className={`px-2 text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] ${showFull ? "block" : "hidden"}`}>
+          Workflows
+        </p>
+        <div className="mt-2 flex flex-col gap-1">
+          {workflowItems.map((item, idx) => {
+            const isActive = location.pathname === item.route;
+            return (
+              <div
+                key={idx}
+                onClick={() => item.route && handleNavigate(item.route)}
+                className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer transition-colors ${isActive
+                  ? "bg-blue-100 text-blue-700"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  }`}
+              >
+                <span className={`${isActive ? "text-blue-700" : "text-slate-500"}`}>
+                  {item.icon}
+                </span>
+                {showFull && <span className="text-sm font-medium sidebar-text">{item.label}</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
+      {/* Promo card */}
+      <div className="mt-auto px-2 pb-4">
+        {showFull ? (
+          <div className="rounded-2xl border border-slate-200 p-3 bg-white shadow-[0_10px_24px_rgba(148,163,184,0.2)]">
+            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <div className="h-10 w-10 rounded-xl bg-yellow-100 flex items-center justify-center text-yellow-600 text-xs font-semibold">
+                GL
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-slate-500">GlobalLink</p>
+                <p className="text-sm font-semibold text-slate-900">Accept credit cards</p>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-slate-600">and bank payment</p>
+            <button className="mt-3 w-full rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+              Set up now
+            </button>
+          </div>
+        ) : (
+          <div className="h-12 w-12 mx-auto rounded-xl border border-slate-200 bg-white" />
+        )}
       </div>
     </div>
   );
@@ -310,10 +248,10 @@ const Sidebar = ({ collapsed, mobileVisible, onCloseMobile }) => {
         onMouseLeave={() => setHovered(false)}
       >
         <div
-          className={`h-[100vh] mt-[-8vh]   shadow-md ${collapsed && !hovered ? "w-16" : "w-60"
+          className={`h-[calc(100vh-72px)] ${collapsed && !hovered ? "w-16" : "w-64"
             } transition-all duration-[600ms] ease-[cubic-bezier(.22,.61,.36,1)] `}
         >
-          <div className="h-full flex mt-[8vh] flex-col justify-end">
+          <div className="h-full flex flex-col justify-end">
             <SidebarContent
               isCollapsed={collapsed && !hovered}
               mobileVisible={mobileVisible}
@@ -326,7 +264,7 @@ const Sidebar = ({ collapsed, mobileVisible, onCloseMobile }) => {
       {/* Mobile Sidebar */}
       {mobileVisible && (
         <div className="absolute inset-0 z-50 flex md:hidden">
-          <div className="w-60 bg-[#1e2939] shadow-lg h-[100vh] py-1.75 overflow-hidden">
+          <div className="w-60 bg-white shadow-lg h-[100vh] py-1.75 overflow-hidden">
             {/* <div className="flex justify-end pr-4">
               <X
                 className="cursor-pointer text-gray-600"

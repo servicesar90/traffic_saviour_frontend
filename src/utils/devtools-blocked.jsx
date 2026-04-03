@@ -13,7 +13,7 @@ export default function DevToolsBlocked() {
         justifyContent: "center",
         background: "#000",
         color: "#fff",
-        fontFamily: "Outfit, sans-serif",
+        fontFamily: "Manrope, sans-serif",
         textAlign: "center",
         padding: "20px",
       }}
