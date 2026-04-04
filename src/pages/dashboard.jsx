@@ -29,6 +29,10 @@ const Dashboard = () => {
     }
   };
 
+  const handleCollapseToggle = () => {
+    setIsCollapsed((prev) => !prev);
+  };
+
   const steps = [
     {
       element: "#image",
@@ -228,17 +232,18 @@ const Dashboard = () => {
           }}
         />
       )}
-      <div className="dashboard-light min-h-screen w-full bg-slate-50">
-        <div className="sticky top-0 z-40">
+      <div className="dashboard-light h-screen w-full bg-[#f3f1f7] overflow-hidden flex flex-col">
+        <div className="z-40 shrink-0">
           <Header onMenuClick={handleMenuClick} />
         </div>
 
-        <div className="flex w-full h-[calc(100vh-72px)] overflow-hidden">
+        <div className="flex w-full flex-1 min-h-0 overflow-hidden">
           <div className="h-full sticky top-0 self-start">
             <Sidebar
               collapsed={isCollapsed}
               mobileVisible={mobileVisible}
               onCloseMobile={handleMenuClick}
+              onToggleCollapse={handleCollapseToggle}
             />
           </div>
           <main className="flex-1 h-full overflow-y-auto">

@@ -1,6 +1,94 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 @import "../node_modules/flag-icons/css/flag-icons.min.css";
-body { font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
+
+@font-face {
+  font-family: "Nunito Sans";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/nunitosans/v19/pe0TMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfGWVpNn64CL7U8upHZIbMV51Q42ptCp7t4R-tCKQ.woff2") format("woff2");
+}
+
+@theme {
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+body {
+  font-family: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+html,
+body,
+#root {
+  font-family: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Force Nunito Sans everywhere unless explicitly overridden */
+body * {
+  font-family: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+:root {
+  --app-border: #CBD0DD;
+}
+
+/* Global border color + 1px solid */
+*,
+*::before,
+*::after {
+  border-color: var(--app-border);
+}
+
+.border,
+.border-t,
+.border-r,
+.border-b,
+.border-l,
+[class*="border-"] {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--app-border) !important;
+}
+
+/* Sidebar item typography + spacing */
+.sidebar-item {
+  color: #525b75;
+  font-weight: 300;
+  font-stretch: 100%;
+  font-size: 12.8px;
+  margin: 0 12px;
+  padding: 5.6px 16px;
+  border-radius: 999px;
+}
+
+.sidebar-item.sidebar-item-active {
+  color: #3874ff;
+  font-weight: 300;
+}
+
+.sidebar-item:hover {
+  background: #f2f4f7;
+}
+
+.sidebar-item-icon {
+  color: #525b75;
+}
+
+.sidebar-item-icon.sidebar-item-active {
+  color: #3874ff;
+}
+
+.sidebar-item-icon svg {
+  stroke-width: 1.5;
+  opacity: 0.9;
+}
 
 :root {
 
@@ -315,16 +403,6 @@ body { font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI
     #f8fafc;
 }
 
-/* Square card corners */
-.rounded-3xl,
-.rounded-2xl,
-.rounded-xl,
-.rounded-lg {
-  border-radius: 0 !important;
-}
-
-
-
 
 .auth-left {
   background:
@@ -362,5 +440,6 @@ body { font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI
   0% { opacity: 0.65; filter: brightness(0.95); }
   100% { opacity: 0.95; filter: brightness(1.1); }
 }
+
 
 

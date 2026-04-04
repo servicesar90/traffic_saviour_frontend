@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   BarChart,
   Bar,
@@ -459,19 +459,44 @@ const Dashboard = () => {
   }, [tasks]);
 
   // Small reusable StatCard
-  const StatCard = ({ icon, value, title, subtitle }) => (
-    <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center text-lg">
-            {icon}
+  const StatCard = ({
+    value,
+    title,
+    subtitle = "Since last week",
+    badge = "13.4%",
+    tone,
+    lineColor = "#5b6ff3",
+    badgeBg = "bg-white/90",
+    badgeText = "text-emerald-600",
+  }) => (
+    <div
+      className={`rounded-[14px] p-4 min-h-[108px] shadow-[0_10px_22px_rgba(31,41,55,0.08)] border border-white/80 ${tone}`}
+    >
+      <div className="text-[12px] text-slate-500 mb-2">{title}</div>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-[24px] leading-tight font-semibold text-slate-900 tracking-tight">
+            {value}
           </div>
-          <div>
-            <div className="text-2xl font-semibold text-slate-900">{value}</div>
-            <div className="text-xs text-slate-500">{title}</div>
+          <div className="mt-2 inline-flex items-center gap-2">
+            <span className="text-[12px] text-slate-500">{subtitle}</span>
+            <span className={`text-[11px] font-semibold ${badgeText} ${badgeBg} border border-white/70 px-2 py-[2px] rounded-full inline-flex items-center gap-1`}>
+              {badge}
+              <svg width="7" height="7" viewBox="0 0 10 10" fill="none">
+                <path d="M5 2 L8 6 H2 L5 2 Z" fill="currentColor" />
+              </svg>
+            </span>
           </div>
         </div>
-        <div className="text-xs text-slate-400">{subtitle}</div>
+        <svg width="60" height="26" viewBox="0 0 60 26" fill="none">
+          <path
+            d="M2 18 C 9 12, 15 16, 21 10 C 27 5, 31 14, 37 8 C 43 3, 50 8, 58 6"
+            stroke={lineColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
     </div>
   );
@@ -827,7 +852,7 @@ const Dashboard = () => {
                     onClick={(e) => handleActionClick(e, item?.uid)}
                     className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
                       isDropdownOpen
-                        ? "bg-slate-900 text-white"
+                        ? "bg-[#2b1f57] text-white"
                         : "hover:bg-slate-100"
                     }`}
                   >
@@ -844,15 +869,13 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Header */}
-      <div className="flex flex-col gap-5 mb-8">
+    <div className="min-h-screen text-slate-900">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 mb-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{formattedDate}</p>
-            <h2 className="text-2xl font-semibold">
-              Welcome Back, {user?.name ? user.name.split(" ")[0] : "Admin"}!
-            </h2>
+            <p className="text-xs uppercase tracking-[0.2em] text-[#6b5aa6]">{formattedDate}</p>
+            <h2 className="text-2xl font-semibold text-[#2b1f57]">Viewer Demographics</h2>
             <p className="text-slate-500 text-sm">
               Here is a snapshot of campaign performance and traffic safety.
             </p>
@@ -860,7 +883,7 @@ const Dashboard = () => {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleAddNewCampaign}
-              className="flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 rounded-full font-medium text-sm text-white shadow-sm transition cursor-pointer"
+              className="flex items-center px-4 py-2 bg-[#2b1f57] hover:bg-[#241a4a] rounded-xl font-medium text-sm text-white shadow-[0_10px_24px_rgba(43,31,87,0.25)] transition cursor-pointer"
             >
               <svg
                 className="h-4 w-4 mr-2"
@@ -880,11 +903,11 @@ const Dashboard = () => {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm border transition-all duration-200 cursor-pointer
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm border transition-all duration-200 cursor-pointer
                 ${
                   isRefreshing
                     ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                    : "bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100"
                 }
               `}
             >
@@ -904,27 +927,64 @@ const Dashboard = () => {
               {isRefreshing ? "Refreshing..." : "Refresh"}
             </button>
             <div className="hidden lg:flex items-center gap-2">
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Send</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Request</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Transfer</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Deposit</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">Pay Bill</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-slate-900 text-white hover:bg-slate-800">Create Invoice</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Send</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Request</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Transfer</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Deposit</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Pay Bill</button>
+              <button className="px-3 py-1.5 rounded-full text-xs border border-[#2b1f57] bg-[#2b1f57] text-white hover:bg-[#241a4a] shadow-[0_10px_24px_rgba(43,31,87,0.25)]">Create Invoice</button>
             </div>
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-6 border-b border-slate-200/70 text-sm text-slate-500">
+          <button className="pb-3 border-b-2 border-[#2b1f57] text-[#2b1f57] font-medium">
+            Value comparison
+          </button>
+          <button className="pb-3 hover:text-[#2b1f57]">Average values</button>
+          <button className="pb-3 hover:text-[#2b1f57]">Configure analysis</button>
+          <button className="pb-3 hover:text-[#2b1f57]">Filter analysis</button>
         </div>
       </div>
 
       {/* Top Stats */}
       <div className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon="TC" value={stats.total_campaigns} title="Total Campaigns" />
-        <StatCard icon="AC" value={stats.active_campaigns} title="Active" />
-        <StatCard icon="AL" value={stats.allowed_campaigns} title="Allow All" />
-        <StatCard icon="BL" value={stats.blocked_campaigns} title="Blocked" />
+        <StatCard
+          value={stats.total_campaigns}
+          title="Total sales"
+          tone="bg-[#dfe9ff]"
+          lineColor="#5b6ff3"
+          badgeText="text-[#3b5bfd]"
+          badgeBg="bg-white/95"
+        />
+        <StatCard
+          value={stats.active_campaigns}
+          title="Total Orders"
+          tone="bg-[#fbe5e4]"
+          lineColor="#f07b7b"
+          badgeText="text-[#e36767]"
+          badgeBg="bg-white/95"
+        />
+        <StatCard
+          value={stats.allowed_campaigns}
+          title="Total Customers"
+          tone="bg-[#e3f1ed]"
+          lineColor="#3aa39b"
+          badgeText="text-[#2e8d84]"
+          badgeBg="bg-white/95"
+        />
+        <StatCard
+          value={stats.blocked_campaigns}
+          title="Blocked"
+          tone="bg-[#ebe7ff]"
+          lineColor="#7a6ee6"
+          badgeText="text-[#6c5fe4]"
+          badgeBg="bg-white/95"
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-white/90 border border-slate-200/70 rounded-3xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-semibold text-slate-900">Overview</h3>
@@ -1036,7 +1096,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-white/90 border border-slate-200/70 rounded-3xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-900">Accounts</h3>
             <button className="h-9 w-9 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100">
@@ -1045,7 +1105,7 @@ const Dashboard = () => {
           </div>
           <div className="space-y-3">
             {accountCards.map((card) => (
-              <div key={card.title} className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3">
+              <div key={card.title} className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white/70 px-4 py-3 shadow-[0_6px_14px_rgba(15,23,42,0.05)]">
                 <div className="flex items-center gap-3">
                   <div className={`h-11 w-16 rounded-2xl bg-gradient-to-br ${card.color}`} />
                   <div>
@@ -1057,19 +1117,19 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
-          <button className="mt-4 w-full rounded-2xl border border-dashed border-slate-200 px-4 py-2 text-sm text-slate-500 hover:bg-slate-100">
+          <button className="mt-4 w-full rounded-2xl border border-dashed border-slate-300 px-4 py-2 text-sm text-slate-500 hover:bg-slate-100">
             + Create account
           </button>
         </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr] mt-6">
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-white/90 border border-slate-200/70 rounded-3xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-900">Money movement</h3>
-            <button className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-500">Aug 2026</button>
+            <button className="rounded-lg border border-slate-200/70 bg-white px-3 py-1 text-xs text-slate-500">Aug 2026</button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 p-4">
+            <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-slate-500">Money in</p>
                 <button className="h-7 w-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-100">+</button>
@@ -1081,7 +1141,7 @@ const Dashboard = () => {
               <p className="text-xs text-slate-400 mt-2">{safePercent}% from safe traffic</p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 p-4">
+            <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-slate-500">Money out</p>
                 <button className="h-7 w-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-100">+</button>
@@ -1095,7 +1155,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-white/90 border border-slate-200/70 rounded-3xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-900">Invoices</h3>
             <button className="h-9 w-9 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100">...</button>
@@ -1107,7 +1167,7 @@ const Dashboard = () => {
               <div className="text-sm text-slate-400">No invoices yet</div>
             ) : (
               invoiceRows.map((row, index) => (
-                <div key={`${row.title}-${index}`} className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3">
+                <div key={`${row.title}-${index}`} className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white/70 px-4 py-3 shadow-[0_6px_14px_rgba(15,23,42,0.05)]">
                   <div>
                     <p className="text-sm font-medium text-slate-900">{row.title}</p>
                     <p className="text-xs text-slate-400">{row.date}</p>
@@ -1133,23 +1193,23 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="mt-8 border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-sm">
+      <div className="mt-8 border border-slate-200/70 rounded-3xl overflow-hidden bg-white/90 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2 text-sm">
-            <button className="px-4 py-1.5 rounded-full bg-slate-900 text-white">Recent</button>
+            <button className="px-4 py-1.5 rounded-full bg-[#2b1f57] text-white">Recent</button>
             <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">My transactions</button>
             <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">Monthly money in</button>
             <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">Monthly money out</button>
           </div>
           <div className="text-xs text-slate-400">Transactions</div>
         </div>
-        <div className="flex flex-col border border-slate-200 rounded-3xl bg-white overflow-hidden">
+        <div className="flex flex-col border border-slate-200/70 rounded-3xl bg-white overflow-hidden">
           {/* ===== FIXED HEADER ===== */}
-          <div className="flex-none overflow-x-auto bg-slate-50">
+          <div className="flex-none overflow-x-auto bg-[#f6f5fb]">
             <table className="min-w-full table-fixed">
               <TableColGroup />
 
-              <thead className="bg-slate-50">
+              <thead className="bg-[#f6f5fb]">
                 <tr>
                   <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
                     Sn
@@ -1195,7 +1255,7 @@ const Dashboard = () => {
           </div>
 
           {/* ===== FIXED FOOTER ===== */}
-          <div className="flex-none bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between">
+          <div className="flex-none bg-[#f6f5fb] border-t border-slate-200 px-6 py-3 flex items-center justify-between">
             {/* LEFT */}
             <span className="text-sm text-slate-500">
               Showing{" "}
@@ -1230,7 +1290,7 @@ const Dashboard = () => {
                     onClick={() => handlePageChange(page)}
                     className={`px-3 py-1 text-sm rounded border cursor-pointer ${
                       page === currentPage
-                        ? "bg-slate-900 text-white border-slate-900"
+                        ? "bg-[#2b1f57] text-white border-[#2b1f57]"
                         : "text-slate-600 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
@@ -1259,18 +1319,18 @@ const Dashboard = () => {
       {/* Bottom Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         {/* To-do */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 min-h-[220px] shadow-sm">
+        <div className="bg-white/90 border border-slate-200/70 rounded-2xl p-6 min-h-[220px] shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-slate-900 font-semibold">To do</h4>
             <div className="text-slate-400 text-sm">Reminders list</div>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 min-h-[120px]">
+          <div className="bg-[#f6f5fb] border border-slate-200/70 rounded-xl p-4 min-h-[120px]">
             {/*  Search */}
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-slate-200 px-3 py-2 rounded-lg text-slate-700 mb-3"
+              className="w-full bg-white/90 border border-slate-200/70 px-3 py-2 rounded-lg text-slate-700 mb-3"
               placeholder="Search tasks"
             />
 
@@ -1279,12 +1339,12 @@ const Dashboard = () => {
               <input
                 value={newTask}
                 onChange={(e) => setNewTask(e.target.value)}
-                className="flex-1 w-full bg-white border border-slate-200 px-3 py-2 rounded-lg text-slate-700"
+                className="flex-1 w-full bg-white/90 border border-slate-200/70 px-3 py-2 rounded-lg text-slate-700"
                 placeholder="Write new task..."
               />
               <button
                 onClick={handleAddTask}
-                className="bg-slate-900 text-white px-4 py-2 rounded-lg cursor-pointer"
+                className="bg-[#2b1f57] text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-[#241a4a]"
               >
                 Add
               </button>
@@ -1300,7 +1360,7 @@ const Dashboard = () => {
                 filteredTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between bg-white border border-slate-200 px-3 py-2 rounded-lg"
+                    className="flex items-center justify-between bg-white/90 border border-slate-200/70 px-3 py-2 rounded-lg"
                   >
                     <div
                       onClick={() => handleToggleComplete(task.id)}
@@ -1332,7 +1392,7 @@ const Dashboard = () => {
         </div>
 
         {/* Click Metrics */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 min-h-[220px] shadow-sm">
+        <div className="bg-white/90 border border-slate-200/70 rounded-2xl p-6 min-h-[220px] shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-slate-900 font-semibold">
               Click Metrics - Realtime Logs
@@ -1342,14 +1402,14 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
+          <div className="bg-[#f6f5fb] border border-slate-200/70 rounded-xl p-6">
             {loading ? (
               <p className="text-center text-slate-400">Loading...</p>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 {/*  Total Clicks */}
                 <div className="text-center">
-                  <div className="bg-white border border-slate-200 p-4 rounded-xl inline-block">
+                  <div className="bg-white/90 border border-slate-200/70 p-4 rounded-xl inline-block shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
                     <div className="text-2xl font-semibold text-slate-900">
                       {clickSummary.totalClicks}
                     </div>
@@ -1361,7 +1421,7 @@ const Dashboard = () => {
 
                 {/*  Safe Clicks */}
                 <div className="text-center">
-                  <div className="bg-white border border-slate-200 p-4 rounded-xl inline-block">
+                  <div className="bg-white/90 border border-slate-200/70 p-4 rounded-xl inline-block shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
                     <div className="text-2xl font-semibold text-slate-900">
                       {clickSummary.safeClicks}
                     </div>
@@ -1381,5 +1441,11 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+
+
+
 
 

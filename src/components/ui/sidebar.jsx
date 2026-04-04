@@ -10,7 +10,7 @@ import { signOutApi } from "../../api/Apis";
 
 // import { useSelector } from "react-redux";
 
-const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
+const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCollapse }) => {
   const location = useLocation();
   const [databaseOpen, setDatabaseOpen] = useState(false);
   const showFull = !isCollapsed;
@@ -22,47 +22,47 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
   const navItems = [
     {
       label: "Home",
-      icon: <FontAwesomeIcon icon={faChartPie} size="sm" />,
+      icon: <FontAwesomeIcon icon={faChartPie} size="lg" />,
       route: "/Dashboard/allStats",
     },
     {
       label: "Tasks",
-      icon: <FontAwesomeIcon icon={faList} size="sm" />,
+      icon: <FontAwesomeIcon icon={faList} size="lg" />,
       route: "/Dashboard/allCampaign",
     },
     {
       label: "Transactions",
-      icon: <FontAwesomeIcon icon={faChartSimple} size="sm" />,
+      icon: <FontAwesomeIcon icon={faChartSimple} size="lg" />,
       route: "/Dashboard/analytics",
     },
     {
       label: "Payments",
-      icon: <CreditCard size={18} />,
+      icon: <CreditCard size={20} />,
       route: "/Dashboard/pricing",
       collapsible: true,
     },
     {
       label: "Cards",
-      icon: <Layers size={18} />,
+      icon: <Layers size={20} />,
       route: "/Dashboard/billing",
     },
     {
       label: "Capital",
-      icon: <FontAwesomeIcon icon={faBan} size="sm" />,
+      icon: <FontAwesomeIcon icon={faBan} size="lg" />,
       route: "/Dashboard/IpListings",
     },
     {
       label: "Accounts",
-      icon: <NotepadText size={16} />,
+      icon: <NotepadText size={18} />,
       collapsible: true,
     },
   ];
 
   const workflowItems = [
-    { label: "Bill Pay", icon: <NotepadText size={16} />, route: "/Dashboard/billing" },
-    { label: "Invoicing", icon: <NotepadText size={16} />, route: "/Dashboard/pricing" },
-    { label: "Reimbursements", icon: <NotepadText size={16} />, route: "/Dashboard/analytics" },
-    { label: "Accounting", icon: <NotepadText size={16} />, route: "/Dashboard/reports" },
+    { label: "Bill Pay", icon: <NotepadText size={18} />, route: "/Dashboard/billing" },
+    { label: "Invoicing", icon: <NotepadText size={18} />, route: "/Dashboard/pricing" },
+    { label: "Reimbursements", icon: <NotepadText size={18} />, route: "/Dashboard/analytics" },
+    { label: "Accounting", icon: <NotepadText size={18} />, route: "/Dashboard/reports" },
   ];
 
   const handleNavigate = (route) => {
@@ -98,16 +98,17 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
 
   return (
     <div
-      className={`h-full flex flex-col py-4 px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed" : "w-64 sidebar-expanded"
-        } transition-all duration-500 ease-in-out`}
+      className={`flex flex-col py-3 px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed" : "w-64 sidebar-expanded"
+        } transition-all duration-500 ease-in-out text-slate-900 overflow-hidden box-border min-h-0`}
+      style={{ borderTop: 0, height: "calc(100vh - 72px - 1px)" }}
     >
       {/* Logo & Avatar */}
       <div
         className={`px-1 mb-4 flex items-center ${showFull ? "gap-3" : "justify-center"
           }`}
       >
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 px-2 py-2 w-full">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-900 text-white">
+        <div className="flex items-center gap-3 rounded-2xl bg-white px-2 py-2 w-full">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 text-slate-700">
             {user?.company?.logoUrl ? (
               <img
                 src={user?.company?.logoUrl}
@@ -122,22 +123,22 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
           </div>
           {showFull && (
             <div className="flex-1 leading-tight sidebar-text">
-              <p className="text-xs text-slate-400">Agency</p>
+              <p className="text-xs text-slate-500">Agency</p>
               <p className="text-sm font-semibold text-slate-900 truncate">
                 {user?.name || "Orbix Studio Team"}
               </p>
             </div>
           )}
           {showFull && (
-            <div className="w-6 h-6 rounded-md border border-slate-200 flex items-center justify-center text-slate-400">
-              <span className="text-xs">⋯</span>
+            <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center text-slate-500">
+              <span className="text-xs">...</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-1 text-slate-600">
+      <nav className="flex flex-col gap-1 text-slate-200 overflow-hidden">
         {navItems.map((item, index) => {
           const isActive = location.pathname === item.route;
           const isItemActive = isActive || (item.collapsible && isDatabaseActive);
@@ -153,13 +154,13 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
                     handleNavigate(item.route);
                   }
                 }}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors ${isItemActive
-                  ? "bg-blue-100 text-blue-700 shadow-[0_6px_16px_rgba(148,163,184,0.25)]"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                className={`sidebar-item flex items-center justify-between rounded-xl cursor-pointer transition-colors ${isItemActive
+                  ? "sidebar-item-active"
+                  : "text-slate-600"
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className={`${isItemActive ? "text-blue-700" : "text-slate-500"}`}>
+                  <span className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`}>
                     {item.icon}
                   </span>
                   {showFull && (
@@ -167,11 +168,11 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
                   )}
                 </div>
                 {item.collapsible && showFull && (
-                  <span className="text-slate-400 sidebar-text">
+                  <span className="text-slate-300/70 sidebar-text">
                     {databaseOpen ? (
-                      <ChevronUp size={16} className="text-slate-500" />
+                      <ChevronUp size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
                     ) : (
-                      <ChevronDown size={16} className="text-slate-500" />
+                      <ChevronDown size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
                     )}
                   </span>
                 )}
@@ -183,9 +184,9 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
       </nav>
       <div className="mt-4">
         <div className={`px-2 ${showFull ? "block" : "hidden"}`}>
-          <div className="h-px w-full bg-slate-200" />
+          <div className="h-px w-full bg-white/10" />
         </div>
-        <p className={`px-2 text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] ${showFull ? "block" : "hidden"}`}>
+        <p className={`px-2 text-[11px] font-semibold text-slate-300/70 uppercase tracking-[0.12em] ${showFull ? "block" : "hidden"}`}>
           Workflows
         </p>
         <div className="mt-2 flex flex-col gap-1">
@@ -195,12 +196,12 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
               <div
                 key={idx}
                 onClick={() => item.route && handleNavigate(item.route)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer transition-colors ${isActive
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors ${isActive
+                  ? "sidebar-item-active"
+                  : "text-slate-600"
                   }`}
               >
-                <span className={`${isActive ? "text-blue-700" : "text-slate-500"}`}>
+                <span className={`sidebar-item-icon ${isActive ? "sidebar-item-active" : ""}`}>
                   {item.icon}
                 </span>
                 {showFull && <span className="text-sm font-medium sidebar-text">{item.label}</span>}
@@ -210,52 +211,45 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile }) => {
         </div>
       </div>
 
-      {/* Promo card */}
-      <div className="mt-auto px-2 pb-4">
-        {showFull ? (
-          <div className="rounded-2xl border border-slate-200 p-3 bg-white shadow-[0_10px_24px_rgba(148,163,184,0.2)]">
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <div className="h-10 w-10 rounded-xl bg-yellow-100 flex items-center justify-center text-yellow-600 text-xs font-semibold">
-                GL
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-slate-500">GlobalLink</p>
-                <p className="text-sm font-semibold text-slate-900">Accept credit cards</p>
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-slate-600">and bank payment</p>
-            <button className="mt-3 w-full rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800">
-              Set up now
-            </button>
+      <div className="mt-auto">
+        <div className="-mx-3">
+          <div className="h-px w-full bg-[#CBD0DD]" />
+        </div>
+        <div className="mt-2">
+          <div
+            className="sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors text-slate-600"
+            onClick={onToggleCollapse}
+          >
+            <span className="sidebar-item-icon">
+              <span className="text-base leading-none">|&larr;</span>
+            </span>
+            {showFull && <span className="text-sm font-medium sidebar-text">Collapsed View</span>}
           </div>
-        ) : (
-          <div className="h-12 w-12 mx-auto rounded-xl border border-slate-200 bg-white" />
-        )}
+        </div>
       </div>
+
     </div>
   );
 };
 
-const Sidebar = ({ collapsed, mobileVisible, onCloseMobile }) => {
-  const [hovered, setHovered] = useState(false);
+const Sidebar = ({ collapsed, mobileVisible, onCloseMobile, onToggleCollapse }) => {
 
   return (
     <>
       {/* Desktop Sidebar */}
       <div
-        className="hidden md:block "
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        className="hidden md:block overflow-hidden"
       >
         <div
-          className={`h-[calc(100vh-72px)] ${collapsed && !hovered ? "w-16" : "w-64"
-            } transition-all duration-[600ms] ease-[cubic-bezier(.22,.61,.36,1)] `}
+          className={`h-[calc(100vh-72px)] ${collapsed ? "w-16" : "w-64"
+            } transition-[width] duration-500 ease-[cubic-bezier(.22,.61,.36,1)] overflow-hidden will-change-[width]`}
         >
           <div className="h-full flex flex-col justify-end">
             <SidebarContent
-              isCollapsed={collapsed && !hovered}
+              isCollapsed={collapsed}
               mobileVisible={mobileVisible}
               onCloseMobile={onCloseMobile}
+              onToggleCollapse={onToggleCollapse}
             />
           </div>
         </div>
@@ -283,3 +277,4 @@ const Sidebar = ({ collapsed, mobileVisible, onCloseMobile }) => {
 };
 
 export default Sidebar;
+
