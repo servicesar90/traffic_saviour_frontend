@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-  Legend,
 } from "recharts";
 
 import { useNavigate, Link } from "react-router-dom";
@@ -41,6 +40,7 @@ const Dashboard = () => {
   const [newTask, setNewTask] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [chartData, setChartData] = useState([]);
+  const [chartRangeDays, setChartRangeDays] = useState(10);
   const [loading, setLoading] = useState(true);
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,11 +102,11 @@ const Dashboard = () => {
       const res = await apiFunction("get", ipClicks);
       const rawData = res?.data?.data || [];
 
-      //  Only latest 10 days
-      const last10DaysData = rawData.slice(-10);
+      // Keep latest 30 days for range filtering
+      const last30DaysData = rawData.slice(-30);
 
       // Chart data
-      const formattedData = last10DaysData.map((item) => ({
+      const formattedData = last30DaysData.map((item) => ({
         date: new Date(item.date).toLocaleDateString("en-IN", {
           day: "2-digit",
           month: "short",
@@ -459,6 +459,362 @@ const Dashboard = () => {
   }, [tasks]);
 
   // Small reusable StatCard
+  const StatStarStack = () => (
+    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
+      <svg
+        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="square"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.1875em 0.75em", color: "#90D67F" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
+            <path
+              fill="currentColor"
+              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-success"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="circle"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style={{ transformOrigin: "0.6875em 0.25em" }}
+      >
+        <g transform="translate(256 256)">
+          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
+              transform="translate(-256 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-star fa-stack-1x text-success fa-stack-star"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="star"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 576 512"
+        style={{ transformOrigin: "0.9375em 0em" }}
+      >
+        <g transform="translate(288 256)">
+          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"
+              transform="translate(-288 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+    </span>
+  );
+
+  const StatPauseStack = () => (
+    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
+      <svg
+        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="square"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.1875em 0.75em", color: "#FFCC85" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
+            <path
+              fill="currentColor"
+              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-warning"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="circle"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style={{ transformOrigin: "0.6875em 0.25em" }}
+      >
+        <g transform="translate(256 256)">
+          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
+              transform="translate(-256 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-play fa-stack-1x text-warning"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="play"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.6875em 0em" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 41.6V470.4c0 35.5 43.8 51.9 72.4 34.9l352-208.1c28.6-16.9 28.6-58.6 0-75.5z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+    </span>
+  );
+
+  const StatBlockStack = () => (
+    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
+      <svg
+        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="square"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.1875em 0.75em", color: "#F48270" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
+            <path
+              fill="currentColor"
+              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-danger"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="circle"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style={{ transformOrigin: "0.6875em 0.25em" }}
+      >
+        <g transform="translate(256 256)">
+          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
+              transform="translate(-256 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-xmark fa-stack-1x text-danger"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="xmark"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 384 512"
+        style={{ transformOrigin: "0.75em 0em" }}
+      >
+        <g transform="translate(192 256)">
+          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
+              transform="translate(-192 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+    </span>
+  );
+
+  const StatAllowStack = () => (
+    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
+      <svg
+        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="square"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.1875em 0.75em", color: "#90D67F" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
+            <path
+              fill="currentColor"
+              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-success"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="circle"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style={{ transformOrigin: "0.6875em 0.25em" }}
+      >
+        <g transform="translate(256 256)">
+          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
+              transform="translate(-256 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-check fa-stack-1x text-success"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="check"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.75em 0em" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.2 0z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+    </span>
+  );
+
+  const StatItem = ({ icon, value, label }) => (
+    <div className="flex items-center gap-3">
+      {icon}
+      <div>
+        <h4 className="text-[20px] leading-[20px] text-[#121824] font-bold text-left">
+          {value}
+        </h4>
+        <p className="text-[0.8rem] leading-none text-[#3e465b] font-normal mt-1">
+          {label}
+        </p>
+      </div>
+    </div>
+  );
+
+  const ChartTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div
+        style={{
+          borderStyle: "solid",
+          whiteSpace: "nowrap",
+          boxShadow: "rgba(0, 0, 0, 0.2) 1px 2px 10px",
+          backgroundColor: "rgb(239, 242, 246)",
+          borderWidth: "1px",
+          borderRadius: "4px",
+          color: "rgb(20, 24, 36)",
+          fontSize: 14,
+          lineHeight: "21px",
+          padding: 10,
+          borderColor: "rgb(203, 208, 221)",
+        }}
+      >
+        <div className="ms-1">
+          {payload.map((entry, idx) => (
+            <div
+              key={`${entry.dataKey}-${idx}`}
+              className={idx === payload.length - 1 ? "mb-0" : ""}
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
+            >
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 999,
+                  backgroundColor: entry.color,
+                  display: "inline-block",
+                }}
+              />
+              <span>
+                {label} : {entry.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const demo30Days = Array.from({ length: 30 }, (_, i) => {
+    const day = String(i + 1).padStart(2, "0");
+    const safe = 80 + Math.round(Math.sin((i + 1) / 3) * 60 + i * 4);
+    const money = 40 + Math.round(Math.cos((i + 1) / 4) * 40 + i * 3);
+    return { date: `${day} May`, Safe: safe, Money: money };
+  });
+
+  const baseSeriesFull = chartData?.length ? chartData : demo30Days;
+  const baseSeries = baseSeriesFull.slice(-chartRangeDays);
+
+  const denseSeries = baseSeries.flatMap((d, i) => {
+    if (i === baseSeries.length - 1) return [d];
+    const next = baseSeries[i + 1];
+    return [
+      d,
+      {
+        date: `${d.date} `,
+        Safe: Math.round((d.Safe + next.Safe) / 2),
+        Money: Math.round((d.Money + next.Money) / 2),
+        _ghost: true,
+      },
+    ];
+  });
+
+  const labelSet = new Set(baseSeries.map((d) => d.date));
+
   const StatCard = ({
     value,
     title,
@@ -468,6 +824,7 @@ const Dashboard = () => {
     lineColor = "#5b6ff3",
     badgeBg = "bg-white/90",
     badgeText = "text-emerald-600",
+    rightNode,
   }) => (
     <div
       className={`rounded-[14px] p-4 min-h-[108px] shadow-[0_10px_22px_rgba(31,41,55,0.08)] border border-white/80 ${tone}`}
@@ -488,15 +845,19 @@ const Dashboard = () => {
             </span>
           </div>
         </div>
-        <svg width="60" height="26" viewBox="0 0 60 26" fill="none">
-          <path
-            d="M2 18 C 9 12, 15 16, 21 10 C 27 5, 31 14, 37 8 C 43 3, 50 8, 58 6"
-            stroke={lineColor}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        {rightNode ? (
+          <div className="mt-1">{rightNode}</div>
+        ) : (
+          <svg width="60" height="26" viewBox="0 0 60 26" fill="none">
+            <path
+              d="M2 18 C 9 12, 15 16, 21 10 C 27 5, 31 14, 37 8 C 43 3, 50 8, 58 6"
+              stroke={lineColor}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        )}
       </div>
     </div>
   );
@@ -874,16 +1235,15 @@ const Dashboard = () => {
       <div className="flex flex-col gap-4 mb-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[#6b5aa6]">{formattedDate}</p>
-            <h2 className="text-2xl font-semibold text-[#2b1f57]">Viewer Demographics</h2>
-            <p className="text-slate-500 text-sm">
+            <h2 className="dashboard-heading text-left">Viewer Demographics</h2>
+            <p className="dashboard-subheading">
               Here is a snapshot of campaign performance and traffic safety.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleAddNewCampaign}
-              className="flex items-center px-4 py-2 bg-[#2b1f57] hover:bg-[#241a4a] rounded-xl font-medium text-sm text-white shadow-[0_10px_24px_rgba(43,31,87,0.25)] transition cursor-pointer"
+              className="flex items-center px-4 py-2 rounded-xl font-medium text-sm border transition-all duration-200 cursor-pointer bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100"
             >
               <svg
                 className="h-4 w-4 mr-2"
@@ -926,173 +1286,120 @@ const Dashboard = () => {
               </svg>
               {isRefreshing ? "Refreshing..." : "Refresh"}
             </button>
-            <div className="hidden lg:flex items-center gap-2">
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Send</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Request</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Transfer</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Deposit</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">Pay Bill</button>
-              <button className="px-3 py-1.5 rounded-full text-xs border border-[#2b1f57] bg-[#2b1f57] text-white hover:bg-[#241a4a] shadow-[0_10px_24px_rgba(43,31,87,0.25)]">Create Invoice</button>
-            </div>
+            <div className="hidden lg:flex items-center gap-2" />
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-6 border-b border-slate-200/70 text-sm text-slate-500">
-          <button className="pb-3 border-b-2 border-[#2b1f57] text-[#2b1f57] font-medium">
-            Value comparison
-          </button>
-          <button className="pb-3 hover:text-[#2b1f57]">Average values</button>
-          <button className="pb-3 hover:text-[#2b1f57]">Configure analysis</button>
-          <button className="pb-3 hover:text-[#2b1f57]">Filter analysis</button>
-        </div>
       </div>
 
       {/* Top Stats */}
-      <div className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
+      <div className="mb-8 flex flex-wrap items-center gap-8">
+        <StatItem
+          icon={<StatStarStack />}
           value={stats.total_campaigns}
-          title="Total sales"
-          tone="bg-[#dfe9ff]"
-          lineColor="#5b6ff3"
-          badgeText="text-[#3b5bfd]"
-          badgeBg="bg-white/95"
+          label="All campaigns"
         />
-        <StatCard
+        <StatItem
+          icon={<StatPauseStack />}
           value={stats.active_campaigns}
-          title="Total Orders"
-          tone="bg-[#fbe5e4]"
-          lineColor="#f07b7b"
-          badgeText="text-[#e36767]"
-          badgeBg="bg-white/95"
+          label="Active campaigns"
         />
-        <StatCard
+        <StatItem
+          icon={<StatAllowStack />}
           value={stats.allowed_campaigns}
-          title="Total Customers"
-          tone="bg-[#e3f1ed]"
-          lineColor="#3aa39b"
-          badgeText="text-[#2e8d84]"
-          badgeBg="bg-white/95"
+          label="Allow campaigns"
         />
-        <StatCard
+        <StatItem
+          icon={<StatBlockStack />}
           value={stats.blocked_campaigns}
-          title="Blocked"
-          tone="bg-[#ebe7ff]"
-          lineColor="#7a6ee6"
-          badgeText="text-[#6c5fe4]"
-          badgeBg="bg-white/95"
+          label="Block campaigns"
         />
       </div>
+      <div className="h-px w-full bg-[var(--app-border)] mt-6 mb-10" />
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="bg-white/90 border border-slate-200/70 rounded-3xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between mb-4">
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] mb-16">
+        <div className="bg-[#F5F7FA] rounded-3xl p-6 shadow-none">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Overview</h3>
-              <p className="text-sm text-slate-500">Clicks performance across the last 10 days</p>
+              <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">Traffic Clicks</h3>
+              <p className="text-[#525b75] leading-[1.2] text-sm">
+                Safe and money page clicks over the last {chartRangeDays} days
+              </p>
             </div>
-            <button className="h-9 w-9 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100">
-              ...
-            </button>
+            <div className="w-full sm:w-auto text-left">
+              <select
+                value={chartRangeDays}
+                onChange={(e) => setChartRangeDays(Number(e.target.value))}
+                className="rounded-sm border border-[#CBD0DD] bg-white px-4 py-1.5 text-xs text-[#4b5565] w-48"
+              >
+                <option value={10}>Last 10 days</option>
+                <option value={15}>Last 15 days</option>
+              </select>
+            </div>
           </div>
 
-          <div className="flex items-center gap-6 mb-6">
-            <div>
-              <p className="text-xs text-slate-400">Total Clicks</p>
-              <p className="text-2xl font-semibold text-slate-900">{clickSummary.totalClicks}</p>
-            </div>
-            <div className="text-sm text-emerald-500 font-medium">+5.8% this week</div>
-          </div>
-
-          <div style={{ width: "100%", height: 260 }}>
+          <div className="bg-[#F5F7FA]" style={{ width: "100%", height: 280 }}>
             {loading ? (
               <p className="text-center text-slate-400 mt-6">Loading...</p>
-            ) : chartData?.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <div className="text-2xl mb-2 text-slate-400">N/A</div>
-                <p className="text-slate-500 text-sm font-medium">
-                  No IP Click Data Available
-                </p>
-                <p className="text-slate-400 text-xs mt-1">
-                  Data will appear here once clicks are recorded.
-                </p>
-              </div>
             ) : (
               <ResponsiveContainer>
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 10, right: 20, left: -8, bottom: 0 }}
+                  <LineChart
+                  data={denseSeries}
+                  margin={{ top: 8, right: 0, left: 0, bottom: 0 }}
                 >
-                  <defs>
-                    <linearGradient id="safeGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.9} />
-                      <stop offset="95%" stopColor="#93c5fd" stopOpacity={0.2} />
-                    </linearGradient>
-
-                    <linearGradient
-                      id="moneyGradient"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.9} />
-                      <stop offset="95%" stopColor="#6ee7b7" stopOpacity={0.2} />
-                    </linearGradient>
-                  </defs>
-
-                  <CartesianGrid stroke="#e2e8f0" vertical={false} strokeDasharray="3 3" />
+                  <CartesianGrid stroke="#E3E6ED" strokeOpacity={1} strokeDasharray="0" horizontal={false} vertical={true} />
 
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: "#94a3b8", fontSize: 12 }}
+                    tick={{ fill: "#5f6b84", fontSize: 12, fontWeight: 600 }}
+                    tickFormatter={(value) => (labelSet.has(value) ? value : "")}
                     tickLine={false}
-                    axisLine={false}
+                    axisLine={{ stroke: "#CBD0DD", strokeWidth: 1, strokeOpacity: 1, strokeDasharray: "0" }}
+                    height={28}
+                    tickMargin={10}
+                    interval={0}
+                    padding={{ left: 0, right: 0 }}
                   />
 
                   <YAxis
-                    tick={{ fill: "#94a3b8", fontSize: 12 }}
+                    tick={false}
                     tickLine={false}
                     axisLine={false}
+                    width={0}
                   />
 
-                  <Tooltip
-                    contentStyle={{
-                      background: "#ffffff",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "10px",
-                      color: "#0f172a",
-                    }}
-                    cursor={{ fill: "rgba(148, 163, 184, 0.2)" }}
-                  />
+                  <Tooltip content={<ChartTooltip />} cursor={false} />
 
-                  <Legend
-                    wrapperStyle={{
-                      color: "#64748b",
-                      fontSize: 12,
-                    }}
-                    iconType="circle"
-                    verticalAlign="top"
-                    align="right"
-                  />
-
-                  <Bar
+                  <Line
+                    type="linear"
                     dataKey="Safe"
-                    stackId="a"
-                    fill="url(#safeGradient)"
-                    barSize={16}
-                    radius={[6, 6, 0, 0]}
+                    stroke="#3874FF"
+                    strokeWidth={2}
+                    dot={false}
                   />
 
-                  <Bar
+                  <Line
+                    type="linear"
                     dataKey="Money"
-                    stackId="a"
-                    fill="url(#moneyGradient)"
-                    barSize={16}
-                    radius={[6, 6, 0, 0]}
+                    stroke="#0097EB"
+                    strokeWidth={2}
+                    strokeDasharray="4 3"
+                    dot={false}
                   />
-                </BarChart>
+                </LineChart>
               </ResponsiveContainer>
             )}
+          </div>
+
+          <div className="mt-3 flex items-center gap-6 text-sm text-[#5f6b84]">
+            <div className="flex items-center gap-2">
+              <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: "#3874FF" }} />
+              <span>Safe page clicks</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: "#0097EB" }} />
+              <span>Money page clicks</span>
+            </div>
           </div>
         </div>
 
@@ -1122,76 +1429,8 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] mt-6">
-        <div className="bg-white/90 border border-slate-200/70 rounded-3xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Money movement</h3>
-            <button className="rounded-lg border border-slate-200/70 bg-white px-3 py-1 text-xs text-slate-500">Aug 2026</button>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-slate-500">Money in</p>
-                <button className="h-7 w-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-100">+</button>
-              </div>
-              <p className="text-2xl font-semibold text-slate-900">${clickSummary.safeClicks}</p>
-              <div className="mt-3 h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: `${safePercent}%` }} />
-              </div>
-              <p className="text-xs text-slate-400 mt-2">{safePercent}% from safe traffic</p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-slate-500">Money out</p>
-                <button className="h-7 w-7 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-100">+</button>
-              </div>
-              <p className="text-2xl font-semibold text-slate-900">${clickSummary.moneyClicks}</p>
-              <div className="mt-3 h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-                <div className="h-full bg-rose-500" style={{ width: `${moneyPercent}%` }} />
-              </div>
-              <p className="text-xs text-slate-400 mt-2">{moneyPercent}% risk traffic</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/90 border border-slate-200/70 rounded-3xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Invoices</h3>
-            <button className="h-9 w-9 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100">...</button>
-          </div>
-          <div className="space-y-3">
-            {billingLoading ? (
-              <div className="text-sm text-slate-400">Loading invoices...</div>
-            ) : invoiceRows.length === 0 ? (
-              <div className="text-sm text-slate-400">No invoices yet</div>
-            ) : (
-              invoiceRows.map((row, index) => (
-                <div key={`${row.title}-${index}`} className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white/70 px-4 py-3 shadow-[0_6px_14px_rgba(15,23,42,0.05)]">
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">{row.title}</p>
-                    <p className="text-xs text-slate-400">{row.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-slate-900">{row.amount}</p>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        row.status === "Paid"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : row.status === "Unpaid"
-                          ? "bg-rose-50 text-rose-600"
-                          : "bg-amber-50 text-amber-600"
-                      }`}
-                    >
-                      {row.status}
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
+      <div className="mt-6 mb-16 h-px w-[calc(100%+48px)] bg-[var(--app-border)] -mx-6" />
+      {/* Money movement and invoices removed */}
 
       <div className="mt-8 border border-slate-200/70 rounded-3xl overflow-hidden bg-white/90 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">

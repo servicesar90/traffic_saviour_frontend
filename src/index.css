@@ -1,26 +1,19 @@
 @import "tailwindcss";
 @import "../node_modules/flag-icons/css/flag-icons.min.css";
-
-@font-face {
-  font-family: "Nunito Sans";
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url("https://fonts.gstatic.com/s/nunitosans/v19/pe0TMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfGWVpNn64CL7U8upHZIbMV51Q42ptCp7t4R-tCKQ.woff2") format("woff2");
-}
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap");
 
 @theme {
-  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sans: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 body {
-  font-family: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 html,
 body,
 #root {
-  font-family: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 button,
@@ -32,7 +25,29 @@ textarea {
 
 /* Force Nunito Sans everywhere unless explicitly overridden */
 body * {
-  font-family: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.dashboard-heading {
+  margin: 0 0 4px;
+  font-size: 28px;
+  line-height: 28px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: #141824;
+}
+
+.dashboard-subheading {
+  margin: 0 0 8px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #6b7280;
 }
 
 :root {
@@ -68,6 +83,14 @@ body * {
   border-radius: 999px;
 }
 
+.sidebar-item.sidebar-item-collapsed {
+  margin: 0 auto;
+  padding: 8px;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+}
+
 .sidebar-item.sidebar-item-active {
   color: #3874ff;
   font-weight: 300;
@@ -88,6 +111,87 @@ body * {
 .sidebar-item-icon svg {
   stroke-width: 1.5;
   opacity: 0.9;
+}
+
+/* Font Awesome stack helpers (for stat card icon) */
+.fa-stack {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 46px;
+  --square-offset-x: -4px;
+  --square-offset-y: 0px;
+  --circle-offset-x: 0px;
+  --circle-offset-y: 0px;
+}
+
+.fa-stack-1x,
+.fa-stack-2x {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fa-stack-1x {
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  transform: translate(-50%, -50%) translate(-1px, -2px);
+}
+
+.fa-stack-star {
+  transform: translate(-50%, -50%) translate(-1px, -3px);
+}
+
+.fa-stack-square {
+  transform: translate(var(--square-offset-x), var(--square-offset-y));
+}
+
+.fa-stack-circle {
+  transform: translate(var(--circle-offset-x), var(--circle-offset-y));
+}
+
+.dark__text-opacity-50 {
+  opacity: 0.5;
+}
+
+.text-success-light {
+  color: #90D67F;
+}
+
+.text-stats-circle-success {
+  color: #D9FBD0;
+}
+
+.text-success {
+  color: #22c55e;
+}
+
+.text-warning-light {
+  color: #FFCC85;
+}
+
+.text-stats-circle-warning {
+  color: #FFEFCA;
+}
+
+.text-warning {
+  color: #f59e0b;
+}
+
+.text-danger-light {
+  color: #F5F7FA;
+}
+
+.text-stats-circle-danger {
+  color: #FFE0DB;
+}
+
+.text-danger {
+  color: #ef4444;
 }
 
 :root {
@@ -280,7 +384,7 @@ body * {
 
 /* Dashboard light theme overrides */
 .dashboard-light {
-  background-color: #f8fafc;
+  background-color: #F5F7FA;
   color: #0f172a;
 }
 

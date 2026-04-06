@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronDown, ChevronUp, NotepadText } from "lucide-react";
+import { ChevronDown, ChevronUp, NotepadText, ChevronLeft } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList, faBan, faChartPie, faChartSimple } from "@fortawesome/free-solid-svg-icons";
 import { CreditCard, Layers } from "lucide-react";
@@ -154,7 +154,7 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                     handleNavigate(item.route);
                   }
                 }}
-                className={`sidebar-item flex items-center justify-between rounded-xl cursor-pointer transition-colors ${isItemActive
+                className={`sidebar-item flex items-center ${showFull ? "justify-between" : "justify-center"} rounded-xl cursor-pointer transition-colors ${!showFull ? "sidebar-item-collapsed" : ""} ${isItemActive
                   ? "sidebar-item-active"
                   : "text-slate-600"
                   }`}
@@ -196,7 +196,7 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
               <div
                 key={idx}
                 onClick={() => item.route && handleNavigate(item.route)}
-                className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors ${isActive
+                className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors ${!showFull ? "sidebar-item-collapsed justify-center" : ""} ${isActive
                   ? "sidebar-item-active"
                   : "text-slate-600"
                   }`}
@@ -211,17 +211,17 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
         </div>
       </div>
 
-      <div className="mt-auto">
+      <div className="mt-auto pb-2">
         <div className="-mx-3">
           <div className="h-px w-full bg-[#CBD0DD]" />
         </div>
-        <div className="mt-2">
+        <div className="mt-3">
           <div
-            className="sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors text-slate-600"
+            className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors text-slate-600 ${!showFull ? "sidebar-item-collapsed justify-center" : ""}`}
             onClick={onToggleCollapse}
           >
             <span className="sidebar-item-icon">
-              <span className="text-base leading-none">|&larr;</span>
+              <ChevronLeft size={18} />
             </span>
             {showFull && <span className="text-sm font-medium sidebar-text">Collapsed View</span>}
           </div>

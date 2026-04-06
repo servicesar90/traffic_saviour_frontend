@@ -232,7 +232,7 @@ const Dashboard = () => {
           }}
         />
       )}
-      <div className="dashboard-light h-screen w-full bg-[#f3f1f7] overflow-hidden flex flex-col">
+      <div className="dashboard-light h-screen w-full bg-[#F5F7FA] overflow-hidden flex flex-col">
         <div className="z-40 shrink-0">
           <Header onMenuClick={handleMenuClick} />
         </div>
