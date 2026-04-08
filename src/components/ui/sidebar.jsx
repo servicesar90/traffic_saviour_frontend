@@ -98,8 +98,8 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
 
   return (
     <div
-      className={`flex flex-col py-3 px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed" : "w-64 sidebar-expanded"
-        } transition-all duration-500 ease-in-out text-slate-900 overflow-hidden box-border min-h-0`}
+      className={`flex flex-col py-3 px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed overflow-visible" : "w-64 sidebar-expanded overflow-hidden"
+        } transition-all duration-500 ease-in-out text-slate-900 box-border min-h-0`}
       style={{ borderTop: 0, height: "calc(100vh - 72px - 1px)" }}
     >
       {/* Logo & Avatar */}
@@ -138,7 +138,7 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-1 text-slate-200 overflow-hidden">
+      <nav className={`flex flex-col gap-1 text-slate-200 ${showFull ? "overflow-hidden" : "overflow-visible"}`}>
         {navItems.map((item, index) => {
           const isActive = location.pathname === item.route;
           const isItemActive = isActive || (item.collapsible && isDatabaseActive);
@@ -157,7 +157,7 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                 className={`sidebar-item flex items-center ${showFull ? "justify-between" : "justify-center"} rounded-xl cursor-pointer transition-colors ${!showFull ? "sidebar-item-collapsed" : ""} ${isItemActive
                   ? "sidebar-item-active"
                   : "text-slate-600"
-                  }`}
+                  } relative group`}
               >
                 <div className="flex items-center gap-3">
                   <span className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`}>
@@ -167,6 +167,11 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                     <span className="text-sm font-medium sidebar-text">{item.label}</span>
                   )}
                 </div>
+                {!showFull && (
+                  <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md group-hover:block z-50 whitespace-nowrap">
+                    {item.label}
+                  </span>
+                )}
                 {item.collapsible && showFull && (
                   <span className="text-slate-300/70 sidebar-text">
                     {databaseOpen ? (
@@ -199,12 +204,17 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                 className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors ${!showFull ? "sidebar-item-collapsed justify-center" : ""} ${isActive
                   ? "sidebar-item-active"
                   : "text-slate-600"
-                  }`}
+                  } relative group`}
               >
                 <span className={`sidebar-item-icon ${isActive ? "sidebar-item-active" : ""}`}>
                   {item.icon}
                 </span>
                 {showFull && <span className="text-sm font-medium sidebar-text">{item.label}</span>}
+                {!showFull && (
+                  <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md group-hover:block z-50 whitespace-nowrap">
+                    {item.label}
+                  </span>
+                )}
               </div>
             );
           })}
@@ -217,13 +227,18 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
         </div>
         <div className="mt-3">
           <div
-            className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors text-slate-600 ${!showFull ? "sidebar-item-collapsed justify-center" : ""}`}
+            className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors text-slate-600 ${!showFull ? "sidebar-item-collapsed justify-center" : ""} relative group`}
             onClick={onToggleCollapse}
           >
             <span className="sidebar-item-icon">
               <ChevronLeft size={18} />
             </span>
             {showFull && <span className="text-sm font-medium sidebar-text">Collapsed View</span>}
+            {!showFull && (
+              <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md group-hover:block z-50 whitespace-nowrap">
+                Collapsed View
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -238,11 +253,11 @@ const Sidebar = ({ collapsed, mobileVisible, onCloseMobile, onToggleCollapse }) 
     <>
       {/* Desktop Sidebar */}
       <div
-        className="hidden md:block overflow-hidden"
+        className={`hidden md:block ${collapsed ? "overflow-visible" : "overflow-hidden"}`}
       >
         <div
           className={`h-[calc(100vh-72px)] ${collapsed ? "w-16" : "w-64"
-            } transition-[width] duration-500 ease-[cubic-bezier(.22,.61,.36,1)] overflow-hidden will-change-[width]`}
+            } transition-[width] duration-500 ease-[cubic-bezier(.22,.61,.36,1)] ${collapsed ? "overflow-visible" : "overflow-hidden"} will-change-[width]`}
         >
           <div className="h-full flex flex-col justify-end">
             <SidebarContent

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   createCampaignApi,
   getAllCampaign,
@@ -10,6 +10,7 @@ import {
 import { apiFunction } from "../api/ApiFunction";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast, showInfoToast, showSuccessToast } from "../components/toast/toast";
+import { Pencil, Copy, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
 
 // Note: TABS definition is kept here for reference
@@ -265,130 +266,86 @@ const statsAbortRef = useRef(null);
   }, [fetchCampaigns]);
   
 
-  useEffect(() => {
-  return () => {
-    campaignAbortRef.current?.abort();
-    ipClickAbortRef.current?.abort();
-    statsAbortRef.current?.abort();
-  };
-}, []);
-
-
-  useEffect(() => {
-    function handleClickOutside(event) {
+    useEffect(() => {
+    const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setOpenDropdownId(null);
-        setDropdownPos(null);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []); // Empty dependency array means this runs once
 
-  // --- NEW Handlers for Dropdown ---
-  const handleActionClick = (e, campaignId) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-   
-    setDropdownPos({
-      top: rect.bottom + 2, // below button
-      left: rect.right - 150, // align right (w-48 = 192px)
-    });
-    setOpenDropdownId(openDropdownId === campaignId ? null : campaignId);
-  };
-
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleActionSelect = async (action, campaignId, row) => {
-     setOpenDropdownId(null); //   
-     switch (action) {
-       case "edit":
-         // alert(`Editing campaign ID: ${campaignId}`);
-         navigate("/Dashboard/create-campaign", {
-           state: {
-             mode: "edit",
-             id: row.uid,
-             data: row, // campaign data from db
-           },
-         });
-         // TODO: Navigate to Edit screen or open a modal
-         break;
-       case "duplicate": {
-         try {
-           if (!row) return;
-          //  console.log(row);
- 
-           //  deep clone campaign
-           const payload = JSON.parse(JSON.stringify(row));
-        
- 
-           //  backend generated fields hatao
-           delete payload.uid;
-           delete payload._id;
-           delete payload.createdAt;
-           delete payload.updatedAt;
-           delete payload.date_time;
- 
-           //  campaign name modify
-           const data = {
-             ...payload,
- 
-             campaignName:
-               (payload.campaign_info?.campaignName || "Campaign") + " (Copy)",
-             trafficSource: payload.campaign_info?.trafficSource,
-           };
- 
-           // optional default status
- 
- 
-           //  CREATE API CALL (same API as create)
-           const res = await apiFunction("post", createCampaignApi, null, data);
- 
-           if (res?.data?.status || res?.data?.success) {
-             const newCampaign = res.data.data;
- 
-             //  UI update (top me add)
-             setCampaigns((prev) => [newCampaign, ...prev]);
-             
- 
-             showSuccessToast("Campaign duplicated successfully");
-             await fetchCampaigns();
-             await fetchStats();
-            
- 
-           }
-         } catch (err) {
-          //  console.error("Duplicate campaign error:", err);
-           showErrorToast(err?.response?.data?.message || "Failed to duplicate campaign");
-         }
- 
-         break;
-       }
- 
-       case "delete":
-         if (window.confirm(`Are you sure you want to delete this campaign?`)) {
-           const res = await apiFunction(
-             "delete",
-             createCampaignApi,
-             campaignId,
-             null
-           );
- 
-           if (res) {
-             setCampaigns((prev) =>
-               prev.filter((item) => item.uid !== campaignId)
-             );
-             await fetchStats();
-             
-             
-           }
-         }
-         break;
-       default:
-         break;
-     }
-   };
+    setOpenDropdownId(null);
+    switch (action) {
+      case "edit":
+        navigate("/Dashboard/create-campaign", {
+          state: {
+            mode: "edit",
+            id: row.uid,
+            data: row,
+          },
+        });
+        break;
+      case "duplicate": {
+        try {
+          if (!row) return;
 
+          const payload = JSON.parse(JSON.stringify(row));
+          delete payload.uid;
+          delete payload._id;
+          delete payload.createdAt;
+          delete payload.updatedAt;
+          delete payload.date_time;
+
+          const data = {
+            ...payload,
+            campaignName:
+              (payload.campaign_info?.campaignName || "Campaign") + " (Copy)",
+            trafficSource: payload.campaign_info?.trafficSource,
+          };
+
+          const res = await apiFunction("post", createCampaignApi, null, data);
+
+          if (res?.data?.status || res?.data?.success) {
+            const newCampaign = res.data.data;
+            setCampaigns((prev) => [newCampaign, ...prev]);
+            showSuccessToast("Campaign duplicated successfully");
+            await fetchCampaigns();
+            await fetchStats();
+          }
+        } catch (err) {
+          showErrorToast(
+            err?.response?.data?.message || "Failed to duplicate campaign"
+          );
+        }
+
+        break;
+      }
+
+      case "delete":
+        if (window.confirm("Are you sure you want to delete this campaign?")) {
+          const res = await apiFunction(
+            "delete",
+            createCampaignApi,
+            campaignId,
+            null
+          );
+
+          if (res) {
+            setCampaigns((prev) =>
+              prev.filter((item) => item.uid !== campaignId)
+            );
+            await fetchStats();
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  };
   // --- Existing Handlers ---
  const handleRefresh = async () => {
   if (isRefreshing) return;
@@ -454,11 +411,296 @@ const endItem = Math.min(
 
 
 
+  const StatStarStack = () => (
+    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
+      <svg
+        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="square"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.1875em 0.75em", color: "#90D67F" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
+            <path
+              fill="currentColor"
+              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-success"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="circle"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style={{ transformOrigin: "0.6875em 0.25em" }}
+      >
+        <g transform="translate(256 256)">
+          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
+              transform="translate(-256 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-star fa-stack-1x text-success fa-stack-star"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="star"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 576 512"
+        style={{ transformOrigin: "0.9375em 0em" }}
+      >
+        <g transform="translate(288 256)">
+          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"
+              transform="translate(-288 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+    </span>
+  );
+
+  const StatPauseStack = () => (
+    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
+      <svg
+        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="square"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.1875em 0.75em", color: "#FFCC85" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
+            <path
+              fill="currentColor"
+              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-warning"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="circle"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style={{ transformOrigin: "0.6875em 0.25em" }}
+      >
+        <g transform="translate(256 256)">
+          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
+              transform="translate(-256 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-play fa-stack-1x text-warning"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="play"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.6875em 0em" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 41.6V470.4c0 35.5 43.8 51.9 72.4 34.9l352-208.1c28.6-16.9 28.6-58.6 0-75.5z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+    </span>
+  );
+
+  const StatBlockStack = () => (
+    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
+      <svg
+        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="square"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.1875em 0.75em", color: "#F48270" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
+            <path
+              fill="currentColor"
+              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-danger"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="circle"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style={{ transformOrigin: "0.6875em 0.25em" }}
+      >
+        <g transform="translate(256 256)">
+          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
+              transform="translate(-256 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-xmark fa-stack-1x text-danger"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="xmark"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 384 512"
+        style={{ transformOrigin: "0.75em 0em" }}
+      >
+        <g transform="translate(192 256)">
+          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
+              transform="translate(-192 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+    </span>
+  );
+
+  const StatAllowStack = () => (
+    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
+      <svg
+        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="square"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.1875em 0.75em", color: "#90D67F" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
+            <path
+              fill="currentColor"
+              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-success"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="circle"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        style={{ transformOrigin: "0.6875em 0.25em" }}
+      >
+        <g transform="translate(256 256)">
+          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
+              transform="translate(-256 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+      <svg
+        className="svg-inline--fa fa-check fa-stack-1x text-success"
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="check"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 448 512"
+        style={{ transformOrigin: "0.75em 0em" }}
+      >
+        <g transform="translate(224 256)">
+          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
+            <path
+              fill="currentColor"
+              d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.2 0z"
+              transform="translate(-224 -256)"
+            />
+          </g>
+        </g>
+      </svg>
+    </span>
+  );
+
+  const StatItem = ({ icon, value, label }) => (
+    <div className="flex items-center gap-3">
+      {icon}
+      <div>
+        <h4 className="text-[20px] leading-[20px] text-[#121824] font-bold text-left">
+          {value}
+        </h4>
+        <p className="text-[0.8rem] leading-none text-[#3e465b] font-normal mt-1">
+          {label}
+        </p>
+      </div>
+    </div>
+  );
   //  NEW Render Function: Action Dropdown Menu
   const renderActionDropdown = (campaignId, row) => (
     // ref   dropdownRef    wrapper div    click outside  
     <div
-      className="fixed right-0 top-full mt-2 w-48 rounded-xl shadow-lg bg-white border border-slate-200 z-20"
+      className="fixed right-0 top-full mt-2 w-48 bg-white border border-slate-200 z-20"
       style={{
         zIndex: 9999999, // over ALL elements
         left: dropdownPos.left,
@@ -496,8 +738,8 @@ const endItem = Math.min(
     <col className="w-25" />
     <col className="w-32" />
     <col className="w-20" />
-    <col className="w-16" />
-    <col className="w-20" />
+    <col className="w-24" />
+    <col className="w-24" />
     <col className="w-48" />
     <col className="w-20" />
   </colgroup>
@@ -530,24 +772,23 @@ const endItem = Math.min(
   }
 
   return (
-    <tbody className="bg-white divide-y divide-slate-200">
+    <tbody className="bg-white divide-y divide-[#d5d9e4]">
       {campaigns.map((item, index) => {
         const campaignId = item.campaign_info?.campaign_id || index;
         const isDropdownOpen = openDropdownId === item?.uid;
         return(
           <>
-          <tr key={item.campaignId}>
-          <td className="px-3 py-3 text-sm text-left text-slate-600">{index + 1}</td>
-          <td className="px-3 py-3 text-sm text-left text-slate-900 font-medium">{item.campaign_info?.campaignName}</td>
-          <td className="px-3 py-3 text-sm text-left text-slate-600">{item.campaign_info?.trafficSource}</td>
-          <td className="px-3 py-3 text-left">
+          <tr key={item.campaignId} className="odd:bg-white even:bg-slate-50/40 hover:bg-slate-100/60 transition-colors">
+          <td className="px-3 py-1.5 text-sm text-left text-slate-600">{index + 1}</td>
+          <td className="px-3 py-1.5 text-sm text-left text-slate-900 font-medium">{item.campaign_info?.campaignName}</td>
+          <td className="px-3 py-1.5 text-sm text-left text-slate-600">{item.campaign_info?.trafficSource}</td>
+          <td className="px-3 py-1.5 text-left">
              <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Active")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+      className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Active"
-          ? "text-green-500 drop-shadow-[0_0_6px_rgba(16,185,129,.8)]"
+        ${item.status === "Active" ? "text-[#f97316]"
           : "text-slate-400 hover:text-slate-600"
         }`}
     >
@@ -555,16 +796,16 @@ const endItem = Math.min(
         viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
         <path d="M7 4v16l13-8L7 4z"/>
       </svg>
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Active</span>
     </button>
 
     {/*  Boost */}
     <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Allow")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+      className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Allow"
-          ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
+        ${item.status === "Allow" ? "text-[#16a34a]"
           : "text-slate-400 hover:text-slate-600"
         }`}
     >
@@ -572,16 +813,16 @@ const endItem = Math.min(
         viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
         <path d="M13 2L3 14h7v8l10-12h-7z"/>
       </svg>
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Allow</span>
     </button>
 
     {/*  Block */}
     <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Block")}
-      className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+      className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Block"
-          ? "text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,.8)]"
+        ${item.status === "Block" ? "text-[#dc2626]"
           : "text-slate-400 hover:text-slate-600"
         }`}
     >
@@ -594,8 +835,9 @@ const endItem = Math.min(
         <circle cx="12" cy="12" r="10"/>
         <line x1="5" y1="19" x2="19" y2="5"/>
       </svg>
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Block</span>
     </button></td>
-          <td className="px-3 py-3 text-left "> {item.integration ? (
+          <td className="px-3 py-1.5 text-sm text-left "> {item.integration ? (
             
                   <div className="relative group flex justify-center">
                     <svg
@@ -613,7 +855,7 @@ const endItem = Math.min(
                     </svg>
 
                     {/*  Tooltip container */}
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white text-slate-700 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white text-slate-700 text-xs px-3 py-1 rounded whitespace-nowrap z-50 border border-slate-200">
                       {item.integrationUrl || "No URL Found"}
                     </div>
                   </div>
@@ -634,9 +876,9 @@ const endItem = Math.min(
                     </svg>
                   </div>
                 )}</td>
-          <td className="px-3 py-3 text-slate-600 text-center">{item?.campclicks?.total_t_clicks || 0}</td>
-          <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right w-16">
-  <div className="flex items-center gap-1 relative group">
+          <td className="px-3 py-1.5 text-sm text-slate-600 text-center">{item?.campclicks?.total_t_clicks || 0}</td>
+          <td className="px-3 py-1.5 whitespace-nowrap text-sm text-slate-600 text-right w-24">
+  <div className="ml-auto w-fit inline-flex items-center gap-1 relative group">
     {/* i Icon */}
     <svg
       className="h-4 w-4 text-blue-400 cursor-pointer"
@@ -658,14 +900,14 @@ const endItem = Math.min(
     {/* Tooltip */}
     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
       hidden group-hover:block bg-white text-slate-700 text-xs 
-      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
+      px-3 py-1 rounded whitespace-nowrap z-50 border border-slate-200">
       {item?.safe_page || "No URL Found"}
     </div>
   </div>
 </td>
 
-        <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right w-20">
-  <div className="flex items-center gap-1 relative group">
+        <td className="px-3 py-1.5 whitespace-nowrap text-sm text-slate-600 text-right w-24">
+  <div className="ml-auto w-fit inline-flex items-center gap-1 relative group">
     {/* i Icon */}
     <svg
       className="h-4 w-4 text-blue-400 cursor-pointer"
@@ -687,29 +929,55 @@ const endItem = Math.min(
     {/* Tooltip */}
     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
       hidden group-hover:block bg-white text-slate-700 text-xs 
-      px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
+      px-3 py-1 rounded whitespace-nowrap z-50 border border-slate-200">
       {item?.money_page?.[0]?.url || "No URL Found"}
     </div>
   </div>
 </td>
 
-          <td className="px-3 py-3 text-slate-600 text-left">
+          <td className="px-3 py-1.5 text-sm text-slate-600 text-left">
             {new Date(item.date_time).toLocaleString()}
           </td>
-          <td
-           ref={isDropdownOpen ? dropdownRef : null}
-           className="px-3 py-3"><button
-                  onClick={(e) => handleActionClick(e, item?.uid)}
-                  className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
-                    isDropdownOpen
-                      ? "bg-slate-900 text-white"
-                      : "hover:bg-slate-100"
-                  }`}
+          <td className="px-3 py-1.5 text-sm">
+            <div className="flex items-center justify-end gap-3">
+              <div className="relative group">
+                <button
+                  onClick={() => handleActionSelect("edit", item?.uid, item)}
+                  className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
+                  aria-label="Edit"
                 >
-                  ...
-                  {/* Vertical three dots */}
+                  <Pencil size={18} strokeWidth={2.25} />
                 </button>
-                 {isDropdownOpen && renderActionDropdown(item?.uid, item)}</td>
+                <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">
+                  Edit
+                </span>
+              </div>
+              <div className="relative group">
+                <button
+                  onClick={() => handleActionSelect("duplicate", item?.uid, item)}
+                  className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
+                  aria-label="Duplicate"
+                >
+                  <Copy size={18} strokeWidth={2.25} />
+                </button>
+                <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">
+                  Duplicate
+                </span>
+              </div>
+              <div className="relative group">
+                <button
+                  onClick={() => handleActionSelect("delete", item?.uid, null)}
+                  className="p-1 rounded hover:bg-rose-50 text-red-500 cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-red-600"
+                  aria-label="Delete"
+                >
+                  <Trash2 size={18} strokeWidth={2.25} />
+                </button>
+                <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">
+                  Delete
+                </span>
+              </div>
+            </div>
+          </td>
         </tr>
           </>
         )
@@ -719,20 +987,19 @@ const endItem = Math.min(
 };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen text-slate-900">
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{formattedDate}</p>
-            <h1 className="text-2xl font-semibold">Campaigns</h1>
-            <p className="text-slate-500 text-sm">
+            <h2 className="dashboard-heading text-left">Campaigns</h2>
+            <p className="dashboard-subheading">
               Manage, refresh, and review all campaigns in one place.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleAddNewCampaign}
-              className="flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 rounded-full font-medium text-sm text-white shadow-sm transition cursor-pointer"
+              className="flex items-center px-4 py-2 rounded-md font-medium text-sm border transition-all duration-200 cursor-pointer bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100"
             >
               <svg
                 className="h-4 w-4 mr-2"
@@ -752,11 +1019,11 @@ const endItem = Math.min(
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm border transition-all duration-200 cursor-pointer
+              className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm border transition-all duration-200 cursor-pointer
                 ${
                   isRefreshing
                     ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                    : "bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100"
                 }
               `}
             >
@@ -779,161 +1046,85 @@ const endItem = Math.min(
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
-          <div className="flex flex-wrap gap-2 text-sm">
-            <div className="px-3 py-1.5 rounded-full bg-slate-900 text-white font-medium">
-              All ({stats.total_campaigns || "0"})
-            </div>
-            <div className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
-              Active ({stats.active_campaigns || "0"})
-            </div>
-            <div className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
-              Allow All ({stats.allowed_campaigns || "0"})
-            </div>
-            <div className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
-              Block All ({stats.blocked_campaigns || "0"})
-            </div>
-          </div>
-          <div className="text-xs text-slate-400">Total: {totalItems}</div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <div className="relative flex-grow max-w-sm">
-            <input
-              type="text"
-              placeholder="Search campaigns"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full py-2 pl-10 pr-4 border border-slate-200 rounded-lg shadow-sm bg-slate-50 text-slate-700 focus:outline-none focus:ring-slate-200 focus:border-slate-300 text-sm"
-            />
-            <svg
-              className="absolute left-3 top-2.5 h-5 w-5 text-slate-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-          <input
-            type="text"
-            placeholder="d/m/y to d/m/y"
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
-            className="py-2 px-3 border border-slate-200 rounded-lg shadow-sm bg-slate-50 text-slate-700 focus:outline-none focus:ring-slate-200 focus:border-slate-300 text-sm max-w-[200px]"
-          />
-          <button
-            onClick={handleApplyFilter}
-            className="px-6 py-2 bg-slate-900 hover:bg-slate-800 rounded-lg font-medium cursor-pointer text-sm text-white transition"
-          >
-            Apply
-          </button>
-        </div>
+            <div className="mb-8 flex flex-wrap items-center gap-8">
+        <StatItem icon={<StatStarStack />} value={stats.total_campaigns} label="All campaigns" />
+        <StatItem icon={<StatPauseStack />} value={stats.active_campaigns} label="Active campaigns" />
+        <StatItem icon={<StatAllowStack />} value={stats.allowed_campaigns} label="Allow campaigns" />
+        <StatItem icon={<StatBlockStack />} value={stats.blocked_campaigns} label="Block campaigns" />
       </div>
 
+
       {/* Campaign Table Container */}
-      <div className="mt-4 border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
-  <div className="flex flex-col border border-slate-200 rounded-2xl bg-white overflow-hidden">
+      <div className="mt-4 border-y border-x-0 border-[#d5d9e4] overflow-hidden bg-white mb-6" style={{ borderLeft: 0, borderRight: 0 }}>
+        <div className="flex flex-col bg-white overflow-hidden">
 
-    {/* ===== FIXED HEADER ===== */}
-    <div className="flex-none overflow-x-auto bg-slate-50">
-      <table className="min-w-full table-fixed">
-        <TableColGroup />
+          {/* ===== FIXED HEADER ===== */}
+          <div className="flex-none overflow-x-auto bg-slate-50" style={{ borderLeft: 0, borderRight: 0 }}>
+            <table className="min-w-full table-fixed">
+              <TableColGroup />
 
-        <thead className="bg-slate-50">
-          <tr>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Sn</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Campaign Name</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Source</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Status</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Integration</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Clicks</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Safe</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Money</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Created on</th>
-            <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">Action</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">#</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Campaign</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Source</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Status</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Integration</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Clicks</th>
+                  <th className="px-3 py-2 text-center text-[13px] font-extrabold text-[#31374A] uppercase">Safe</th>
+                  <th className="px-3 py-2 text-center text-[13px] font-extrabold text-[#31374A] uppercase">Money</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Created</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Action</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
 
-    {/* ===== SCROLLABLE BODY ===== */}
-    <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
-      <table className="min-w-full table-fixed divide-y divide-slate-200 border-t border-slate-200">
-        <TableColGroup />
-        {renderTableContent()}
-      </table>
-    </div>
+          {/* ===== SCROLLABLE BODY ===== */}
+          <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px] border-y border-x-0 border-[#d5d9e4]" style={{ borderLeft: 0, borderRight: 0 }}>
+            <table className="min-w-full table-fixed">
+              <TableColGroup />
+              {renderTableContent()}
+            </table>
+          </div>
 
-    {/* ===== FIXED FOOTER ===== */}
-    <div className="flex-none bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between">
-  {/* LEFT */}
-  <span className="text-sm text-slate-500">
-    Showing{" "}
-    <span className="text-slate-900 font-medium">
-      {startItem}-{endItem}
-    </span>{" "}
-    of{" "}
-    <span className="text-slate-900 font-medium">
-      {totalRecords}
-    </span>{" "}
-    campaigns
-  </span>
+          {/* ===== FIXED FOOTER ===== */}
+          <div className="flex-none bg-white px-4 py-3 flex items-center justify-between">
+            {/* LEFT */}
+            <div className="text-sm text-slate-500 flex items-center gap-4">
+              <span>
+                {startItem} to {endItem} items of {totalRecords}
+              </span>
+            </div>
 
-  {/* RIGHT  Numbered Pagination */}
-  <div className="flex items-center gap-1">
-    {/* Prev */}
-    <button
-      disabled={currentPage === 1}
-      onClick={() => handlePageChange(currentPage - 1)}
-      className={`px-3 py-1 text-sm rounded border ${
-        currentPage === 1
-          ? "text-slate-400 border-slate-200 cursor-not-allowed"
-          : "text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
-      }`}
-    >
-      Prev
-    </button>
-
-    {/* Page Numbers */}
-    {/* Page Numbers */}
-{getVisiblePages().map((page) => (
-  <button
-    key={page}
-    onClick={() => handlePageChange(page)}
-    className={`px-3 py-1 text-sm rounded border cursor-pointer ${
-      page === currentPage
-        ? "bg-slate-900 text-white border-slate-900"
-        : "text-slate-600 border-slate-200 hover:bg-slate-100"
-    }`}
-  >
-    {page}
-  </button>
-))}
-
-
-    {/* Next */}
-    <button
-      disabled={currentPage === totalPages}
-      onClick={() => handlePageChange(currentPage + 1)}
-      className={`px-3 py-1 text-sm rounded border ${
-        currentPage === totalPages
-          ? "text-slate-400 border-slate-200 cursor-not-allowed"
-          : "text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
-      }`}
-    >
-      Next
-    </button>
-  </div>
-</div>
-  </div>
-</div>
+            {/* RIGHT  Minimal Pagination */}
+            <div className="flex items-center gap-4 text-sm">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className={`flex items-center gap-1 ${
+                  currentPage === 1
+                    ? "text-slate-300 cursor-not-allowed"
+                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                }`}
+              >
+                <ChevronLeft size={16} /> Previous
+              </button>
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className={`flex items-center gap-1 ${
+                  currentPage === totalPages
+                    ? "text-slate-300 cursor-not-allowed"
+                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                }`}
+              >
+                Next <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Pagination/Summary Section (Unchanged) */}
       {/* <div className="mt-4 flex justify-between items-center text-sm text-gray-400">
@@ -947,10 +1138,10 @@ const endItem = Math.min(
           </a>
         </div>
         <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-medium text-sm transition duration-150">
+          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 font-medium text-sm transition duration-150">
             Previous
           </button>
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-medium text-sm transition duration-150">
+          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 font-medium text-sm transition duration-150">
             Next
           </button>
         </div>
@@ -964,5 +1155,9 @@ const endItem = Math.min(
 }
 
 export default AllCampaignsDashboard;
+
+
+
+
 
 

@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip, ZoomControl } from "react-leaflet";
+import { Pencil, Copy, Trash2 } from "lucide-react";
 
 import { useNavigate, Link } from "react-router-dom";
 
@@ -65,6 +67,7 @@ const Dashboard = () => {
   });
   const [billingList, setBillingList] = useState([]);
   const [billingLoading, setBillingLoading] = useState(false);
+  const [countryPage, setCountryPage] = useState(1);
   
 
   const ITEMS_PER_PAGE = 5;
@@ -76,6 +79,26 @@ const Dashboard = () => {
   });
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+  const countryTraffic = [
+    { country: "India", value: 1240, lat: 20.5937, lng: 78.9629 },
+    { country: "United States", value: 980, lat: 37.0902, lng: -95.7129 },
+    { country: "United Kingdom", value: 640, lat: 55.3781, lng: -3.4360 },
+    { country: "Germany", value: 520, lat: 51.1657, lng: 10.4515 },
+    { country: "Brazil", value: 420, lat: -14.2350, lng: -51.9253 },
+    { country: "Australia", value: 360, lat: -25.2744, lng: 133.7751 },
+  ];
+
+  const maxTrafficValue = Math.max(...countryTraffic.map((c) => c.value));
+  const COUNTRIES_PER_PAGE = 5;
+  const countryTotalPages = Math.max(
+    1,
+    Math.ceil(countryTraffic.length / COUNTRIES_PER_PAGE)
+  );
+  const countryPageSafe = Math.min(countryPage, countryTotalPages);
+  const countryStart = (countryPageSafe - 1) * COUNTRIES_PER_PAGE;
+  const countryEnd = Math.min(countryStart + COUNTRIES_PER_PAGE, countryTraffic.length);
+  const countrySlice = countryTraffic.slice(countryStart, countryEnd);
 
   const handleRefresh = async () => {
     if (isRefreshing) return;
@@ -798,6 +821,25 @@ const Dashboard = () => {
 
   const baseSeriesFull = chartData?.length ? chartData : demo30Days;
   const baseSeries = baseSeriesFull.slice(-chartRangeDays);
+  const rangeTotalClicks = baseSeries.reduce((sum, point) => {
+    const safe = Number(point.Safe || 0);
+    const money = Number(point.Money || 0);
+    return sum + safe + money;
+  }, 0);
+  const rangeSafeClicks = baseSeries.reduce(
+    (sum, point) => sum + Number(point.Safe || 0),
+    0
+  );
+  const rangeMoneyClicks = baseSeries.reduce(
+    (sum, point) => sum + Number(point.Money || 0),
+    0
+  );
+  const safePercent = rangeTotalClicks
+    ? Math.round((rangeSafeClicks / rangeTotalClicks) * 100)
+    : 0;
+  const moneyPercent = rangeTotalClicks
+    ? Math.round((rangeMoneyClicks / rangeTotalClicks) * 100)
+    : 0;
 
   const denseSeries = baseSeries.flatMap((d, i) => {
     if (i === baseSeries.length - 1) return [d];
@@ -814,6 +856,13 @@ const Dashboard = () => {
   });
 
   const labelSet = new Set(baseSeries.map((d) => d.date));
+
+  const miniBarSeries = baseSeries.map((d) => {
+    const safe = Number(d.Safe || 0);
+    const money = Number(d.Money || 0);
+    return safe + money;
+  });
+  const miniBarMax = Math.max(1, ...miniBarSeries);
 
   const StatCard = ({
     value,
@@ -918,13 +967,6 @@ const Dashboard = () => {
       date: item.start_date ? new Date(item.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }) : "N/A",
     }));
 
-  const safePercent = clickSummary.totalClicks
-    ? Math.round((clickSummary.safeClicks / clickSummary.totalClicks) * 100)
-    : 0;
-  const moneyPercent = clickSummary.totalClicks
-    ? Math.round((clickSummary.moneyClicks / clickSummary.totalClicks) * 100)
-    : 0;
-
   const renderActionDropdown = (campaignId, row) => (
     // ref   dropdownRef    wrapper div    click outside  
     <div
@@ -966,8 +1008,8 @@ const Dashboard = () => {
       <col className="w-25" />
       <col className="w-32" />
       <col className="w-20" />
-      <col className="w-16" />
-      <col className="w-20" />
+      <col className="w-24" />
+      <col className="w-24" />
       <col className="w-48" />
       <col className="w-20" />
     </colgroup>
@@ -999,35 +1041,37 @@ const Dashboard = () => {
     }
 
     return (
-      <tbody className="bg-white divide-y divide-slate-200">
+      <tbody className="bg-white divide-y divide-[#d5d9e4]">
         {campaigns.map((item, index) => {
           const campaignId = item.campaign_info?.campaign_id || index;
           const isDropdownOpen = openDropdownId === item?.uid;
           return (
             <>
-              <tr key={item.campaignId}>
-                <td className="px-3 py-3 text-sm  text-left text-slate-600">
+              <tr
+                key={item.campaignId}
+                className="odd:bg-white even:bg-slate-50/60 hover:bg-slate-100/60 transition-colors"
+              >
+                <td className="px-3 py-1.5 text-sm  text-left text-slate-600">
                   {index + 1}
                 </td>
-                <td className="px-3 py-3 text-sm text-left text-slate-900 font-medium">
+                <td className="px-3 py-1.5 text-sm text-left text-slate-900 font-medium">
                   {item.campaign_info?.campaignName}
                 </td>
-                <td className="px-3 py-3 text-sm text-left text-slate-600">
+                <td className="px-3 py-1.5 text-sm text-left text-slate-600">
                   {item.campaign_info?.trafficSource}
                 </td>
-                <td className="px-3 py-3 text-left">
+                <td className="px-3 py-1.5 text-sm text-left">
                   <button
                     disabled={item.statusLoading}
                     onClick={() => handleStatusChange(item.uid, "Active")}
-                    className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+                    className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
         ${
           item.statusLoading
             ? "opacity-30 cursor-not-allowed"
             : "cursor-pointer"
         }
         ${
-          item.status === "Active"
-            ? "text-green-500 drop-shadow-[0_0_6px_rgba(16,185,129,.8)]"
+          item.status === "Active" ? "text-[#f97316]"
             : "text-slate-400 hover:text-slate-600"
         }`}
                   >
@@ -1039,21 +1083,21 @@ const Dashboard = () => {
                     >
                       <path d="M7 4v16l13-8L7 4z" />
                     </svg>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Active</span>
                   </button>
 
                   {/*  Boost */}
                   <button
                     disabled={item.statusLoading}
                     onClick={() => handleStatusChange(item.uid, "Allow")}
-                    className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+                    className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
         ${
           item.statusLoading
             ? "opacity-30 cursor-not-allowed"
             : "cursor-pointer"
         }
         ${
-          item.status === "Allow"
-            ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,.8)]"
+          item.status === "Allow" ? "text-[#16a34a]"
             : "text-slate-400 hover:text-slate-600"
         }`}
                   >
@@ -1065,21 +1109,21 @@ const Dashboard = () => {
                     >
                       <path d="M13 2L3 14h7v8l10-12h-7z" />
                     </svg>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Allow</span>
                   </button>
 
                   {/*  Block */}
                   <button
                     disabled={item.statusLoading}
                     onClick={() => handleStatusChange(item.uid, "Block")}
-                    className={`p-1 rounded transition-all duration-300 transform hover:scale-110
+                    className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
         ${
           item.statusLoading
             ? "opacity-30 cursor-not-allowed"
             : "cursor-pointer"
         }
         ${
-          item.status === "Block"
-            ? "text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,.8)]"
+          item.status === "Block" ? "text-[#dc2626]"
             : "text-slate-400 hover:text-slate-600"
         }`}
                   >
@@ -1094,9 +1138,10 @@ const Dashboard = () => {
                       <circle cx="12" cy="12" r="10" />
                       <line x1="5" y1="19" x2="19" y2="5" />
                     </svg>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Block</span>
                   </button>
                 </td>
-                <td className="px-3 py-3 text-left ">
+                <td className="px-3 py-1.5 text-sm text-left ">
                   {" "}
                   {item.integration ? (
                     <div className="relative group flex justify-center">
@@ -1137,11 +1182,11 @@ const Dashboard = () => {
                     </div>
                   )}
                 </td>
-                <td className="px-3 py-3 text-slate-600 text-center">
+                <td className="px-3 py-1.5 text-sm text-slate-600 text-center">
                   {item?.campclicks?.total_t_clicks || 0}
                 </td>
-                <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right w-16">
-                  <div className="flex items-center gap-1 relative group">
+                <td className="px-3 py-1.5 whitespace-nowrap text-sm text-slate-600 text-right w-24">
+                  <div className="ml-auto w-fit inline-flex items-center gap-1 relative group">
                     {/* i Icon */}
                     <svg
                       className="h-4 w-4 text-blue-400 cursor-pointer"
@@ -1171,8 +1216,8 @@ const Dashboard = () => {
                   </div>
                 </td>
 
-                <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right w-20">
-                  <div className="flex items-center gap-1 relative group">
+                <td className="px-3 py-1.5 whitespace-nowrap text-sm text-slate-600 text-right w-24">
+                  <div className="ml-auto w-fit inline-flex items-center gap-1 relative group">
                     {/* i Icon */}
                     <svg
                       className="h-4 w-4 text-blue-400 cursor-pointer"
@@ -1202,24 +1247,48 @@ const Dashboard = () => {
                   </div>
                 </td>
 
-                <td className="px-3 py-3 text-slate-600 text-left">
+                <td className="px-3 py-1.5 text-sm text-slate-600 text-left">
                   {new Date(item.date_time).toLocaleString()}
                 </td>
-                <td
-                  ref={isDropdownOpen ? dropdownRef : null}
-                  className="px-3 py-3"
-                >
-                  <button
-                    onClick={(e) => handleActionClick(e, item?.uid)}
-                    className={`text-2xl leading-none font-bold p-1 rounded-full cursor-pointer ${
-                      isDropdownOpen
-                        ? "bg-[#2b1f57] text-white"
-                        : "hover:bg-slate-100"
-                    }`}
-                  >
-                    ... {/* Vertical three dots */}
-                  </button>
-                  {isDropdownOpen && renderActionDropdown(item?.uid, item)}
+                <td className="px-3 py-1.5 text-sm">
+                  <div className="flex items-center gap-2 justify-end">
+                    <div className="relative group">
+                      <button
+                        onClick={() => handleActionSelect("edit", item?.uid, item)}
+                        className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
+                        aria-label="Edit"
+                      >
+                        <Pencil size={18} strokeWidth={2.25} />
+                      </button>
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 shadow-sm group-hover:block z-50">
+                        Edit
+                      </span>
+                    </div>
+                    <div className="relative group">
+                      <button
+                        onClick={() => handleActionSelect("duplicate", item?.uid, item)}
+                        className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
+                        aria-label="Duplicate"
+                      >
+                        <Copy size={18} strokeWidth={2.25} />
+                      </button>
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 shadow-sm group-hover:block z-50">
+                        Duplicate
+                      </span>
+                    </div>
+                    <div className="relative group">
+                      <button
+                        onClick={() => handleActionSelect("delete", item?.uid, null)}
+                        className="p-1 rounded hover:bg-rose-50 text-red-500 cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-red-600"
+                        aria-label="Delete"
+                      >
+                        <Trash2 size={18} strokeWidth={2.25} />
+                      </button>
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 shadow-sm group-hover:block z-50">
+                        Delete
+                      </span>
+                    </div>
+                  </div>
                 </td>
               </tr>
             </>
@@ -1243,7 +1312,7 @@ const Dashboard = () => {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleAddNewCampaign}
-              className="flex items-center px-4 py-2 rounded-xl font-medium text-sm border transition-all duration-200 cursor-pointer bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100"
+              className="flex items-center px-4 py-2 rounded-md font-medium text-sm border transition-all duration-200 cursor-pointer bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100"
             >
               <svg
                 className="h-4 w-4 mr-2"
@@ -1263,7 +1332,7 @@ const Dashboard = () => {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm border transition-all duration-200 cursor-pointer
+              className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm border transition-all duration-200 cursor-pointer
                 ${
                   isRefreshing
                     ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed"
@@ -1315,9 +1384,12 @@ const Dashboard = () => {
           label="Block campaigns"
         />
       </div>
-      <div className="h-px w-full bg-[var(--app-border)] mt-6 mb-10" />
+      <hr
+        className="w-full mt-6 mb-10"
+        style={{ border: 0, borderTop: "1px solid #d5d9e4", height: 0 }}
+      />
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] mb-16">
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr] mb-16">
         <div className="bg-[#F5F7FA] rounded-3xl p-6 shadow-none">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>
@@ -1403,156 +1475,398 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white/90 border border-slate-200/70 rounded-3xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Accounts</h3>
-            <button className="h-9 w-9 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100">
-              ...
-            </button>
-          </div>
-          <div className="space-y-3">
-            {accountCards.map((card) => (
-              <div key={card.title} className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white/70 px-4 py-3 shadow-[0_6px_14px_rgba(15,23,42,0.05)]">
-                <div className="flex items-center gap-3">
-                  <div className={`h-11 w-16 rounded-2xl bg-gradient-to-br ${card.color}`} />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{card.title}</p>
-                    <p className="text-xs text-slate-400">{card.number}</p>
-                  </div>
-                </div>
-                <p className="text-sm font-semibold text-slate-900">{card.balance}</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+          {/* Mini Card 1 */}
+          <div className="bg-white border border-slate-200/70 rounded-md p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Total clicks</p>
+                <p className="text-xs text-slate-400">Last {chartRangeDays} days</p>
               </div>
-            ))}
+              <div className="text-lg font-semibold text-slate-900">
+                {rangeTotalClicks.toLocaleString("en-US")}
+              </div>
+            </div>
+            <div className="mt-4 h-20 px-3">
+              {(() => {
+                const barWidth = 4;
+                const gap = miniBarSeries.length > 10 ? 4 : 8;
+                const totalWidth =
+                  miniBarSeries.length * barWidth +
+                  Math.max(0, miniBarSeries.length - 1) * gap +
+                  12;
+                return (
+                  <svg viewBox={`0 0 ${totalWidth} 60`} className="w-full h-full">
+                    <g transform="translate(6,4)">
+                      {miniBarSeries.map((value, idx) => {
+                        const x = idx * (barWidth + gap);
+                        const height = Math.max(8, Math.round((value / miniBarMax) * 50));
+                        const y = 54 - height;
+                        const isSafe = idx % 2 !== 0;
+                        const label = isSafe ? "Safe" : "Money";
+                        return (
+                          <rect
+                            key={`mini-bar-${idx}`}
+                            x={x}
+                            y={y}
+                            width={barWidth}
+                            height={height}
+                            rx="3"
+                            fill={isSafe ? "#3874FF" : "#0097EB"}
+                          >
+                            <title>{`${label}: ${value}`}</title>
+                          </rect>
+                        );
+                      })}
+                    </g>
+                  </svg>
+                );
+              })()}
+            </div>
+            <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+              <span className="inline-flex items-center gap-4">
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2 w-4 rounded-sm bg-[#3874FF]" />
+                  Safe
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2 w-4 rounded-sm bg-[#0097EB]" />
+                  Money
+                </span>
+              </span>
+              <span>{chartRangeDays}d</span>
+            </div>
           </div>
-          <button className="mt-4 w-full rounded-2xl border border-dashed border-slate-300 px-4 py-2 text-sm text-slate-500 hover:bg-slate-100">
-            + Create account
-          </button>
+
+          {/* Mini Card 2 */}
+          <div className="bg-white border border-slate-200/70 rounded-md p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">New traffic</p>
+                <p className="text-xs text-slate-400">Last {chartRangeDays} days</p>
+              </div>
+              <div className="text-lg font-semibold text-slate-900">356</div>
+            </div>
+            <div className="mt-4 h-20">
+              <svg viewBox="0 0 140 50" className="w-full h-full">
+                <polyline
+                  points="4,36 24,34 42,28 60,30 78,24 96,12 114,18 134,8"
+                  fill="none"
+                  stroke="#3874FF"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <polyline
+                  points="4,40 24,38 42,34 60,36 78,32 96,26 114,28 134,24"
+                  fill="none"
+                  stroke="#D6E2FF"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+              <span>01 May</span>
+              <span>07 May</span>
+            </div>
+          </div>
+
+          {/* Mini Card 3 */}
+          <div className="bg-white border border-slate-200/70 rounded-md p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Safe share</p>
+                <p className="text-xs text-slate-400">Last {chartRangeDays} days</p>
+              </div>
+              <div className="text-xs text-slate-500">{safePercent}%</div>
+            </div>
+            <div className="mt-4 h-20 flex items-center justify-center">
+              <svg viewBox="0 0 60 60" className="h-22 w-22">
+                <circle cx="30" cy="30" r="24" stroke="#E7EDF9" strokeWidth="4" fill="none" />
+                <circle
+                  cx="30"
+                  cy="30"
+                  r="24"
+                  stroke="#3874FF"
+                  strokeWidth="4"
+                  fill="none"
+                  strokeDasharray="151"
+                  strokeDashoffset={151 - (151 * safePercent) / 100}
+                  strokeLinecap="round"
+                  transform="rotate(-90 30 30)"
+                />
+                <text x="30" y="34" textAnchor="middle" fontSize="12" fill="#2b1f57" fontWeight="700">
+                  {safePercent}%
+                </text>
+              </svg>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+              <span>Safe</span>
+              <span>of total</span>
+            </div>
+          </div>
+
+          {/* Mini Card 4 */}
+          <div className="bg-white border border-slate-200/70 rounded-md p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Money share</p>
+                <p className="text-xs text-slate-400 text-left">Last {chartRangeDays} days</p>
+              </div>
+              <div className="text-xs text-slate-500">{moneyPercent}%</div>
+            </div>
+            <div className="mt-4 h-20 flex items-center justify-center">
+              <svg viewBox="0 0 60 60" className="h-22 w-22">
+                <circle cx="30" cy="30" r="24" stroke="#E7EDF9" strokeWidth="4" fill="none" />
+                <circle
+                  cx="30"
+                  cy="30"
+                  r="24"
+                  stroke="#0097EB"
+                  strokeWidth="4"
+                  fill="none"
+                  strokeDasharray="151"
+                  strokeDashoffset={151 - (151 * moneyPercent) / 100}
+                  strokeLinecap="round"
+                  transform="rotate(-90 30 30)"
+                />
+                <text x="30" y="34" textAnchor="middle" fontSize="12" fill="#2b1f57" fontWeight="700">
+                  {moneyPercent}%
+                </text>
+              </svg>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+              <span>Money</span>
+              <span>of total</span>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="mt-6 mb-16 h-px w-[calc(100%+48px)] bg-[var(--app-border)] -mx-6" />
+      <hr
+        className="mt-6 w-[calc(100%+48px)] -mx-6"
+        style={{ border: 0, borderTop: "1px solid var(--app-border)", height: 0 }}
+      />
       {/* Money movement and invoices removed */}
 
-      <div className="mt-8 border border-slate-200/70 rounded-3xl overflow-hidden bg-white/90 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <div className="flex items-center gap-2 text-sm">
-            <button className="px-4 py-1.5 rounded-full bg-[#2b1f57] text-white">Recent</button>
-            <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">My transactions</button>
-            <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">Monthly money in</button>
-            <button className="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600">Monthly money out</button>
+      <div className="bg-white -mx-6 px-6 pt-10">
+        <div className="flex items-start justify-between gap-4 px-0 py-4 bg-white">
+          <div>
+            <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">
+              Campaign Performance
+            </h3>
+            <p className="text-[#525b75] leading-[1.2] text-sm text-left">
+              A quick view of traffic safety, clicks, and status.
+            </p>
           </div>
-          <div className="text-xs text-slate-400">Transactions</div>
+          <div className="flex items-center gap-2 text-sm" />
         </div>
-        <div className="flex flex-col border border-slate-200/70 rounded-3xl bg-white overflow-hidden">
-          {/* ===== FIXED HEADER ===== */}
-          <div className="flex-none overflow-x-auto bg-[#f6f5fb]">
-            <table className="min-w-full table-fixed">
-              <TableColGroup />
 
-              <thead className="bg-[#f6f5fb]">
-                <tr>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Sn
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Campaign Name
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Source
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Status
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Integration
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Clicks
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Safe
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Money
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Created on
-                  </th>
-                  <th className="px-3 py-4 text-left text-xs font-medium text-slate-400 uppercase">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-            </table>
-          </div>
+        <div className="overflow-hidden bg-white">
+          <hr
+            className="w-full"
+            style={{ border: 0, borderTop: "1px solid #d5d9e4", height: 0 }}
+          />
+          <div className="flex flex-col bg-white overflow-hidden">
+            {/* ===== FIXED HEADER ===== */}
+            <div className="flex-none overflow-x-auto bg-white" style={{ borderLeft: 0, borderRight: 0 }}>
+              <table className="min-w-full table-fixed">
+                <TableColGroup />
+
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">
+                      #
+                    </th>
+                    <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Campaign
+                    </th>
+                    <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Source
+                    </th>
+                    <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Status
+                    </th>
+                    <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Integration
+                    </th>
+                    <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Clicks
+                    </th>
+                    <th className="px-3 py-2 text-center text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Safe
+                    </th>
+                    <th className="px-3 py-2 text-center text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Money
+                    </th>
+                    <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Created
+                    </th>
+                    <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
 
           {/* ===== SCROLLABLE BODY ===== */}
-          <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px]">
-            <table className="min-w-full table-fixed divide-y divide-slate-200 border-t border-slate-200">
+          <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar max-h-[300px] border-y border-[#d5d9e4]" style={{ borderLeft: 0, borderRight: 0 }}>
+            <table className="min-w-full table-fixed">
               <TableColGroup />
               {renderTableContent()}
             </table>
           </div>
 
           {/* ===== FIXED FOOTER ===== */}
-          <div className="flex-none bg-[#f6f5fb] border-t border-slate-200 px-6 py-3 flex items-center justify-between">
+          <div className="flex-none bg-white px-4 py-3 flex items-center justify-between">
             {/* LEFT */}
-            <span className="text-sm text-slate-500">
-              Showing{" "}
-              <span className="text-slate-900 font-medium">
-                {startItem}-{endItem}
-              </span>{" "}
-              of{" "}
-              <span className="text-slate-900 font-medium">{totalRecords}</span>{" "}
-              campaigns
-            </span>
+            <div className="text-sm text-slate-500 flex items-center gap-4">
+              <span>
+                {startItem} to {endItem} items of {totalRecords}
+              </span>
+            </div>
 
-            {/* RIGHT  Numbered Pagination */}
-            <div className="flex items-center gap-1">
-              {/* Prev */}
+            {/* RIGHT  Minimal Pagination */}
+            <div className="flex items-center gap-4 text-sm">
               <button
                 disabled={currentPage === 1}
                 onClick={() => handlePageChange(currentPage - 1)}
-                className={`px-3 py-1 text-sm rounded border ${
+                className={`flex items-center gap-1 ${
                   currentPage === 1
-                    ? "text-slate-400 border-slate-200 cursor-not-allowed"
-                    : "text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
+                    ? "text-slate-300 cursor-not-allowed"
+                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
                 }`}
               >
-                Prev
+                <span className="text-lg leading-none">‹</span> Previous
               </button>
-
-              {/* Page Numbers */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 text-sm rounded border cursor-pointer ${
-                      page === currentPage
-                        ? "bg-[#2b1f57] text-white border-[#2b1f57]"
-                        : "text-slate-600 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
-
-              {/* Next */}
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => handlePageChange(currentPage + 1)}
-                className={`px-3 py-1 text-sm rounded border ${
+                className={`flex items-center gap-1 ${
                   currentPage === totalPages
-                    ? "text-slate-400 border-slate-200 cursor-not-allowed"
-                    : "text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
+                    ? "text-slate-300 cursor-not-allowed"
+                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
                 }`}
               >
-                Next
+                Next <span className="text-lg leading-none">›</span>
               </button>
             </div>
           </div>
+          
+          </div>
         </div>
+
+        <hr
+          className="mt-16 w-[calc(100%+48px)] -mx-6"
+          style={{ border: 0, borderTop: "1px solid var(--app-border)", height: 0 }}
+        />
+      </div>
+
+      {/* Traffic by Country */}
+      <div className="mt-0 -mx-6 bg-[var(--app-bg)] py-0">
+        <div className="grid gap-0 grid-cols-1 lg:grid-cols-2 items-stretch">
+          {/* Left list + header */}
+          <div className="px-6 py-10 min-h-[380px]">
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">
+                  Traffic by Country
+                </h3>
+                <p className="text-[#525b75] leading-[1.2] text-sm text-left">
+                  Dummy data preview for geography-based traffic.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+            {countrySlice.map((row) => (
+              <div key={row.country} className="flex items-center gap-4">
+                <div className="w-28 text-xs text-slate-700">{row.country}</div>
+                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#3874FF]"
+                    style={{ width: `${Math.round((row.value / maxTrafficValue) * 100)}%` }}
+                  />
+                </div>
+                <div className="w-16 text-right text-xs text-slate-600">
+                  {row.value.toLocaleString("en-US")}
+                </div>
+              </div>
+            ))}
+            {/* Country pagination */}
+            <div className="mt-6 flex items-center justify-between text-sm text-slate-500">
+              <span>
+                {countryTraffic.length === 0
+                  ? "0 items"
+                  : `${countryStart + 1} to ${countryEnd} items of ${countryTraffic.length}`}
+              </span>
+              <div className="flex items-center gap-4 text-sm">
+                <button
+                  disabled={countryPageSafe === 1}
+                  onClick={() => setCountryPage((p) => Math.max(1, p - 1))}
+                className={`flex items-center gap-1 ${
+                  countryPageSafe === 1
+                    ? "text-slate-300 cursor-not-allowed"
+                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                }`}
+                >
+                  <span className="text-lg leading-none">‹</span> Previous
+                </button>
+                <button
+                  disabled={countryPageSafe === countryTotalPages}
+                  onClick={() =>
+                    setCountryPage((p) => Math.min(countryTotalPages, p + 1))
+                  }
+                  className={`flex items-center gap-1 ${
+                    countryPageSafe === countryTotalPages
+                    ? "text-slate-300 cursor-not-allowed"
+                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                  }`}
+                >
+                  Next <span className="text-lg leading-none">›</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          {/* Right map */}
+          <div className="relative border-l border-slate-200/70 border-y-0 bg-[#F7F9FC] p-0 overflow-hidden h-[380px]">
+            <MapContainer
+              center={[20, 10]}
+              zoom={2}
+              zoomControl={false}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <ZoomControl position="topleft" />
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                attribution=""
+              />
+              {countryTraffic.map((row) => {
+                const radius = Math.max(6, Math.round((row.value / maxTrafficValue) * 16));
+                return (
+                  <CircleMarker
+                    key={row.country}
+                    center={[row.lat, row.lng]}
+                    radius={radius}
+                    pathOptions={{ color: "#3874FF", fillColor: "#3874FF", fillOpacity: 0.35 }}
+                  >
+                    <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                      {row.country}: {row.value.toLocaleString("en-US")}
+                    </LeafletTooltip>
+                  </CircleMarker>
+                );
+              })}
+            </MapContainer>
+          </div>
+        </div>
+        <hr
+          className="mt-0 w-full"
+          style={{ border: 0, borderTop: "1px solid var(--app-border)", height: 0 }}
+        />
       </div>
 
       {/* Bottom Cards */}
