@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   createCampaignApi,
   getAllCampaign,
@@ -65,6 +65,72 @@ const statsAbortRef = useRef(null);
     day: "2-digit",
     year: "numeric",
   });
+
+  const healthSummary = useMemo(() => {
+    if (!campaigns || campaigns.length === 0) {
+      return {
+        avgScore: 0,
+        good: 0,
+        warning: 0,
+        critical: 0,
+        issues: [],
+      };
+    }
+
+    let totalScore = 0;
+    let good = 0;
+    let warning = 0;
+    let critical = 0;
+    let lowSafe = 0;
+    let veryLowSafe = 0;
+    let blocked = 0;
+    let lowMoney = 0;
+    let lowTraffic = 0;
+
+    campaigns.forEach((item) => {
+      const total = Number(item?.campclicks?.total_t_clicks || 0);
+      const safe = Number(item?.campclicks?.total_s_clicks || 0);
+      const money = Number(item?.campclicks?.total_m_clicks || 0);
+      const status = (item?.status || "").toLowerCase();
+      const safeRatio = total > 0 ? safe / total : 0;
+      const moneyRatio = total > 0 ? money / total : 0;
+
+      let score = 100;
+      if (status === "block") score -= 40;
+      if (safeRatio < 0.4) score -= 30;
+      else if (safeRatio < 0.6) score -= 15;
+      if (moneyRatio < 0.05) score -= 10;
+      if (total < 20) score -= 5;
+      if (score < 0) score = 0;
+
+      totalScore += score;
+
+      if (status === "block" || safeRatio < 0.4) {
+        critical += 1;
+      } else if (safeRatio < 0.6 || moneyRatio < 0.05) {
+        warning += 1;
+      } else {
+        good += 1;
+      }
+
+      if (safeRatio < 0.6) lowSafe += 1;
+      if (safeRatio < 0.4) veryLowSafe += 1;
+      if (status === "block") blocked += 1;
+      if (moneyRatio < 0.05) lowMoney += 1;
+      if (total < 20) lowTraffic += 1;
+    });
+
+    const avgScore = Math.round(totalScore / campaigns.length);
+    const issues = [
+      veryLowSafe > 0 && { label: "Very low safe ratio", count: veryLowSafe },
+      blocked > 0 && { label: "Blocked status", count: blocked },
+      lowMoney > 0 && { label: "Low money clicks", count: lowMoney },
+      lowSafe > 0 && { label: "Low safe ratio", count: lowSafe },
+      lowTraffic > 0 && { label: "Low traffic volume", count: lowTraffic },
+    ].filter(Boolean);
+
+    return { avgScore, good, warning, critical, issues };
+  }, [campaigns]);
 
   // --- API Fetch Function (Unchanged, except for the console.log) ---
   const fetchCampaigns = useCallback(async (page=1) => {
@@ -772,23 +838,23 @@ const endItem = Math.min(
   }
 
   return (
-    <tbody className="bg-white divide-y divide-[#d5d9e4]">
+    <tbody className="bg-white divide-y divide-[#d5d9e4] text-[13px] leading-5">
       {campaigns.map((item, index) => {
         const campaignId = item.campaign_info?.campaign_id || index;
         const isDropdownOpen = openDropdownId === item?.uid;
         return(
           <>
           <tr key={item.campaignId} className="odd:bg-white even:bg-slate-50/40 hover:bg-slate-100/60 transition-colors">
-          <td className="px-3 py-1.5 text-sm text-left text-slate-600">{index + 1}</td>
-          <td className="px-3 py-1.5 text-sm text-left text-slate-900 font-medium">{item.campaign_info?.campaignName}</td>
-          <td className="px-3 py-1.5 text-sm text-left text-slate-600">{item.campaign_info?.trafficSource}</td>
-          <td className="px-3 py-1.5 text-left">
+          <td className="px-3 py-1 text-sm text-left text-slate-600">{index + 1}</td>
+          <td className="px-3 py-1 text-sm text-left text-slate-900 font-medium">{item.campaign_info?.campaignName}</td>
+          <td className="px-3 py-1 text-sm text-left text-slate-600">{item.campaign_info?.trafficSource}</td>
+          <td className="px-3 py-1 text-left">
              <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Active")}
-      className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
+      className={`relative group p-1 transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Active" ? "text-[#f97316]"
+        ${item.status === "Active" ? "text-[#f59e0b]"
           : "text-slate-400 hover:text-slate-600"
         }`}
     >
@@ -803,9 +869,9 @@ const endItem = Math.min(
     <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Allow")}
-      className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
+      className={`relative group p-1 transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Allow" ? "text-[#16a34a]"
+        ${item.status === "Allow" ? "text-[#22c55e]"
           : "text-slate-400 hover:text-slate-600"
         }`}
     >
@@ -820,9 +886,9 @@ const endItem = Math.min(
     <button
       disabled={item.statusLoading}
       onClick={() => handleStatusChange(item.uid, "Block")}
-      className={`relative group p-1 rounded transition-all duration-300 transform hover:scale-110
+      className={`relative group p-1 transition-all duration-300 transform hover:scale-110
         ${item.statusLoading ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
-        ${item.status === "Block" ? "text-[#dc2626]"
+        ${item.status === "Block" ? "text-[#ef4444]"
           : "text-slate-400 hover:text-slate-600"
         }`}
     >
@@ -837,7 +903,7 @@ const endItem = Math.min(
       </svg>
       <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Block</span>
     </button></td>
-          <td className="px-3 py-1.5 text-sm text-left "> {item.integration ? (
+          <td className="px-3 py-1 text-sm text-left "> {item.integration ? (
             
                   <div className="relative group flex justify-center">
                     <svg
@@ -876,9 +942,9 @@ const endItem = Math.min(
                     </svg>
                   </div>
                 )}</td>
-          <td className="px-3 py-1.5 text-sm text-slate-600 text-center">{item?.campclicks?.total_t_clicks || 0}</td>
-          <td className="px-3 py-1.5 whitespace-nowrap text-sm text-slate-600 text-right w-24">
-  <div className="ml-auto w-fit inline-flex items-center gap-1 relative group">
+          <td className="px-3 py-1 text-sm text-slate-600 text-center"><div className="inline-block translate-x-1">{item?.campclicks?.total_t_clicks || 0}</div></td>
+          <td className="px-3 py-1 whitespace-nowrap text-sm text-slate-600 text-right w-24">
+  <div className="ml-auto w-fit inline-flex items-center gap-1 relative group translate-x-1">
     {/* i Icon */}
     <svg
       className="h-4 w-4 text-blue-400 cursor-pointer"
@@ -906,8 +972,8 @@ const endItem = Math.min(
   </div>
 </td>
 
-        <td className="px-3 py-1.5 whitespace-nowrap text-sm text-slate-600 text-right w-24">
-  <div className="ml-auto w-fit inline-flex items-center gap-1 relative group">
+        <td className="px-3 py-1 whitespace-nowrap text-sm text-slate-600 text-right w-24">
+  <div className="ml-auto w-fit inline-flex items-center gap-1 relative group translate-x-1">
     {/* i Icon */}
     <svg
       className="h-4 w-4 text-blue-400 cursor-pointer"
@@ -935,15 +1001,15 @@ const endItem = Math.min(
   </div>
 </td>
 
-          <td className="px-3 py-1.5 text-sm text-slate-600 text-left">
+          <td className="px-3 py-1 text-sm text-slate-600 text-left">
             {new Date(item.date_time).toLocaleString()}
           </td>
-          <td className="px-3 py-1.5 text-sm">
+          <td className="px-3 py-1 text-sm">
             <div className="flex items-center justify-end gap-3">
               <div className="relative group">
                 <button
                   onClick={() => handleActionSelect("edit", item?.uid, item)}
-                  className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
+                  className="p-1.5 rounded-full hover:bg-slate-100/80 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
                   aria-label="Edit"
                 >
                   <Pencil size={18} strokeWidth={2.25} />
@@ -955,7 +1021,7 @@ const endItem = Math.min(
               <div className="relative group">
                 <button
                   onClick={() => handleActionSelect("duplicate", item?.uid, item)}
-                  className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
+                  className="p-1.5 rounded-full hover:bg-slate-100/80 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
                   aria-label="Duplicate"
                 >
                   <Copy size={18} strokeWidth={2.25} />
@@ -1059,22 +1125,22 @@ const endItem = Math.min(
         <div className="flex flex-col bg-white overflow-hidden">
 
           {/* ===== FIXED HEADER ===== */}
-          <div className="flex-none overflow-x-auto bg-slate-50" style={{ borderLeft: 0, borderRight: 0 }}>
+          <div className="flex-none overflow-x-auto bg-slate-50 sticky top-0 z-20 shadow-[0_1px_0_0_#d5d9e4]" style={{ borderLeft: 0, borderRight: 0 }}>
             <table className="min-w-full table-fixed">
               <TableColGroup />
 
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">#</th>
-                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Campaign</th>
-                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Source</th>
-                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Status</th>
-                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Integration</th>
-                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Clicks</th>
-                  <th className="px-3 py-2 text-center text-[13px] font-extrabold text-[#31374A] uppercase">Safe</th>
-                  <th className="px-3 py-2 text-center text-[13px] font-extrabold text-[#31374A] uppercase">Money</th>
-                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Created</th>
-                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A] uppercase">Action</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A]">#</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A]">Campaign</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A]">Source</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A]">Status</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A]">Integration</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A]">Clicks</th>
+                  <th className="px-3 py-2 text-center text-[13px] font-extrabold text-[#31374A]">Safe</th>
+                  <th className="px-3 py-2 text-center text-[13px] font-extrabold text-[#31374A]">Money</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A]">Created</th>
+                  <th className="px-3 py-2 text-left text-[13px] font-extrabold text-[#31374A]">Action</th>
                 </tr>
               </thead>
             </table>
@@ -1089,7 +1155,7 @@ const endItem = Math.min(
           </div>
 
           {/* ===== FIXED FOOTER ===== */}
-          <div className="flex-none bg-white px-4 py-3 flex items-center justify-between">
+          <div className="flex-none bg-white px-4 py-3 flex items-center justify-between text-xs">
             {/* LEFT */}
             <div className="text-sm text-slate-500 flex items-center gap-4">
               <span>
@@ -1098,14 +1164,14 @@ const endItem = Math.min(
             </div>
 
             {/* RIGHT  Minimal Pagination */}
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-3">
               <button
                 disabled={currentPage === 1}
                 onClick={() => handlePageChange(currentPage - 1)}
                 className={`flex items-center gap-1 ${
                   currentPage === 1
                     ? "text-slate-300 cursor-not-allowed"
-                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                    : "text-blue-600 hover:text-blue-700 cursor-pointer"
                 }`}
               >
                 <ChevronLeft size={16} /> Previous
@@ -1116,11 +1182,102 @@ const endItem = Math.min(
                 className={`flex items-center gap-1 ${
                   currentPage === totalPages
                     ? "text-slate-300 cursor-not-allowed"
-                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                    : "text-blue-600 hover:text-blue-700 cursor-pointer"
                 }`}
               >
                 Next <ChevronRight size={16} />
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Campaign Health Panel */}
+      <div
+        className="mt-6 bg-[var(--app-bg)]"
+      >
+        <div className="px-4 py-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-[24px] font-extrabold text-[#141824] mb-1 text-left">
+                Campaign Health
+              </h3>
+              <p className="text-[#525b75] leading-[1.2] text-sm">
+                Health based on safe/money clicks and status from the table.
+              </p>
+            </div>
+            <div className="text-xs font-medium text-slate-600">Auto‑updated overview</div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="bg-white border border-[#d5d9e4] p-4">
+              <div className="flex items-center justify-between">
+                <div className="text-xs uppercase tracking-wide text-slate-600 font-semibold">
+                  Overall Health
+                </div>
+                <div className="text-xs text-slate-400">Score</div>
+              </div>
+              <div className="mt-2 flex items-end gap-3">
+                <div className="text-4xl font-extrabold text-slate-900">
+                  {healthSummary.avgScore}
+                </div>
+                <div className="text-xs text-slate-400 pb-1">/ 100</div>
+              </div>
+              <div className="mt-3 h-2 w-full bg-slate-100">
+                <div
+                  className="h-2 bg-[#3874FF]"
+                  style={{ width: `${Math.min(100, Math.max(0, healthSummary.avgScore))}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-white border border-[#d5d9e4] p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-600 font-semibold">
+                Status Breakdown
+              </div>
+              <div className="mt-3 grid grid-cols-[1fr_auto] gap-y-3 gap-x-2 text-sm text-slate-700">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]"></span>
+                  <span className="text-slate-600">Good</span>
+                </div>
+                <div className="text-right font-semibold text-slate-900">
+                  {healthSummary.good}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]"></span>
+                  <span className="text-slate-600">Warning</span>
+                </div>
+                <div className="text-right font-semibold text-slate-900">
+                  {healthSummary.warning}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
+                  <span className="text-slate-600">Critical</span>
+                </div>
+                <div className="text-right font-semibold text-slate-900">
+                  {healthSummary.critical}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-[#d5d9e4] p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-600 font-semibold">
+                Top Issues
+              </div>
+              <ul className="mt-3 text-sm text-slate-700 space-y-2">
+                {healthSummary.issues.length === 0 ? (
+                  <li className="text-slate-400">No issues detected.</li>
+                ) : (
+                  healthSummary.issues.slice(0, 4).map((issue, idx) => (
+                    <li key={idx} className="flex items-center justify-between">
+                      <span>{issue.label}</span>
+                      <span className="text-slate-500">{issue.count}</span>
+                    </li>
+                  ))
+                )}
+              </ul>
             </div>
           </div>
         </div>

@@ -1,98 +1,28 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Trash2, FileDown, Plus, Pencil } from "lucide-react";
-import PropTypes from "prop-types";
 import { apiFunction } from "../api/ApiFunction";
 import { blacklistIpApi, getWhitelistApi } from "../api/Apis";
-import { showSuccessToast, showErrorToast } from "../components/toast/toast";
+import { showErrorToast, showSuccessToast } from "../components/toast/toast";
+import BlacklistedIPsPage from "./IpListings";
 
-const BlacklistedIPsPage = ({
-  totalItems,
-  currentPage,
-  itemsPerPage,
-  onViewAll,
-  onPrevious,
-  onNext,
-  onAddIp,
-  onRefresh,
-}) => {
-  const PlusIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-4 w-4"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-    >
-      <path
-        fillRule="evenodd"
-        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-
-  const RefreshIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-4 w-4"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-    >
-      <path
-        fillRule="evenodd"
-        d="M4 4a8 8 0 1111.31 6.9l1.39 1.39a1 1 0 01-1.42 1.42l-2.83-2.83A1 1 0 0113 9h3a6 6 0 10-6 6v-2a1 1 0 012 0v3a1 1 0 01-1 1H8a8 8 0 01-4-13z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-
-  // Reusable Button
-  const Button = ({ children, variant, icon: Icon, onClick }) => {
-    let classes =
-      "px-5 py-2.5 rounded-xl font-medium transition-all duration-200 inline-flex items-center gap-2 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500";
-
-    if (variant === "primary") {
-      classes += " bg-blue-600 hover:bg-blue-700 text-white shadow-md";
-    } else if (variant === "secondary") {
-      classes +=
-        " bg-gray-700 text-gray-100 hover:bg-gray-600 border border-gray-600";
-    } else if (variant === "pagination") {
-      classes +=
-        " bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700";
-    }
-
-    return (
-      <button className={classes} onClick={onClick}>
-        {Icon && <Icon />}
-        {children}
-      </button>
-    );
-  };
-
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+export default function WhitelistIp() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [singleIp, setSingleIp] = useState("");
   const [ipName, setIpName] = useState("");
   const [ipDescription, setIpDescription] = useState("");
   const [ipActive, setIpActive] = useState(true);
-  const [ipBlacklisted, setIpBlacklisted] = useState(true);
+  const [ipBlacklisted, setIpBlacklisted] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  // ✅ ONLY ONCE
   const [ips, setIps] = useState([]);
   const [loadingIps, setLoadingIps] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const abortRef = useRef(null);
 
-  const TrashIcon = ({ onClick }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className="text-red-500 hover:text-red-600 cursor-pointer"
-      aria-label="Delete IP"
-    >
-      <Trash2 size={16} />
-    </button>
-  );
+  const normalizeFlag = (value) =>
+    value === true ||
+    value === 1 ||
+    value === "1" ||
+    String(value).toLowerCase() === "true";
 
   const isValidIPv4 = (ip) => {
     const ipv4Regex =
@@ -101,27 +31,22 @@ const BlacklistedIPsPage = ({
   };
 
   const isValidIPv6 = (ip) => {
-    const ipv6Regex = /^(([0-9a-fA-F]{1,4}):){7}([0-9a-fA-F]{1,4})$/;
+    const ipv6Regex =
+      /^(([0-9a-fA-F]{1,4}):){7}([0-9a-fA-F]{1,4})$/;
     return ipv6Regex.test(ip);
   };
 
   const isValidIP = (ip) => isValidIPv4(ip) || isValidIPv6(ip);
 
-  const normalizeFlag = (value) =>
-    value === true ||
-    value === 1 ||
-    value === "1" ||
-    String(value).toLowerCase() === "true";
-
-  const exportBlacklistedIps = () => {
+  const exportWhitelistedIps = () => {
     if (!ips || ips.length === 0) {
       showErrorToast("No IPs to export");
       return;
     }
     const rows = [
       ["SN", "IP Address", "Title", "Description", "Status", "Active", "Added On"],
-      ...ips.map((ip) => [
-        ip.sn,
+      ...ips.map((ip, index) => [
+        index + 1,
         ip.ip,
         ip.name || "",
         ip.description || "",
@@ -141,7 +66,7 @@ const BlacklistedIPsPage = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `blacklisted-ips-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `whitelisted-ips-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -149,7 +74,7 @@ const BlacklistedIPsPage = ({
     showSuccessToast("Export started");
   };
 
-  const addBlacklistedIps = async (payload) => {
+  const addWhitelistedIp = async (payload) => {
     try {
       const userData = JSON.parse(localStorage.getItem("user"));
       const userId = userData?.id;
@@ -171,34 +96,33 @@ const BlacklistedIPsPage = ({
 
       const finalPayload = {
         userId,
-        IPAddress: [payload.IPAddress.trim()] ,
+        IPAddress: [payload.IPAddress.trim()],
         name: payload.name || "",
         description: payload.description || "",
         isActive: payload.isActive ? true : false,
         isBlacklisted: payload.isBlacklisted ? true : false,
       };
-      console.log("Adding IP with payload:", finalPayload);
 
       await apiFunction("post", blacklistIpApi, null, finalPayload);
-      await fetchBlacklistedIps();
+      await fetchWhitelistedIps();
 
       showSuccessToast("IP added successfully");
       setSingleIp("");
       setIpName("");
       setIpDescription("");
       setIpActive(true);
-      setIpBlacklisted(true);
+      setIpBlacklisted(false);
       setIsDrawerOpen(false);
       return true;
     } catch (error) {
       if (error?.response?.status === 409) {
         const shouldSwitch = window.confirm(
-          "This IP already exists in another list. Do you want to move it to Blacklist?"
+          "This IP already exists in another list. Do you want to move it to Whitelist?",
         );
         if (!shouldSwitch) {
           showErrorToast("IP already exists");
           return false;
-        }
+        } 
 
         try {
           const userData = JSON.parse(localStorage.getItem("user"));
@@ -210,9 +134,9 @@ const BlacklistedIPsPage = ({
 
           const res = await apiFunction(
             "get",
-            `${getWhitelistApi}?userId=${userId}`,
+            `${blacklistIpApi}?userId=${userId}`,
             null,
-            null
+            null,
           );
           const rawData = Array.isArray(res?.data?.data)
             ? res.data.data
@@ -222,104 +146,38 @@ const BlacklistedIPsPage = ({
                 ? res.data.data.rows
                 : [];
           const existing = rawData.find(
-            (row) => String(row.IPAddress || "").trim() === payload.IPAddress.trim()
+            (row) =>
+              String(row.IPAddress || "").trim() === payload.IPAddress.trim(),
           );
           if (!existing) {
             showErrorToast("IP exists but could not be found");
             return false;
           }
 
-          await updateBlacklistedIp({
+          await updateWhitelistedIp({
             id: existing.id,
             IPAddress: existing.IPAddress,
             name: existing.name || payload.name || "",
             description: existing.description || payload.description || "",
             isActive: true,
-            isBlacklisted: true,
+            isBlacklisted: false,
           });
-          await fetchBlacklistedIps();
-          showSuccessToast("Moved to Blacklist");
+          await fetchWhitelistedIps();
+          showSuccessToast("Moved to Whitelist");
           return true;
         } catch {
           showErrorToast("Failed to switch list");
           return false;
         }
       }
-      // console.error(error);
       showErrorToast("Failed to add IP(s)");
       return false;
     }
   };
 
-  const fetchBlacklistedIps = async () => {
-    if (abortRef.current) {
-      abortRef.current.abort();
-    }
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-    try {
-      setLoadingIps(true);
-
-      const userData = JSON.parse(localStorage.getItem("user"));
-      const userId = userData?.id;
-
-      if (!userId) {
-        showErrorToast("User not logged in");
-        return;
-      }
-
-      const res = await apiFunction(
-        "get",
-        `${blacklistIpApi}?userId=${userId}`,
-        null,
-        null,
-        controller.signal,
-      );
-      if (!res) return;
-
-      const rawData = Array.isArray(res?.data?.data)
-        ? res.data.data
-        : Array.isArray(res?.data)
-          ? res.data
-          : Array.isArray(res?.data?.data?.rows)
-            ? res.data.data.rows
-            : [];
-
-      const filteredData = rawData.filter((item) =>
-        normalizeFlag(item.isBlacklisted),
-      );
-      const formatted = filteredData.map((item, index) => ({
-        sn: index + 1,
-        ip: item.IPAddress || "-",
-        name: item.name || "",
-        description: item.description || "",
-        isActive:
-          item.isActive === true ||
-          String(item.isActive) === "1" ||
-          String(item.isActive).toLowerCase() === "true",
-        isBlacklisted:
-          item.isBlacklisted === true ||
-          String(item.isBlacklisted) === "1" ||
-          String(item.isBlacklisted).toLowerCase() === "true",
-        addedOn: item.createdAt
-          ? new Date(item.createdAt).toLocaleString("en-IN")
-          : "-",
-        id: item.id,
-      }));
-      
-
-      setIps(formatted);
-    } catch (error) {
-      if (error?.code === "ERR_CANCELED") return;
-      // console.error(error);
-      showErrorToast("Failed to fetch IPs");
-    } finally {
-      setLoadingIps(false);
-    }
-  };
-
-  const updateBlacklistedIp = async (payload) => {
+  const updateWhitelistedIp = async (payload) => {
+    console.log(`pfsdjn ${JSON.stringify(payload)}`);
+    
     try {
       const userData = JSON.parse(localStorage.getItem("user"));
       const userId = userData?.id;
@@ -335,9 +193,10 @@ const BlacklistedIPsPage = ({
         name: payload.name || "",
         description: payload.description || "",
         isActive: payload.isActive ? true : false,
-        isBlacklisted: payload.isBlacklisted ? true: false,
+        isBlacklisted: payload.isBlacklisted ? true : false,
       };
-
+      console.log("updated payload",updatePayload);
+      
       await apiFunction("put", blacklistIpApi, payload?.id, updatePayload);
 
       setIps((prev) =>
@@ -361,8 +220,24 @@ const BlacklistedIPsPage = ({
     }
   };
 
+  const deleteWhitelistedIp = async (id) => {
+    try {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this IP?",
+      );
+
+      if (!confirmDelete) return;
+
+      await apiFunction("delete", blacklistIpApi, id, null);
+      showSuccessToast("IP deleted successfully");
+      setIps((prev) => prev.filter((ip) => ip.id !== id));
+    } catch (error) {
+      showErrorToast("Failed to delete IP");
+    }
+  };
+
   const toggleActiveStatus = async (ip) => {
-    await updateBlacklistedIp({
+    await updateWhitelistedIp({
       id: ip.id,
       IPAddress: ip.ip,
       name: ip.name,
@@ -372,24 +247,14 @@ const BlacklistedIPsPage = ({
     });
   };
 
-  const deleteBlacklistedIp = async (id) => {
-    try {
-      const confirmDelete = window.confirm(
-        "Are you sure you want to delete this IP?",
-      );
-
-      if (!confirmDelete) return;
-
-      await apiFunction("delete", blacklistIpApi, id, null);
-
-      showSuccessToast("IP deleted successfully");
-
-      // 🔁 refresh list OR local remove
-      setIps((prev) => prev.filter((ip) => ip.id !== id));
-    } catch (error) {
-      // console.error(error);
-      showErrorToast("Failed to delete IP");
-    }
+  const openAddDrawer = () => {
+    setSingleIp("");
+    setIpName("");
+    setIpDescription("");
+    setIpActive(true);
+    setIpBlacklisted(false);
+    setEditingId(null);
+    setIsDrawerOpen(true);
   };
 
   const handleEditIp = (ip) => {
@@ -402,27 +267,9 @@ const BlacklistedIPsPage = ({
     setIsDrawerOpen(true);
   };
 
-  const handleRefresh = async () => {
-    if (isRefreshing) return;
-
-    try {
-      setIsRefreshing(true);
-      await fetchBlacklistedIps();
-    } finally {
-      setTimeout(() => setIsRefreshing(false), 500); // smooth finish
-    }
-  };
-
-  useEffect(() => {
-    fetchBlacklistedIps();
-    return () => {
-      abortRef.current?.abort(); // 🧹 cleanup
-    };
-  }, []);
-
   const handleSubmitIps = async () => {
     if (editingId) {
-      await updateBlacklistedIp({
+      await updateWhitelistedIp({
         id: editingId,
         IPAddress: singleIp,
         name: ipName,
@@ -435,41 +282,192 @@ const BlacklistedIPsPage = ({
       return;
     }
 
-    await addBlacklistedIps({
+    const added = await addWhitelistedIp({
       IPAddress: singleIp,
       name: ipName,
       description: ipDescription,
       isActive: ipActive,
       isBlacklisted: ipBlacklisted,
     });
+    if (added) {
+      setIsDrawerOpen(false);
+    }
   };
 
-  const openAddDrawer = () => {
-    setSingleIp("");
-    setIpName("");
-    setIpDescription("");
-    setIpActive(true);
-    setIpBlacklisted(true);
-    setEditingId(null);
-    setIsDrawerOpen(true);
+  const fetchWhitelistedIps = async () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      setLoadingIps(true);
+      const userData = JSON.parse(localStorage.getItem("user"));
+      const userId = userData?.id;
+
+      if (!userId) {
+        showErrorToast("User not logged in");
+        return;
+      }
+
+      let res;
+      try {
+        res = await apiFunction(
+          "get",
+          `${getWhitelistApi}?userId=${userId}`,
+          null,
+          null,
+          controller.signal,
+        );
+      } catch (error) {
+        const status = error?.response?.status;
+        if (status === 404 || status === 405) {
+          res = await apiFunction(
+            "get",
+            `${blacklistIpApi}?userId=${userId}`,
+            null,
+            null,
+            controller.signal,
+          );
+          if (!res) return;
+          const rawAll = Array.isArray(res?.data?.data)
+            ? res.data.data
+            : Array.isArray(res?.data)
+              ? res.data
+              : Array.isArray(res?.data?.data?.rows)
+                ? res.data.data.rows
+                : [];
+          const rawData = rawAll.filter(
+            (item) => !normalizeFlag(item.isBlacklisted),
+          );
+
+          const formatted = rawData.map((item, index) => ({
+            sn: index + 1,
+            ip: item.IPAddress || "-",
+            name: item.name || "",
+            description: item.description || "",
+            isActive:
+              item.isActive === true ||
+              String(item.isActive) === "1" ||
+              String(item.isActive).toLowerCase() === "true",
+            isBlacklisted:
+              item.isBlacklisted === true ||
+              String(item.isBlacklisted) === "1" ||
+              String(item.isBlacklisted).toLowerCase() === "true",
+            addedOn: item.createdAt
+              ? new Date(item.createdAt).toLocaleString("en-IN")
+              : "-",
+            id: item.id,
+          }));
+
+          setIps(formatted);
+          return;
+        }
+        throw error;
+      }
+      if (!res) return;
+
+      let rawData = Array.isArray(res?.data?.data)
+        ? res.data.data
+        : Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res?.data?.data?.rows)
+            ? res.data.data.rows
+            : [];
+
+      if (!rawData || rawData.length === 0) {
+        const fallbackRes = await apiFunction(
+          "get",
+          `${blacklistIpApi}?userId=${userId}`,
+          null,
+          null,
+          controller.signal,
+        );
+        const fallbackData = Array.isArray(fallbackRes?.data?.data)
+          ? fallbackRes.data.data
+          : Array.isArray(fallbackRes?.data)
+            ? fallbackRes.data
+            : Array.isArray(fallbackRes?.data?.data?.rows)
+              ? fallbackRes.data.data.rows
+              : [];
+        rawData = fallbackData.filter(
+          (item) => !normalizeFlag(item.isBlacklisted),
+        );
+      } else {
+        rawData = rawData.filter((item) => !normalizeFlag(item.isBlacklisted));
+      }
+
+      const formatted = rawData.map((item, index) => ({
+        sn: index + 1,
+        ip: item.IPAddress || "-",
+        name: item.name || "",
+        description: item.description || "",
+        isActive:
+          item.isActive === true ||
+          String(item.isActive) === "1" ||
+          String(item.isActive).toLowerCase() === "true",
+        isBlacklisted:
+          item.isBlacklisted === true ||
+          String(item.isBlacklisted) === "1" ||
+          String(item.isBlacklisted).toLowerCase() === "true",
+        addedOn: item.createdAt
+          ? new Date(item.createdAt).toLocaleString("en-IN")
+          : "-",
+        id: item.id,
+      }));
+
+      setIps(formatted);
+    } catch (error) {
+      if (error?.code === "ERR_CANCELED") return;
+      showErrorToast("Failed to fetch IPs");
+    } finally {
+      setLoadingIps(false);
+    }
   };
+
+  const handleRefresh = async () => {
+    if (isRefreshing) return;
+    try {
+      setIsRefreshing(true);
+      await fetchWhitelistedIps();
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
+
+  useEffect(() => {
+    fetchWhitelistedIps();
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
+  const TrashIcon = ({ onClick }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-red-500 hover:text-red-600 cursor-pointer"
+      aria-label="Delete IP"
+    >
+      <Trash2 size={16} />
+    </button>
+  );
 
   return (
     <div className="min-h-screen bg-[var(--app-bg)] text-slate-900 p-0 font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="flex flex-col justify-between items-start mb-8 gap-4">
           <div>
-            <h1 className="dashboard-heading text-left">Blacklisted IPs</h1>
+            <h1 className="dashboard-heading text-left">Whitelisted IPs</h1>
             <p className="dashboard-subheading text-left">
-              Manage, add or remove blacklisted IP addresses with ease
+              Manage, add or remove whitelisted IP addresses with ease
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={openAddDrawer}
-              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
+              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] hover:bg-[#356ee6] cursor-pointer !text-white"
             >
               <Plus size={14} />
               Add IP
@@ -504,7 +502,7 @@ const BlacklistedIPsPage = ({
             </button>
             <button
               type="button"
-              onClick={exportBlacklistedIps}
+              onClick={exportWhitelistedIps}
               className="flex items-center gap-2 px-3 py-2 rounded-md font-semibold text-[13px] text-slate-700 hover:text-slate-900 cursor-pointer"
             >
               <FileDown size={16} />
@@ -513,25 +511,21 @@ const BlacklistedIPsPage = ({
           </div>
         </div>
 
-        {/* Cards */}
         <div className="max-h-[520px] overflow-y-auto custom-scrollbar">
-          {loadingIps && (
+          {loadingIps ? (
             <div className="flex flex-col items-center justify-center py-16 text-slate-400">
               <div className="flex items-center gap-2 mb-3">
                 <span className="h-2 w-2 rounded-full bg-[#3c79ff] animate-pulse"></span>
                 <span className="h-2 w-2 rounded-full bg-[#3c79ff] animate-pulse [animation-delay:0.15s]"></span>
                 <span className="h-2 w-2 rounded-full bg-[#3c79ff] animate-pulse [animation-delay:0.3s]"></span>
               </div>
-              <p className="text-sm">Loading blacklisted IPs...</p>
+              <p className="text-sm">Loading whitelisted IPs...</p>
             </div>
-          )}
-
-          {/* 📭 Empty State */}
-          {!loadingIps && ips.length === 0 && (
+          ) : ips.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center text-slate-400">
               <div className="text-2xl mb-3 text-slate-400">No items</div>
               <p className="text-lg font-medium text-slate-700">
-                No Blacklisted IPs Found
+                No Whitelisted IPs Found
               </p>
               <p className="text-sm mt-1">
                 You haven't added any IP addresses yet.
@@ -539,15 +533,12 @@ const BlacklistedIPsPage = ({
 
               <button
                 onClick={openAddDrawer}
-                className="mt-5 px-5 py-2 bg-[#3c79ff] hover:bg-[#356ee6] text-white rounded-md text-sm cursor-pointer !text-white"
+                className="mt-5 px-5 py-2 bg-[#3c79ff] hover:bg-[#356ee6] rounded-md text-sm cursor-pointer !text-white"
               >
                 + Add Your First IP
               </button>
             </div>
-          )}
-
-          {/* ✅ Data State */}
-          {!loadingIps && ips.length > 0 && (
+          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {ips.map((ip) => (
                 <div
@@ -558,19 +549,20 @@ const BlacklistedIPsPage = ({
                     <div className="flex items-start gap-3 min-w-0">
                       <input type="checkbox" className="mt-1 h-4 w-4" />
                       <div className="min-w-0">
-                        <div className="text-[16px] font-semibold text-[#3c79ff] truncate text-left">
+                        <div className="text-[16px] font-semibold text-[#3c79ff] truncate">
                           {ip.ip}
                         </div>
                         <div className="text-sm text-slate-800 text-left truncate">
                           <span className="font-semibold">Title:</span>{" "}
-                          <span className="font-normal text-slate-500">{ip.name || "Not available"}</span>
+                          <span className="font-normal text-slate-500">
+                            {ip.name || "Not available"}
+                          </span>
                         </div>
-                        <div
-                          className="text-xs text-slate-800 text-left truncate whitespace-nowrap"
-                          title={ip.description || "Not available"}
-                        >
+                        <div className="text-xs text-slate-800 text-left truncate whitespace-nowrap">
                           <span className="font-semibold">Description:</span>{" "}
-                          <span className="font-normal text-slate-500">{ip.description || "Not available"}</span>
+                          <span className="font-normal text-slate-500">
+                            {ip.description || "Not available"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -610,11 +602,7 @@ const BlacklistedIPsPage = ({
 
                   <div className="flex items-center justify-between text-xs text-slate-500">
                     <div className="flex items-center gap-2">
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        className="h-4 w-4"
-                      >
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
                         <path
                           fill="currentColor"
                           d="M7 2h10a2 2 0 0 1 2 2v2H5V4a2 2 0 0 1 2-2Zm12 6H5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Zm-2 4h-5v5h5v-5Z"
@@ -646,7 +634,7 @@ const BlacklistedIPsPage = ({
                         </span>
                       </div>
                       <div className="relative group">
-                        <TrashIcon onClick={() => deleteBlacklistedIp(ip.id)} />
+                        <TrashIcon onClick={() => deleteWhitelistedIp(ip.id)} />
                         <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
                           Delete
                         </span>
@@ -668,12 +656,12 @@ const BlacklistedIPsPage = ({
           onClick={() => setIsDrawerOpen(false)}
         />
         <div
-          className={`absolute right-0 top-0 h-full w-[380px] bg-[#f5f7fa] border-l border-[#d5d9e4] shadow-2xl transition-transform duration-300 flex flex-col ${isDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
+          className={`absolute right-0 top-0 h-full w-[380px] bg-[#f5f7fa] border-l  shadow-2xl transition-transform duration-300 flex flex-col ${isDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
         >
           <div className="flex items-start justify-between p-5 border-b border-[#d5d9e4]">
             <div>
               <div className="text-lg font-semibold text-slate-900 text-left">Add IP</div>
-              <div className="text-xs text-slate-500">Blacklist entry details</div>
+              <div className="text-xs text-slate-500">Whitelist entry details</div>
             </div>
             <button
               onClick={() => setIsDrawerOpen(false)}
@@ -710,7 +698,7 @@ const BlacklistedIPsPage = ({
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-700 block mb-2">
-                Name
+                Title
               </label>
               <input
                 value={ipName}
@@ -788,6 +776,4 @@ const BlacklistedIPsPage = ({
       </div>
     </div>
   );
-};
-
-export default BlacklistedIPsPage;
+}

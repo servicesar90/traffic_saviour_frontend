@@ -39,7 +39,6 @@ const Dashboard = () => {
     allowed_campaigns: 0,
   });
 
-  const [newTask, setNewTask] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [chartData, setChartData] = useState([]);
   const [chartRangeDays, setChartRangeDays] = useState(10);
@@ -55,6 +54,15 @@ const Dashboard = () => {
     const saved = localStorage.getItem("todo_tasks");
     return saved ? JSON.parse(saved) : [];
   });
+  const [isTodoDrawerOpen, setIsTodoDrawerOpen] = useState(false);
+  const [drawerTitle, setDrawerTitle] = useState("");
+  const [drawerDescription, setDrawerDescription] = useState("");
+  const [drawerSubtasks, setDrawerSubtasks] = useState([]);
+  const [drawerStatus, setDrawerStatus] = useState("");
+  const [drawerDueDate, setDrawerDueDate] = useState("");
+  const [drawerReminder, setDrawerReminder] = useState("");
+  const [drawerTag, setDrawerTag] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -68,7 +76,6 @@ const Dashboard = () => {
   const [billingList, setBillingList] = useState([]);
   const [billingLoading, setBillingLoading] = useState(false);
   const [countryPage, setCountryPage] = useState(1);
-  
 
   const ITEMS_PER_PAGE = 5;
 
@@ -100,36 +107,14 @@ const Dashboard = () => {
   const countryEnd = Math.min(countryStart + COUNTRIES_PER_PAGE, countryTraffic.length);
   const countrySlice = countryTraffic.slice(countryStart, countryEnd);
 
-  const handleRefresh = async () => {
-    if (isRefreshing) return;
-
-    try {
-      setIsRefreshing(true);
-
-      await Promise.all([fetchIpClicks(), fetchStats(), fetchCampaigns()]);
-    } catch (err) {
-      // console.error(err);
-    } finally {
-      setTimeout(() => setIsRefreshing(false), 600); // smooth UX
-    }
-  };
-
-  // const goToCampaign = (id) => alert("Open campaign: " + id);
-  // const prevPage = () => setPage((p) => Math.max(1, p - 1));
-  // const nextPage = () => setPage((p) => p + 1);
-
   const fetchIpClicks = async () => {
     try {
       setLoading(true);
-
       const res = await apiFunction("get", ipClicks);
       const rawData = res?.data?.data || [];
 
-      // Keep latest 30 days for range filtering
-      const last30DaysData = rawData.slice(-30);
-
-      // Chart data
-      const formattedData = last30DaysData.map((item) => ({
+      const lastDays = rawData.slice(-chartRangeDays);
+      const formattedData = lastDays.map((item) => ({
         date: new Date(item.date).toLocaleDateString("en-IN", {
           day: "2-digit",
           month: "short",
@@ -141,8 +126,7 @@ const Dashboard = () => {
 
       setChartData(formattedData);
 
-      // Summary totals (only last 10 days)
-      const totals = last10DaysData.reduce(
+      const totals = lastDays.reduce(
         (acc, item) => {
           acc.totalClicks += Number(item.total_t_clicks || 0);
           acc.safeClicks += Number(item.total_s_clicks || 0);
@@ -154,7 +138,6 @@ const Dashboard = () => {
 
       setClickSummary(totals);
     } catch (err) {
-      // console.error("IP Click API Error:", err);
       setChartData([]);
       setClickSummary({ totalClicks: 0, safeClicks: 0, moneyClicks: 0 });
     } finally {
@@ -162,7 +145,18 @@ const Dashboard = () => {
     }
   };
 
-  const fetchCampaigns = useCallback(async (page = 1) => {
+  const handleRefresh = async () => {
+    if (isRefreshing) return;
+    try {
+      setIsRefreshing(true);
+      await Promise.all([fetchIpClicks(), fetchStats(), fetchCampaigns()]);
+    } catch (err) {
+      // console.error(err);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 600);
+    }
+  };
+const fetchCampaigns = useCallback(async (page = 1) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -226,17 +220,55 @@ const Dashboard = () => {
     }
   };
 
-  const handleAddTask = () => {
-    if (!newTask.trim()) return;
+  const resetDrawerFields = () => {
+    setDrawerTitle("");
+    setDrawerDescription("");
+    setDrawerSubtasks([]);
+    setDrawerStatus("");
+    setDrawerDueDate("");
+    setDrawerReminder("");
+    setDrawerTag("");
+    setEditingTaskId(null);
+  };
 
-    const task = {
-      id: Date.now(),
-      text: newTask,
-      completed: false,
-    };
+  const handleSaveDrawerTask = () => {
+    if (!drawerTitle.trim()) return;
 
-    setTasks((prev) => [task, ...prev]);
-    setNewTask("");
+    const now = new Date();
+    if (editingTaskId) {
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === editingTaskId
+            ? {
+                ...task,
+                text: drawerTitle.trim(),
+                dueDate: drawerDueDate || "",
+                status: drawerStatus || "",
+                reminder: drawerReminder || "",
+                tag: drawerTag || "",
+                description: drawerDescription || "",
+                subtasks: drawerSubtasks || [],
+              }
+            : task
+        )
+      );
+    } else {
+      const task = {
+        id: Date.now(),
+        text: drawerTitle.trim(),
+        completed: false,
+        createdAt: now.toISOString(),
+        dueDate: drawerDueDate || "",
+        status: drawerStatus || "",
+        reminder: drawerReminder || "",
+        tag: drawerTag || "",
+        description: drawerDescription || "",
+        subtasks: drawerSubtasks || [],
+      };
+      setTasks((prev) => [task, ...prev]);
+    }
+    resetDrawerFields();
+    setIsTodoDrawerOpen(false);
   };
 
   //  Toggle complete/incomplete
@@ -253,10 +285,90 @@ const Dashboard = () => {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   };
 
+  const handleAddSubtask = () => {
+    setDrawerSubtasks((prev) => [
+      ...prev,
+      { id: Date.now(), text: "New subtask", completed: false },
+    ]);
+  };
+  
+  const handleToggleSubtask = (id) => {
+    setDrawerSubtasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+  
+  const handleSubtaskText = (id, value) => {
+    setDrawerSubtasks((prev) =>
+      prev.map((task) => (task.id === id ? { ...task, text: value } : task))
+    );
+  };
+
+  const openTodoDrawer = () => {
+    resetDrawerFields();
+    setIsTodoDrawerOpen(true);
+  };
+
+  const handleEditTask = (task) => {
+    setDrawerTitle(task.text || "");
+    setDrawerDescription(task.description || "");
+    setDrawerSubtasks(task.subtasks || []);
+    setDrawerStatus(task.status || "");
+    setDrawerDueDate(task.dueDate || "");
+    setDrawerReminder(task.reminder || "");
+    setDrawerTag(task.tag || "");
+    setEditingTaskId(task.id);
+    setIsTodoDrawerOpen(true);
+  };
+
+
   //  Filtered tasks by search
   const filteredTasks = tasks.filter((task) =>
     task.text.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getTaskDateLabel = (task) => {
+    const dateSource = task.dueDate || task.createdAt;
+    if (!dateSource) return "";
+    const date = new Date(dateSource);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const getTaskTimeLabel = (task) => {
+    if (!task.createdAt) return "";
+    const date = new Date(task.createdAt);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getTaskStatusLabel = (task) => {
+    const status = (task.status || "").toLowerCase();
+    if (status === "inprogress") return "ON PROCESS";
+    if (status === "done") return "COMPLETED";
+    if (status === "todo") return "DRAFT";
+    return "DRAFT";
+  };
+
+  const getTaskStatusClass = (task) => {
+    const status = (task.status || "").toLowerCase();
+    if (status === "inprogress") {
+      return "bg-[#E0F2FE] text-[#0B6AD6] border-[#7CC3FF]";
+    }
+    if (status === "done") {
+      return "bg-[#DCFCE7] text-[#15803D] border-[#86EFAC]";
+    }
+    return "bg-[#E8EEFF] text-[#2B5BFF] border-[#8DA2FF]";
+  };
 
   const handleActionClick = (e, campaignId) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -980,13 +1092,13 @@ const Dashboard = () => {
       <div className="py-1">
         <button
           onClick={() => handleActionSelect("edit", campaignId, row)}
-          className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition duration-100 cursor-pointer"
+          className="block w-full text-left px-4 py-2 text-sm text-slate-700 text-xs hover:bg-slate-100 transition duration-100 cursor-pointer"
         >
           Edit Campaign
         </button>
         <button
           onClick={() => handleActionSelect("duplicate", campaignId, row)}
-          className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition duration-100 cursor-pointer"
+          className="block w-full text-left px-4 py-2 text-sm text-slate-700 text-xs hover:bg-slate-100 transition duration-100 cursor-pointer"
         >
           Duplicate Campaign
         </button>
@@ -1083,7 +1195,7 @@ const Dashboard = () => {
                     >
                       <path d="M7 4v16l13-8L7 4z" />
                     </svg>
-                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Active</span>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 text-xs group-hover:block z-50">Active</span>
                   </button>
 
                   {/*  Boost */}
@@ -1109,7 +1221,7 @@ const Dashboard = () => {
                     >
                       <path d="M13 2L3 14h7v8l10-12h-7z" />
                     </svg>
-                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Allow</span>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 text-xs group-hover:block z-50">Allow</span>
                   </button>
 
                   {/*  Block */}
@@ -1138,7 +1250,7 @@ const Dashboard = () => {
                       <circle cx="12" cy="12" r="10" />
                       <line x1="5" y1="19" x2="19" y2="5" />
                     </svg>
-                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 group-hover:block z-50">Block</span>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 text-xs group-hover:block z-50">Block</span>
                   </button>
                 </td>
                 <td className="px-3 py-1.5 text-sm text-left ">
@@ -1160,7 +1272,7 @@ const Dashboard = () => {
                       </svg>
 
                       {/*  Tooltip container */}
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white text-slate-700 text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white text-slate-700 text-xs text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200">
                         {item.integrationUrl || "No URL Found"}
                       </div>
                     </div>
@@ -1189,7 +1301,7 @@ const Dashboard = () => {
                   <div className="ml-auto w-fit inline-flex items-center gap-1 relative group">
                     {/* i Icon */}
                     <svg
-                      className="h-4 w-4 text-blue-400 cursor-pointer"
+                      className="h-3 w-3 text-blue-400 cursor-pointer"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -1208,7 +1320,7 @@ const Dashboard = () => {
                     {/* Tooltip */}
                     <div
                       className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
-      hidden group-hover:block bg-white text-slate-700 text-xs 
+      hidden group-hover:block bg-white text-slate-700 text-xs text-xs 
       px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200"
                     >
                       {item?.safe_page || "No URL Found"}
@@ -1220,7 +1332,7 @@ const Dashboard = () => {
                   <div className="ml-auto w-fit inline-flex items-center gap-1 relative group">
                     {/* i Icon */}
                     <svg
-                      className="h-4 w-4 text-blue-400 cursor-pointer"
+                      className="h-3 w-3 text-blue-400 cursor-pointer"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -1239,7 +1351,7 @@ const Dashboard = () => {
                     {/* Tooltip */}
                     <div
                       className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 
-      hidden group-hover:block bg-white text-slate-700 text-xs 
+      hidden group-hover:block bg-white text-slate-700 text-xs text-xs 
       px-3 py-1 rounded shadow-lg whitespace-nowrap z-50 border border-slate-200"
                     >
                       {item?.money_page?.[0]?.url || "No URL Found"}
@@ -1255,24 +1367,24 @@ const Dashboard = () => {
                     <div className="relative group">
                       <button
                         onClick={() => handleActionSelect("edit", item?.uid, item)}
-                        className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
+                        className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700 text-xs"
                         aria-label="Edit"
                       >
                         <Pencil size={18} strokeWidth={2.25} />
                       </button>
-                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 shadow-sm group-hover:block z-50">
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 text-xs shadow-sm group-hover:block z-50">
                         Edit
                       </span>
                     </div>
                     <div className="relative group">
                       <button
                         onClick={() => handleActionSelect("duplicate", item?.uid, item)}
-                        className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700"
+                        className="p-1 rounded hover:bg-slate-100 text-[#7c8698] cursor-pointer transition-transform duration-150 hover:scale-110 hover:text-slate-700 text-xs"
                         aria-label="Duplicate"
                       >
                         <Copy size={18} strokeWidth={2.25} />
                       </button>
-                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 shadow-sm group-hover:block z-50">
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 text-xs shadow-sm group-hover:block z-50">
                         Duplicate
                       </span>
                     </div>
@@ -1284,7 +1396,7 @@ const Dashboard = () => {
                       >
                         <Trash2 size={18} strokeWidth={2.25} />
                       </button>
-                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 shadow-sm group-hover:block z-50">
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 text-xs shadow-sm group-hover:block z-50">
                         Delete
                       </span>
                     </div>
@@ -1312,10 +1424,10 @@ const Dashboard = () => {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleAddNewCampaign}
-              className="flex items-center px-4 py-2 rounded-md font-medium text-sm border transition-all duration-200 cursor-pointer bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100"
+              className="flex items-center px-4 py-2 rounded-md font-medium text-sm border transition-all duration-200 cursor-pointer bg-white/90 text-slate-700 text-xs border-slate-200 hover:bg-slate-100"
             >
               <svg
-                className="h-4 w-4 mr-2"
+                className="h-3 w-3 mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1336,12 +1448,12 @@ const Dashboard = () => {
                 ${
                   isRefreshing
                     ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed"
-                    : "bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    : "bg-white/90 text-slate-700 text-xs border-slate-200 hover:bg-slate-100"
                 }
               `}
             >
               <svg
-                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1781,38 +1893,39 @@ const Dashboard = () => {
             </div>
 
             <div className="space-y-4">
-            {countrySlice.map((row) => (
-              <div key={row.country} className="flex items-center gap-4">
-                <div className="w-28 text-xs text-slate-700">{row.country}</div>
-                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#3874FF]"
-                    style={{ width: `${Math.round((row.value / maxTrafficValue) * 100)}%` }}
-                  />
+              {countrySlice.map((row) => (
+                <div key={row.country} className="flex items-center gap-4">
+                  <div className="w-28 text-xs text-slate-700 text-xs">{row.country}</div>
+                  <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[#3874FF]"
+                      style={{ width: `${Math.round((row.value / maxTrafficValue) * 100)}%` }}
+                    />
+                  </div>
+                  <div className="w-16 text-right text-xs text-slate-500">
+                    {row.value.toLocaleString("en-US")}
+                  </div>
                 </div>
-                <div className="w-16 text-right text-xs text-slate-600">
-                  {row.value.toLocaleString("en-US")}
-                </div>
-              </div>
-            ))}
-            {/* Country pagination */}
+              ))}
+            </div>
+
             <div className="mt-6 flex items-center justify-between text-sm text-slate-500">
-              <span>
+              <div>
                 {countryTraffic.length === 0
                   ? "0 items"
                   : `${countryStart + 1} to ${countryEnd} items of ${countryTraffic.length}`}
-              </span>
+              </div>
               <div className="flex items-center gap-4 text-sm">
                 <button
                   disabled={countryPageSafe === 1}
                   onClick={() => setCountryPage((p) => Math.max(1, p - 1))}
-                className={`flex items-center gap-1 ${
-                  countryPageSafe === 1
-                    ? "text-slate-300 cursor-not-allowed"
-                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
-                }`}
+                  className={`flex items-center gap-1 ${
+                    countryPageSafe === 1
+                      ? "text-slate-300 cursor-not-allowed"
+                      : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                  }`}
                 >
-                  <span className="text-lg leading-none">‹</span> Previous
+                  <span className="text-lg leading-none"></span> Previous
                 </button>
                 <button
                   disabled={countryPageSafe === countryTotalPages}
@@ -1821,15 +1934,14 @@ const Dashboard = () => {
                   }
                   className={`flex items-center gap-1 ${
                     countryPageSafe === countryTotalPages
-                    ? "text-slate-300 cursor-not-allowed"
-                    : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                      ? "text-slate-300 cursor-not-allowed"
+                      : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
                   }`}
                 >
-                  Next <span className="text-lg leading-none">›</span>
+                  Next <span className="text-lg leading-none"></span>
                 </button>
               </div>
             </div>
-          </div>
           </div>
 
           {/* Right map */}
@@ -1846,13 +1958,20 @@ const Dashboard = () => {
                 attribution=""
               />
               {countryTraffic.map((row) => {
-                const radius = Math.max(6, Math.round((row.value / maxTrafficValue) * 16));
+                const radius = Math.max(
+                  6,
+                  Math.round((row.value / maxTrafficValue) * 16)
+                );
                 return (
                   <CircleMarker
                     key={row.country}
                     center={[row.lat, row.lng]}
                     radius={radius}
-                    pathOptions={{ color: "#3874FF", fillColor: "#3874FF", fillOpacity: 0.35 }}
+                    pathOptions={{
+                      color: "#3874FF",
+                      fillColor: "#3874FF",
+                      fillOpacity: 0.35,
+                    }}
                   >
                     <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
                       {row.country}: {row.value.toLocaleString("en-US")}
@@ -1870,68 +1989,160 @@ const Dashboard = () => {
       </div>
 
       {/* Bottom Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-3">
         {/* To-do */}
-        <div className="bg-white/90 border border-slate-200/70 rounded-2xl p-6 min-h-[220px] shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-slate-900 font-semibold">To do</h4>
-            <div className="text-slate-400 text-sm">Reminders list</div>
+        <div className="bg-[var(--app-bg)] rounded-2xl p-3 min-h-[220px] shadow-none">
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <div>
+              <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">
+                Todo list <span className="font-normal">({tasks.length})</span>
+              </h3>
+              <p className="text-[#525b75] leading-[1.2] text-sm text-left">
+                Your tasks and reminders at a glance.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={openTodoDrawer}
+              className="text-[#3874FF] text-[14px] font-semibold flex items-center gap-1 hover:text-[#2f63d6] cursor-pointer"
+            >
+              <span className="text-base leading-none">+</span>
+              Add new task
+            </button>
           </div>
-
-          <div className="bg-[#f6f5fb] border border-slate-200/70 rounded-xl p-4 min-h-[120px]">
-            {/*  Search */}
+          <div className="relative mt-3 mb-2 max-w-[300px]">
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white/90 border border-slate-200/70 px-3 py-2 rounded-lg text-slate-700 mb-3"
+              className="w-full bg-white/90 border border-slate-200/70 pl-9 pr-3 py-1.5 rounded-md text-slate-700 text-xs"
+              type="search"
               placeholder="Search tasks"
+              aria-label="Search"
             />
+            <svg
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400"
+              aria-hidden="true"
+              viewBox="0 0 512 512"
+              fill="currentColor"
+            >
+              <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+            </svg>
+          </div>
 
-            {/*  Add Task */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <input
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                className="flex-1 w-full bg-white/90 border border-slate-200/70 px-3 py-2 rounded-lg text-slate-700"
-                placeholder="Write new task..."
-              />
-              <button
-                onClick={handleAddTask}
-                className="bg-[#2b1f57] text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-[#241a4a]"
-              >
-                Add
-              </button>
-            </div>
-
+          <div className="bg-[#f6f5fb] rounded-xl pt-2 pb-3 pr-4 pl-0 min-h-[120px] overflow-x-hidden">
             {/*  Task List */}
-            <div className="space-y-2 max-h-[180px] overflow-y-auto">
+            <div className="h-[220px] overflow-y-auto overflow-x-hidden custom-scrollbar">
               {filteredTasks.length === 0 ? (
-                <p className="text-slate-400 text-sm text-center">
-                  No tasks found
-                </p>
+                <p className="text-slate-400 text-sm text-center">No tasks found</p>
               ) : (
                 filteredTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between bg-white/90 border border-slate-200/70 px-3 py-2 rounded-lg"
-                  >
-                    <div
-                      onClick={() => handleToggleComplete(task.id)}
-                      className={`cursor-pointer text-sm ${
-                        task.completed
-                          ? "line-through text-slate-400"
-                          : "text-slate-900"
-                      }`}
-                    >
-                      {task.text}
-                    </div>
+                  <div key={task.id}>
+                    <div className="flex items-center justify-between gap-3 py-3 text-left">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={() => handleToggleComplete(task.id)}
+                          className="h-4 w-4 shrink-0"
+                        />
+                        <div
+                          className={`text-sm truncate ${
+                            task.completed
+                              ? "line-through text-slate-400"
+                              : "text-slate-900"
+                          }`}
+                          title={task.text}
+                        >
+                          {task.text}
+                        </div>
+                        <span
+                          className={`ml-2 text-[10px] uppercase font-semibold px-2 py-0.5 border rounded-full whitespace-nowrap ${getTaskStatusClass(
+                            task
+                          )}`}
+                        >
+                          {getTaskStatusLabel(task)}
+                        </span>
+                      </div>
 
-                    <button
-                      onClick={() => handleDeleteTask(task.id)}
-                      className="text-rose-500 text-xs hover:text-rose-600"
-                    >
-                      X
-                    </button>
+                      <div className="flex items-center gap-3 text-xs text-slate-500 whitespace-nowrap">
+                        <div className="flex items-center gap-1">
+                          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5">
+                            <path
+                              fill="currentColor"
+                              d="M16.5 6.5h-6A4.5 4.5 0 0 0 6 11v6a3 3 0 0 0 3 3h6a4.5 4.5 0 0 0 4.5-4.5v-6a3 3 0 0 0-3-3Zm1.5 9a3 3 0 0 1-3 3H9a1.5 1.5 0 0 1-1.5-1.5v-6A3 3 0 0 1 10.5 8h6A1.5 1.5 0 0 1 18 9.5v6Zm-3.75-9.5 1.25-1.25-1.06-1.06L12 5.19 9.56 2.75 8.5 3.81 10.94 6.25h3.31Z"
+                            />
+                          </svg>
+                          <span>{task.subtasks?.length || 0}</span>
+                        </div>
+                        <span className="text-slate-300">|</span>
+                        <div className="flex items-center gap-1">
+                          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5">
+                            <path
+                              fill="currentColor"
+                              d="M20 4H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3v3l4-3h9a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 13H10.5L8 19v-2H4V6h16v11Z"
+                            />
+                          </svg>
+                          <span>0</span>
+                        </div>
+                        {getTaskDateLabel(task) && (
+                          <>
+                            <span className="text-slate-300">|</span>
+                            <span>{getTaskDateLabel(task)}</span>
+                          </>
+                        )}
+                        {getTaskTimeLabel(task) && (
+                          <>
+                            <span className="text-slate-300">|</span>
+                            <span>{getTaskTimeLabel(task)}</span>
+                          </>
+                        )}
+                        <div className="flex items-center gap-2 ml-2">
+                          <div className="relative group">
+                            <button
+                              type="button"
+                              onClick={() => handleEditTask(task)}
+                              className="text-slate-500 hover:text-slate-700 cursor-pointer"
+                              aria-label="Edit task"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                viewBox="0 0 24 24"
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <rect x="3.5" y="3.5" width="17" height="17" rx="3" />
+                                <path d="M8.5 15.5l.7-3.1 5.8-5.8 2.4 2.4-5.8 5.8-3.1.7Z" />
+                                <path d="M13.6 6.9l2.4 2.4" />
+                              </svg>
+                            </button>
+                            <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+                              Edit
+                            </span>
+                          </div>
+                          <div className="relative group">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTask(task.id)}
+                              className="text-rose-500 hover:text-rose-600 cursor-pointer"
+                              aria-label="Delete task"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                            <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+                              Delete
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      className="w-full"
+                      style={{ border: 0, borderTop: "1px solid var(--app-border)", height: 0 }}
+                    />
                   </div>
                 ))
               )}
@@ -1943,9 +2154,8 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Click Metrics */}
-        <div className="bg-white/90 border border-slate-200/70 rounded-2xl p-6 min-h-[220px] shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+{/* Click Metrics */}
+        <div className="bg-[var(--app-bg)] rounded-2xl p-3 min-h-[220px] shadow-none">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-slate-900 font-semibold">
               Click Metrics - Realtime Logs
@@ -1989,16 +2199,150 @@ const Dashboard = () => {
  
 
 
+          {/* Todo Drawer */}
+      <div className={`fixed inset-0 z-[9999] ${isTodoDrawerOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+        <div
+          className={`absolute inset-0 bg-black/30 transition-opacity duration-300 ${isTodoDrawerOpen ? "opacity-100" : "opacity-0"}`}
+          onClick={() => setIsTodoDrawerOpen(false)}
+        />
+        <div
+          className={`absolute right-0 top-0 h-full w-[360px] bg-[#F3F6FA] shadow-2xl transition-transform duration-300 flex flex-col ${isTodoDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
+          <div className="flex items-start justify-between p-5">
+            <input
+              value={drawerTitle}
+              onChange={(e) => setDrawerTitle(e.target.value)}
+              placeholder="Task title"
+              className="flex-1 min-w-0 bg-transparent text-lg font-semibold text-slate-900 outline-none"
+            />
+            <button
+              onClick={() => setIsTodoDrawerOpen(false)}
+              className="ml-3 h-8 w-8 flex items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 hover:text-slate-800 shrink-0"
+              aria-label="Close"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 block"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              >
+                <line x1="6" y1="6" x2="18" y2="18" />
+                <line x1="18" y1="6" x2="6" y2="18" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="px-5 pb-6 space-y-6 flex-1 overflow-y-auto">
+            <div>
+              <label className="text-sm font-semibold text-slate-700 mb-2 inline-flex items-center gap-2">
+                Description
+              </label>
+              <textarea
+                value={drawerDescription}
+                onChange={(e) => setDrawerDescription(e.target.value)}
+                rows={5}
+                placeholder="Add description..."
+                className="w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700"
+              />
+            </div>
+
+            <div>
+              <div className="text-sm font-semibold text-slate-700 mb-3">Subtasks</div>
+              <div className="space-y-3">
+                {drawerSubtasks.length === 0 ? (
+                  <div className="text-xs text-slate-400">No subtasks yet.</div>
+                ) : (
+                  drawerSubtasks.map((task) => (
+                    <div key={task.id} className="flex items-center gap-3 pb-3">
+                      <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={() => handleToggleSubtask(task.id)}
+                        className="h-4 w-4"
+                      />
+                      <input
+                        value={task.text}
+                        onChange={(e) => handleSubtaskText(task.id, e.target.value)}
+                        className="flex-1 bg-transparent text-sm text-slate-700 outline-none"
+                        placeholder="Subtask title"
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleAddSubtask}
+                className="mt-3 text-[#3874FF] text-sm font-semibold hover:text-[#2f63d6]"
+              >
+                + Add subtask
+              </button>
+            </div>
+
+            <div>
+              <div className="text-base font-semibold text-slate-800 mb-3">Others Information</div>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 mb-2 block">Status</label>
+                  <select
+                    value={drawerStatus}
+                    onChange={(e) => setDrawerStatus(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  >
+                    <option value="">Select</option>
+                    <option value="todo">To do</option>
+                    <option value="inprogress">In progress</option>
+                    <option value="done">Done</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 mb-2 block">Due Date</label>
+                  <input
+                    type="date"
+                    value={drawerDueDate}
+                    onChange={(e) => setDrawerDueDate(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 mb-2 block">Reminder</label>
+                  <input
+                    value={drawerReminder}
+                    onChange={(e) => setDrawerReminder(e.target.value)}
+                    placeholder="Reminder"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 mb-2 block">Tag</label>
+                  <input
+                    value={drawerTag}
+                    onChange={(e) => setDrawerTag(e.target.value)}
+                    placeholder="Select organizer..."
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  />
+                </div>
+                <div className="pt-2 flex justify-start">
+                  <button
+                    type="button"
+                    onClick={handleSaveDrawerTask}
+                    className="rounded-lg bg-[#3874FF] px-4 py-2 text-sm text-white hover:bg-[#2f63d6] !text-white cursor-pointer"
+                  >
+                    {editingTaskId ? "Update Task" : "Add Task"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };
 
 export default Dashboard;
-
-
-
-
-
-
-
-

@@ -1,8 +1,10 @@
-
+﻿
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import Tooltip from "@mui/material/Tooltip";
+import { Check, CircleHelp, Globe, Trash2 } from "lucide-react";
+import { FaEdge } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import { apiFunction } from "../api/ApiFunction";
 import { createCampaignApi } from "../api/Apis";
@@ -13,7 +15,7 @@ import { showErrorToast, showSuccessToast } from "../components/toast/toast";
    Icon components (inline SVG)
    (kept from original parts)
    =========================== */
-const ListChecks = ({ className }) => (
+const ListChecks = ({ className, ...props }) => (
   <svg
     className={className}
     xmlns="http://www.w3.org/2000/svg"
@@ -21,6 +23,7 @@ const ListChecks = ({ className }) => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    {...props}
   >
     <path d="m3 17 2 2 4-4" />
     <path d="m3 7 2 2 4-4" />
@@ -29,7 +32,7 @@ const ListChecks = ({ className }) => (
     <path d="M13 18h8" />
   </svg>
 );
-const DollarSign = ({ className }) => (
+const DollarSign = ({ className, ...props }) => (
   <svg
     className={className}
     xmlns="http://www.w3.org/2000/svg"
@@ -37,12 +40,13 @@ const DollarSign = ({ className }) => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    {...props}
   >
     <line x1="12" x2="12" y1="2" y2="22" />
     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
   </svg>
 );
-const ShieldCheck = ({ className }) => (
+const ShieldCheck = ({ className, ...props }) => (
   <svg
     className={className}
     xmlns="http://www.w3.org/2000/svg"
@@ -50,12 +54,13 @@ const ShieldCheck = ({ className }) => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    {...props}
   >
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
     <path d="m9 12 2 2 4-4" />
   </svg>
 );
-const GitMerge = ({ className }) => (
+const GitMerge = ({ className, ...props }) => (
   <svg
     className={className}
     xmlns="http://www.w3.org/2000/svg"
@@ -63,13 +68,14 @@ const GitMerge = ({ className }) => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    {...props}
   >
     <circle cx="18" cy="18" r="3" />
     <circle cx="6" cy="6" r="3" />
     <path d="M6 21V9a9 9 0 0 1 9 9" />
   </svg>
 );
-const Filter = ({ className }) => (
+const Filter = ({ className, ...props }) => (
   <svg
     className={className}
     xmlns="http://www.w3.org/2000/svg"
@@ -77,11 +83,12 @@ const Filter = ({ className }) => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    {...props}
   >
     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
   </svg>
 );
-const Bot = ({ className }) => (
+const Bot = ({ className, ...props }) => (
   <svg
     className={className}
     xmlns="http://www.w3.org/2000/svg"
@@ -89,6 +96,7 @@ const Bot = ({ className }) => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    {...props}
   >
     <path d="M12 8V4H8" />
     <rect width="16" height="12" x="4" y="8" rx="2" />
@@ -98,9 +106,10 @@ const Bot = ({ className }) => (
     <path d="M9 13v2" />
   </svg>
 );
-const Info = ({ className }) => (
+const Info = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -112,9 +121,10 @@ const Info = ({ className }) => (
     <path d="M12 8h.01" />
   </svg>
 );
-const Play = ({ className }) => (
+const Play = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -124,9 +134,10 @@ const Play = ({ className }) => (
     <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
 );
-const Zap = ({ className }) => (
+const Zap = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -136,9 +147,10 @@ const Zap = ({ className }) => (
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 );
-const CircleSlash = ({ className }) => (
+const CircleSlash = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -149,9 +161,10 @@ const CircleSlash = ({ className }) => (
     <circle cx="12" cy="12" r="10" />
   </svg>
 );
-const CalendarDays = ({ className }) => (
+const CalendarDays = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -170,9 +183,10 @@ const CalendarDays = ({ className }) => (
     <path d="M16 18h.01" />
   </svg>
 );
-const ChevronDown = ({ className }) => (
+const ChevronDown = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -182,9 +196,10 @@ const ChevronDown = ({ className }) => (
     <path d="m6 9 6 6 6-6" />
   </svg>
 );
-const MessageCircle = ({ className }) => (
+const MessageCircle = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -194,9 +209,10 @@ const MessageCircle = ({ className }) => (
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
-const Plus = ({ className }) => (
+const Plus = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -207,9 +223,10 @@ const Plus = ({ className }) => (
     <path d="M5 12h14" />
   </svg>
 );
-const XIcon = ({ className }) => (
+const XIcon = ({ className, ...props }) => (
   <svg
     className={className}
+    {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -259,14 +276,40 @@ const InputField = ({
   tooltip,
   pattern,
   step,
+  min,
+  preventNegative = false,
 }) => (
   <div>
-    <label className="flex items-center text-xs font-semibold text-slate-400 tracking-wider mb-2">
+    <label className="flex items-center text-[11px] font-extrabold uppercase text-[#52607a] tracking-wide mb-2">
       {label} {required && <span className="text-red-500 ml-1">*</span>}
       {tooltip && (
-        <Tooltip title={tooltip} placement="top">
+        <Tooltip
+          title={tooltip}
+          placement="top"
+          arrow
+          slotProps={{
+            tooltip: {
+              sx: {
+                bgcolor: "#ffffff",
+                color: "#64748b",
+                border: "1px solid #d5d9e4",
+                boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)",
+                fontSize: "12px",
+                fontWeight: 500,
+                px: 1.25,
+                py: 0.75,
+              },
+            },
+            arrow: {
+              sx: {
+                color: "#ffffff",
+                "&:before": { border: "1px solid #d5d9e4" },
+              },
+            },
+          }}
+        >
           <span className="ml-2 cursor-pointer">
-            <Info className="w-4 h-4 text-slate-500" />
+            <CircleHelp className="w-4 h-4 text-[#7f8aa3]" strokeWidth={2.2} />
           </span>
         </Tooltip>
       )}
@@ -283,16 +326,29 @@ const InputField = ({
         placeholder={placeholder}
         defaultValue={defaultValue}
         step={step}
-        className={`w-full bg-slate-800 border text-sm rounded-lg py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${icon ? "pl-10" : "px-4"
-          } ${error ? "border-red-500" : "border-slate-700"}`}
+        min={min}
+        className={`w-full bg-white border text-sm rounded-md py-2.5 text-[#141824] placeholder-[#95a1b8] focus:outline-none transition-colors ${icon ? "pl-10 pr-4" : "px-4"
+          } ${error ? "border-red-500 shadow-[inset_0_0_0_1px_#ef4444]" : "border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"}`}
+        style={
+          error
+            ? {
+                borderColor: "#ef4444",
+              }
+            : undefined
+        }
         {...register(name, {
           required: required ? `${label} is required.` : false,
           pattern: pattern || undefined,
           valueAsNumber: type === "number" ? true : undefined,
         })}
+        onKeyDown={(e) => {
+          if (preventNegative && ["-", "+", "e", "E"].includes(e.key)) {
+            e.preventDefault();
+          }
+        }}
       />
     </div>
-    {error && <p className="mt-1 text-xs text-red-400">{error.message}</p>}
+    {error && <p className="mt-1 text-xs text-red-500 text-left">{error.message}</p>}
   </div>
 );
 
@@ -305,35 +361,94 @@ const SelectField = ({
   required,
   tooltip,
   options = [],
-}) => (
-  <div>
-    <label className="flex items-center text-xs font-semibold text-slate-400 tracking-wider mb-2">
-      {label} {required && <span className="text-red-500 ml-1">*</span>}
-      {tooltip && (
-        <Tooltip title={tooltip}>
-          <span className="ml-2 cursor-pointer">
-            <Info className="w-4 h-4 text-slate-500" />
-          </span>
-        </Tooltip>
-      )}
-    </label>
-    <div className="relative">
-      <select
-        className={`w-full appearance-none bg-slate-800 border rounded-lg py-2 px-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${error ? "border-red-500" : "border-slate-700"
+  visibleOptions,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const registration = register(name, {
+    required: required && `${label} is required.`,
+  });
+
+  const isScrollableList = Boolean(visibleOptions);
+  const selectSize =
+    isScrollableList && isExpanded ? Math.min(visibleOptions, options.length) : 1;
+
+  return (
+    <div>
+      <label className="flex items-center text-[11px] font-extrabold uppercase text-[#52607a] tracking-wide mb-2">
+        {label} {required && <span className="text-red-500 ml-1">*</span>}
+        {tooltip && (
+          <Tooltip
+            title={tooltip}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: "#ffffff",
+                  color: "#64748b",
+                  border: "1px solid #d5d9e4",
+                  boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  px: 1.25,
+                  py: 0.75,
+                },
+              },
+              arrow: {
+                sx: {
+                  color: "#ffffff",
+                  "&:before": { border: "1px solid #d5d9e4" },
+                },
+              },
+            }}
+          >
+            <span className="ml-2 cursor-pointer">
+              <CircleHelp className="w-4 h-4 text-[#7f8aa3]" strokeWidth={2.2} />
+            </span>
+          </Tooltip>
+        )}
+      </label>
+      <div className="relative">
+        <select
+          size={selectSize}
+          className={`w-full appearance-none bg-white border rounded-md py-2.5 px-4 text-[#141824] text-sm focus:outline-none transition-colors ${
+            error ? "border-red-500 shadow-[inset_0_0_0_1px_#ef4444]" : "border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
           }`}
-        {...register(name, { required: required && `${label} is required.` })}
-      >
-        {options.map((opt, i) => (
-          <option key={i} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+          style={
+            error
+              ? {
+                  borderColor: "#ef4444",
+                }
+              : undefined
+          }
+          {...registration}
+          onFocus={(e) => {
+            if (isScrollableList) setIsExpanded(true);
+            registration.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            if (isScrollableList) setIsExpanded(false);
+            registration.onBlur(e);
+          }}
+          onChange={(e) => {
+            if (isScrollableList) setIsExpanded(false);
+            registration.onChange(e);
+          }}
+        >
+          {options.map((opt, i) => (
+            <option key={i} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+        {!isExpanded && (
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a96ad] pointer-events-none" />
+        )}
+      </div>
+      {error && <p className="mt-1 text-xs text-red-500 text-left">{error.message}</p>}
     </div>
-    {error && <p className="mt-1 text-xs text-red-400">{error.message}</p>}
-  </div>
-);
+  );
+};
 
 /* StatusButton - styled card button */
 const StatusButton = ({ label, Icon, isActive, onClick }) => (
@@ -360,9 +475,9 @@ const StatusButton = ({ label, Icon, isActive, onClick }) => (
 /* Dashboard Layout wrapper */
 const DashboardLayout = ({ children }) => (
   <div
-    className="min-h-screen bg-slate-950 text-white font-sans"
+    className="min-h-screen bg-[var(--app-bg)] text-slate-900 font-sans"
   >
-    <div className="max-w-7xl mx-auto p-6">{children}</div>
+    <div className="max-w-7xl mx-auto px-1 pt-0 pb-2">{children}</div>
     <div className="fixed bottom-6 right-6">
    
     </div>
@@ -383,6 +498,8 @@ export default function CampaignBuilder() {
   const [appendUrl, setAppendUrl] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [titleInput, setTitleInput] = useState("");
+  const [notesInput, setNotesInput] = useState("");
   const [showInputs, setShowInputs] = useState({
     activateAfterX: false,
     frequencyCap: false,
@@ -392,11 +509,20 @@ export default function CampaignBuilder() {
   const [editCampaignId, setEditCampaignId] = useState(null);
 
   const [activeStatus, setActiveStatus] = useState("Active");
+  const [openCountryDropdownIndex, setOpenCountryDropdownIndex] = useState(null);
+  const [countrySearchByIndex, setCountrySearchByIndex] = useState({});
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewData, setReviewData] = useState(null);
+  const [allowPageLeave, setAllowPageLeave] = useState(false);
 
 
 
   const navigate = useNavigate();
   const location = useLocation();
+  const draftStorageKey = React.useMemo(() => {
+    const idPart = location?.state?.id ? `-${location.state.id}` : "";
+    return `campaignCreationDraft${idPart}`;
+  }, [location?.state?.id]);
 
   // useEffect(() => {
   //   if (location?.state?.mode === "edit") {
@@ -451,6 +577,8 @@ export default function CampaignBuilder() {
       page_guard: c?.page_guard,
       http_code: c?.http_code,
     });
+    setTitleInput(c?.campaign_info?.campaignName || "");
+    setNotesInput(c?.campaign_info?.comment || "");
 
     setMoneyPages(
       c?.money_page || [
@@ -479,9 +607,6 @@ export default function CampaignBuilder() {
       fetchCampaignById(editCampaignId);
     }
   }, [editCampaignId]);
-
-
-
 
   // options copied from parts
   // useMemo candidate: large static list
@@ -623,12 +748,12 @@ export default function CampaignBuilder() {
 
   // useMemo candidate: static list
   const steps = [
-    { id: 1, name: "Campaign info", icon: ListChecks },
-    { id: 2, name: "Money Pages", icon: DollarSign },
-    { id: 3, name: "Safe Page", icon: ShieldCheck },
-    { id: 4, name: "Conditions", icon: GitMerge },
-    { id: 5, name: "Campaign Filters", icon: Filter },
-    { id: 6, name: "Automate", icon: Bot },
+    { id: 1, name: "Campaign Details", icon: ListChecks },
+    { id: 2, name: "Revenue Page", icon: DollarSign },
+    { id: 3, name: "Protected Page", icon: ShieldCheck },
+    { id: 4, name: "Criteria", icon: GitMerge },
+    { id: 5, name: "Campaign Screening", icon: Filter },
+    { id: 6, name: "Automation", icon: Bot },
   ];
 
   // useMemo candidate: static list
@@ -653,11 +778,11 @@ export default function CampaignBuilder() {
     clearErrors,
     setError,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm({
     defaultValues: {
-      campaignName: null,
-      comment: null,
+      campaignName: "",
+      comment: "",
       epc: null,
       cpc: null,
       trafficSource: adPlatforms[0],
@@ -681,12 +806,138 @@ export default function CampaignBuilder() {
   // useMemo candidate: derived value (or keep as direct watch)
   const afterXValue = watch("afterX");
 
+  useEffect(() => {
+    if (location?.state?.mode === "edit") return;
+    try {
+      const raw = localStorage.getItem(draftStorageKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed?.formData) return;
+      reset(parsed.formData);
+      setStep(parsed.step || 1);
+      setMoneyPages(
+        parsed?.formData?.money_page || [{ description: "", url: "", weight: 100 }]
+      );
+      setActiveStatus(parsed?.formData?.status || "Active");
+      setTitleInput(parsed?.formData?.campaignName || "");
+      setNotesInput(parsed?.formData?.comment || "");
+    } catch {
+      // ignore corrupted draft
+    }
+  }, [draftStorageKey, location?.state?.mode, reset]);
+
+  useEffect(() => {
+    if (location?.state?.mode === "edit") return;
+    const sub = watch((values) => {
+      try {
+        const payload = { step, formData: values };
+        localStorage.setItem(draftStorageKey, JSON.stringify(payload));
+      } catch {
+        // ignore storage errors
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [watch, step, draftStorageKey, location?.state?.mode]);
+
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (!isDirty || allowPageLeave) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isDirty, allowPageLeave]);
+
+  const getWordMatches = (value = "") =>
+    String(value).match(/[A-Za-z0-9]+(?:['â€™-][A-Za-z0-9]+)*/g) || [];
+
+  const wordCount = (value = "") => getWordMatches(value).length;
+
+  const trimToWordLimit = (value = "", limit = 0) => {
+    const raw = String(value);
+    if (limit <= 0) return "";
+
+    const matcher = /[A-Za-z0-9]+(?:['â€™-][A-Za-z0-9]+)*/g;
+    let count = 0;
+    let match;
+    let lastAllowedEnd = 0;
+
+    while ((match = matcher.exec(raw)) !== null) {
+      count += 1;
+      lastAllowedEnd = matcher.lastIndex;
+      if (count === limit) break;
+    }
+
+    if (count < limit) return raw;
+    return raw.slice(0, lastAllowedEnd).replace(/\s+$/g, "");
+  };
+
+  const titleWordsUsed = wordCount(titleInput);
+  const titleWordsLeft = Math.max(0, 30 - titleWordsUsed);
+  const descriptionWordsUsed = wordCount(notesInput);
+  const descriptionWordsLeft = Math.max(0, 260 - descriptionWordsUsed);
+
+  useEffect(() => {
+    const clamped = trimToWordLimit(titleInput, 30);
+    if (clamped !== titleInput) {
+      setTitleInput(clamped);
+      return;
+    }
+    setValue("campaignName", clamped, {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+  }, [titleInput, setValue]);
+
+  useEffect(() => {
+    const clamped = trimToWordLimit(notesInput, 260);
+    if (clamped !== notesInput) {
+      setNotesInput(clamped);
+      return;
+    }
+    setValue("comment", clamped, {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+  }, [notesInput, setValue]);
+
+  const canTypeAtWordLimit = (event) => {
+    const k = event.key;
+    return (
+      k === "Backspace" ||
+      k === "Delete" ||
+      k === "ArrowLeft" ||
+      k === "ArrowRight" ||
+      k === "ArrowUp" ||
+      k === "ArrowDown" ||
+      k === "Tab" ||
+      k === "Home" ||
+      k === "End" ||
+      event.ctrlKey ||
+      event.metaKey
+    );
+  };
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "conditions",
   });
+
+  useEffect(() => {
+    register("campaignName", {
+      required: "Campaign Title is required.",
+      validate: (v) =>
+        wordCount(v || "") <= 30 || "Maximum 30 words allowed.",
+    });
+    register("comment", {
+      validate: (v) =>
+        wordCount(v || "") <= 260 || "Maximum 260 words allowed.",
+    });
+  }, [register]);
   // useMemo candidate: derived from watch
   const selectedTypes = watch("conditions").map((c) => c.type);
+  const selectedFiltersCount = (watch("filters") || []).length;
 
   // useEffect required: sync toggle from form value (side-effect on state)
   useEffect(() => {
@@ -711,7 +962,7 @@ export default function CampaignBuilder() {
   const addMoneyPage = () => {
     setMoneyPages((p) => {
       const next = [...p, { description: "", url: "", weight: 100 }];
-
+      setValue("money_page", next);
       return next;
     });
   };
@@ -736,6 +987,176 @@ export default function CampaignBuilder() {
     append({ type, mode: "allow", values: [] });
   };
 
+  const getConditionOptionLabel = (item) =>
+    item?.country || item?.state || item?.name || item?.browser || item?.device || "";
+
+  const validateCriteriaValues = () => {
+    const currentConditions = getValues("conditions") || [];
+    clearErrors("conditions");
+
+    let hasInvalid = false;
+    currentConditions.forEach((condition, idx) => {
+      const values = Array.isArray(condition?.values) ? condition.values : [];
+      const normalized = values
+        .map((v) => String(v || "").trim())
+        .filter(Boolean);
+
+      if (normalized.length === 0) {
+        hasInvalid = true;
+        setError(`conditions.${idx}.values`, {
+          type: "manual",
+          message: `Please add at least one ${condition?.type || "criteria"} value.`,
+        });
+      }
+    });
+
+    if (hasInvalid) {
+      showErrorToast("Each selected criteria must have at least one value.");
+      return false;
+    }
+    return true;
+  };
+
+  const validateFiltersSelection = () => {
+    const selected = getValues("filters") || [];
+    clearErrors("filters");
+    if (!Array.isArray(selected) || selected.length === 0) {
+      setError("filters", {
+        type: "manual",
+        message: "Please enable at least one filter before continuing.",
+      });
+      showErrorToast("At least one filter is required.");
+      return false;
+    }
+    return true;
+  };
+
+  const getCountrySearchValue = (index) => countrySearchByIndex[index] || "";
+
+  const getBrowserIconNode = (browserName = "") => {
+    const name = browserName.toLowerCase();
+    const xiaomiIcon = (
+      <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
+        <rect x="1" y="1" width="22" height="22" rx="5" fill="#ff6900" />
+        <text
+          x="12"
+          y="14.3"
+          textAnchor="middle"
+          fontSize="8.6"
+          fontWeight="700"
+          fill="#ffffff"
+          fontFamily="Arial, sans-serif"
+        >
+          MI
+        </text>
+      </svg>
+    );
+    const ucIcon = (
+      <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
+        <circle cx="12" cy="12" r="11" fill="#f97316" />
+        <path
+          d="M6.5 12.5c2.2-3.8 7.3-4.5 10.9-1.4-2.3-.4-3.8 1.5-3.3 3.5.6 2.4-1 4.2-3.8 4.7"
+          fill="none"
+          stroke="#fff"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+    const ibIcon = (
+      <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
+        <circle cx="12" cy="12" r="11" fill="#2563eb" />
+        <circle cx="12" cy="12" r="5.5" fill="none" stroke="#fff" strokeWidth="1.5" />
+        <path d="M12 6.5v11M6.5 12h11" stroke="#fff" strokeWidth="1.3" strokeLinecap="round" />
+      </svg>
+    );
+    const iconFromUrl = (src) => (
+      <img
+        src={src}
+        alt={`${browserName} icon`}
+        className="w-4 h-4 object-contain"
+        loading="lazy"
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+        }}
+      />
+    );
+
+    // Direct icon mapping for the remaining browsers
+    if (name.includes("samsung")) {
+      return iconFromUrl("https://img.icons8.com/color/48/samsung-internet.png");
+    }
+    if (name.includes("uc browser") || name === "uc") {
+      return ucIcon;
+    }
+    if (name.includes("internt explorer") || name.includes("internet explorer")) {
+      return iconFromUrl("https://img.icons8.com/color/48/internet-explorer.png");
+    }
+    if (name.includes("edge")) {
+      return <FaEdge className="w-4 h-4 text-[#0ea5e9]" />;
+    }
+    if (name.includes("flock")) {
+      return iconFromUrl("https://img.icons8.com/fluency/48/bird.png");
+    }
+    if (name.includes("ibrowser") || name.includes("i browser") || name === "ib") {
+      return ibIcon;
+    }
+    if (name.includes("xiaomi") || name.includes("mi browser")) {
+      return xiaomiIcon;
+    }
+
+    let slug = "";
+    if (name.includes("nokia")) slug = "nokia";
+    else if (name.includes("ubuntu")) slug = "ubuntu";
+    else if (name.includes("chrome")) slug = "googlechrome";
+    else if (name.includes("firefox")) slug = "firefoxbrowser";
+    else if (name.includes("safari")) slug = "safari";
+    else if (name.includes("opera")) slug = "opera";
+
+    if (slug) {
+      return (
+        <img
+          src={`https://cdn.simpleicons.org/${slug}`}
+          alt={`${browserName} icon`}
+          className="w-4 h-4"
+          loading="lazy"
+          onError={(e) => {
+            if (e.currentTarget.dataset.fallbackApplied === "1") {
+              e.currentTarget.style.display = "none";
+              return;
+            }
+            e.currentTarget.dataset.fallbackApplied = "1";
+            e.currentTarget.src = "https://cdn.simpleicons.org/googlechrome";
+          }}
+        />
+      );
+    }
+    return <Globe className="w-4 h-4 text-[#64748b]" />;
+  };
+
+  const renderCriteriaOptionIcon = (type, item, label) => {
+    if (type === "country" && item?.code) {
+      return (
+        <img
+          src={`https://flagcdn.com/w40/${item.code}.png`}
+          alt={`${label} flag`}
+          className="w-5 h-3.5 rounded-[2px] object-cover"
+          loading="lazy"
+        />
+      );
+    }
+
+    if (type === "Device" && item?.icon) {
+      return <span className="text-[#3c79ff]">{item.icon}</span>;
+    }
+
+    if (type === "browser") {
+      return getBrowserIconNode(label);
+    }
+
+    return null;
+  };
+
   const nextStep = () => setStep((s) => Math.min(s + 1, steps.length));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
@@ -758,18 +1179,26 @@ export default function CampaignBuilder() {
       if(!valid) return;
 
     }
+    if (step === 4) {
+      const valid = validateCriteriaValues();
+      if (!valid) return;
+    }
+    if (step === 5) {
+      const valid = validateFiltersSelection();
+      if (!valid) return;
+    }
     nextStep();
   };  
 
 
   const handleStepClick = async (targetStep) => {
-  // 🔙 Backward movement → always allowed
+  // ðŸ”™ Backward movement â†’ always allowed
   if (targetStep <= step) {
     setStep(targetStep);
     return;
   }
 
-  // 👉 Forward movement → validate CURRENT step only
+  // ðŸ‘‰ Forward movement â†’ validate CURRENT step only
   if (step === 1) {
     const fieldsToValidate = ["campaignName", "trafficSource"];
     const valid = await trigger(fieldsToValidate);
@@ -788,14 +1217,63 @@ export default function CampaignBuilder() {
     const valid = await trigger("safe_page");
     if (!valid) return;
   }
+  if (step === 4) {
+    const valid = validateCriteriaValues();
+    if (!valid) return;
+  }
+  if (step === 5) {
+    const valid = validateFiltersSelection();
+    if (!valid) return;
+  }
 
-  // ✅ validation passed → go to clicked step
+  // âœ… validation passed â†’ go to clicked step
   setStep(targetStep);
 };
+
+  const handleSaveDraft = () => {
+    try {
+      const formData = getValues();
+      localStorage.setItem(
+        draftStorageKey,
+        JSON.stringify({ step, formData })
+      );
+      showSuccessToast("Draft saved");
+    } catch {
+      showErrorToast("Unable to save draft");
+    }
+  };
+
+  const handleClearDraft = () => {
+    try {
+      localStorage.removeItem(draftStorageKey);
+      showSuccessToast("Draft removed");
+    } catch {
+      showErrorToast("Unable to remove draft");
+    }
+  };
+
+  const handleOpenReview = handleSubmit((data) => {
+    setReviewData(data);
+    setShowReviewModal(true);
+  });
+
+  const handleFormKeyDown = (e) => {
+    if (e.key !== "Enter") return;
+    const tag = e.target?.tagName?.toLowerCase();
+    if (tag === "textarea") return;
+    // Prevent accidental full form submit on Enter from any step/input.
+    e.preventDefault();
+  };
 
 
   const onSubmit = async (data) => {
     try {
+      setShowReviewModal(false);
+      const criteriaValid = validateCriteriaValues();
+      if (!criteriaValid) return;
+      const filtersValid = validateFiltersSelection();
+      if (!filtersValid) return;
+
       // merge moneyPages from local state into data (to ensure latest)
       // data.money_page = moneyPages;
       data.status = activeStatus;
@@ -817,6 +1295,8 @@ export default function CampaignBuilder() {
     
         
         showSuccessToast("Campaign updated successfully!");
+        setAllowPageLeave(true);
+        localStorage.removeItem(draftStorageKey);
         navigate("/Dashboard/campaign-integration", {
           state: {
             mode: "edit",
@@ -842,6 +1322,8 @@ export default function CampaignBuilder() {
         showSuccessToast(
           "Campaign created successfully! you are going to route to Integration page"
         );
+        setAllowPageLeave(true);
+        localStorage.removeItem(draftStorageKey);
         navigate("/Dashboard/campaign-integration", {
           state: {
             mode: "edit",
@@ -851,7 +1333,7 @@ export default function CampaignBuilder() {
       }
     } catch (err) {
        if (err?.response?.status === 403) {
-    showErrorToast("Campaign limit reached. Upgrade your plan 🚀");
+    showErrorToast("Campaign limit reached. Upgrade your plan ðŸš€");
     navigate('/Dashboard/pricing')
   } else {
     showErrorToast(
@@ -870,147 +1352,345 @@ export default function CampaignBuilder() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-left justify-between">
+        <div className="flex flex-col justify-between items-start mb-8 gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-left text-white">
+            <h1 className="dashboard-heading text-left">
               {location?.state?.mode === "edit" ? "Update" : "Create"} Campaign
             </h1>
-            <p className="text-slate-400 mt-1 text-left max-w-xl">
-              Transform your traffic into a success story — multi-step campaign
+            <p className="dashboard-subheading text-left max-w-xl">
+              Transform your traffic into a success story â€” multi-step campaign
               builder with advanced cloaking controls.
             </p>
           </div>
-          
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              className="flex items-center gap-2 px-3 py-2 rounded-md font-semibold text-[12px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
+            >
+              Save Draft
+            </button>
+            <button
+              type="button"
+              onClick={handleClearDraft}
+              className="flex items-center gap-2 px-3 py-2 rounded-md font-semibold text-[12px] border border-[#d5d9e4] bg-white text-[#475569] hover:bg-[#f8fafc] cursor-pointer"
+            >
+              Clear Draft
+            </button>
+          </div>
         </div>
 
-        {/* Stepper */}
-        <nav aria-label="Progress" className="mb-8">
-          <ol role="list" className="flex items-center gap-4">
-            {steps.map((s, idx) => {
-              const active = idx + 1 <= step;
-              return (
-                <li key={s.name} className="flex items-center">
-                  <div
-  onClick={() => handleStepClick(idx + 1)}
-  className={`flex items-center justify-center h-10 w-10 rounded-full
-    ${active ? "bg-blue-600" : "bg-slate-800"}
-    cursor-pointer`}
->
-                    <s.icon
-                      className={`w-5 h-5 cursor-pointer ${active ? "text-white" : "text-slate-400"
-                        }`}
-                    />
-                  </div>
-                  <div
-                    className={`ml-2 text-sm ${active ? "text-white font-medium" : "text-slate-500"
-                      }`}
-                  >
-                    {s.name}
-                  </div>
-                  {idx !== steps.length - 1 && (
-                    <div
-                      className={`mx-4 h-[2px] w-14 ${idx + 1 < step ? "bg-blue-600" : "bg-slate-800"
-                        }`}
-                    />
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_280px] gap-8 items-start">
+          <div>
+            <div className="xl:hidden mb-8">
+              <nav aria-label="Progress" className="w-full">
+                <ol role="list" className="flex w-full items-start pl-5 pr-1 ml-0">
+                  {steps.map((s, idx) => {
+                    const isCurrent = idx + 1 === step;
+                    const isDone = idx + 1 <= step;
+                    const isConnectorDone = idx + 1 < step;
+                    return (
+                      <li key={s.name} className="relative flex flex-1 min-w-0 flex-col items-center">
+                        <button
+                          type="button"
+                          onClick={() => handleStepClick(idx + 1)}
+                          className={`z-10 flex h-9 w-9 items-center justify-center rounded-full border-[6px] cursor-pointer transition-colors ${
+                            isDone
+                              ? "border-[#3c79ff] bg-[#3c79ff] text-white"
+                              : "border-[#ccd1dd] bg-[#f2f5fa] text-[#525B75]"
+                          }`}
+                        >
+                          <s.icon
+                            className="h-4 w-4"
+                            strokeWidth={2.6}
+                            style={{ color: isDone ? "#ffffff" : "#525B75" }}
+                          />
+                        </button>
+                        <span
+                          className={`mt-2 max-w-[102px] text-center text-[12px] leading-4 ${
+                            isCurrent ? "text-[#3c79ff] font-semibold" : "text-[#4f5d79]"
+                          }`}
+                        >
+                          {s.name}
+                        </span>
+                        {idx < steps.length - 1 && (
+                          <span
+                            className={`absolute top-[18px] left-[calc(50%+18px)] h-[2px] w-[calc(100%-36px)] ${
+                              isConnectorDone ? "bg-[#3c79ff]" : "bg-[#525B75]"
+                            }`}
+                          />
+                        )}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </nav>
+            </div>
 
-        {/* Form container */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Form container */}
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              onKeyDown={handleFormKeyDown}
+              className="space-y-6"
+            >
           {/* Step 1: Campaign Info */}
           {step === 1 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-white">
-                    Campaign Details
-                  </h2>
-                  <InputField
-                    label="Campaign Name"
-                    name="campaignName"
-                    register={register}
-                    error={errors.campaignName}
-                    required
+            <div
+              className="bg-transparent rounded-none p-0 shadow-none"
+              style={{ border: "none", boxShadow: "none" }}
+            >
+              <div className="max-w-3xl space-y-6">
+                <h2 className="text-left text-[22px] font-extrabold text-[#141824]">
+                  Campaign Overview
+                </h2>
+
+                <div>
+                  <label className="flex items-center text-[11px] font-extrabold uppercase text-[#52607a] tracking-wide mb-2">
+                    Campaign Title <span className="text-red-500 ml-1">*</span>
+                    <Tooltip
+                      title="Enter Desired Campaign Name to identify it"
+                      placement="top"
+                      arrow
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            bgcolor: "#ffffff",
+                            color: "#64748b",
+                            border: "1px solid #d5d9e4",
+                            boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)",
+                            fontSize: "12px",
+                            fontWeight: 500,
+                            px: 1.25,
+                            py: 0.75,
+                          },
+                        },
+                        arrow: {
+                          sx: {
+                            color: "#ffffff",
+                            "&:before": { border: "1px solid #d5d9e4" },
+                          },
+                        },
+                      }}
+                    >
+                      <span className="ml-2 cursor-pointer">
+                        <CircleHelp className="w-4 h-4 text-[#7f8aa3]" strokeWidth={2.2} />
+                      </span>
+                    </Tooltip>
+                  </label>
+                  <input
+                    type="text"
+                    value={titleInput}
+                    onChange={(e) => {
+                      const next = trimToWordLimit(e.target.value, 30);
+                      setTitleInput(next);
+                      setValue("campaignName", next, {
+                        shouldDirty: true,
+                        shouldValidate: false,
+                      });
+                    }}
+                    onKeyDown={(e) => {
+                      if (wordCount(titleInput) >= 30 && (e.key === " " || e.key === "Enter")) {
+                        e.preventDefault();
+                      }
+                    }}
+                    onPaste={(e) => {
+                      const pasted = e.clipboardData.getData("text");
+                      const merged = `${titleInput || ""} ${pasted}`.trim();
+                      if (wordCount(merged) > 30) {
+                        e.preventDefault();
+                        const next = trimToWordLimit(merged, 30);
+                        setTitleInput(next);
+                        setValue("campaignName", next, {
+                          shouldDirty: true,
+                          shouldValidate: false,
+                        });
+                      }
+                    }}
                     placeholder="Enter a unique name"
-                    tooltip="Enter Desired Campaign Name to identify it"
+                    className={`w-full bg-white border text-sm rounded-md py-2.5 px-4 text-[#141824] placeholder-[#95a1b8] focus:outline-none transition-colors ${
+                      errors.campaignName ? "border-red-500 shadow-[inset_0_0_0_1px_#ef4444]" : "border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
+                    }`}
+                    style={
+                      errors.campaignName
+                        ? {
+                            borderColor: "#ef4444",
+                          }
+                        : undefined
+                    }
+                  />
+                  {errors.campaignName && (
+                    <p className="mt-1 text-xs text-red-500 text-left">{errors.campaignName.message}</p>
+                  )}
+                  <p className="mt-1 text-xs text-[#6b7280] text-left">
+                   
+                  </p>
+                </div>
+
+                <div>
+                  <label className="flex items-center text-[11px] font-extrabold uppercase text-[#52607a] tracking-wide mb-2">
+                    Notes
+                    <Tooltip
+                      title="Comment for this campaign"
+                      placement="top"
+                      arrow
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            bgcolor: "#ffffff",
+                            color: "#64748b",
+                            border: "1px solid #d5d9e4",
+                            boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)",
+                            fontSize: "12px",
+                            fontWeight: 500,
+                            px: 1.25,
+                            py: 0.75,
+                          },
+                        },
+                        arrow: {
+                          sx: {
+                            color: "#ffffff",
+                            "&:before": { border: "1px solid #d5d9e4" },
+                          },
+                        },
+                      }}
+                    >
+                      <span className="ml-2 cursor-pointer">
+                        <CircleHelp className="w-4 h-4 text-[#7f8aa3]" strokeWidth={2.2} />
+                      </span>
+                    </Tooltip>
+                  </label>
+                  <textarea
+                    placeholder="Add a brief description"
+                    rows={2}
+                    value={notesInput}
+                    onChange={(e) => {
+                      const next = trimToWordLimit(e.target.value, 260);
+                      setNotesInput(next);
+                      setValue("comment", next, {
+                        shouldDirty: true,
+                        shouldValidate: false,
+                      });
+                    }}
+                    onKeyDown={(e) => {
+                      if (wordCount(notesInput) >= 260 && (e.key === " " || e.key === "Enter")) {
+                        e.preventDefault();
+                      }
+                    }}
+                    onPaste={(e) => {
+                      const pasted = e.clipboardData.getData("text");
+                      const merged = `${notesInput || ""} ${pasted}`.trim();
+                      if (wordCount(merged) > 260) {
+                        e.preventDefault();
+                        const next = trimToWordLimit(merged, 260);
+                        setNotesInput(next);
+                        setValue("comment", next, {
+                          shouldDirty: true,
+                          shouldValidate: false,
+                        });
+                      }
+                    }}
+                    className={`w-full bg-white border rounded-md px-4 py-2.5 text-sm text-[#141824] placeholder-[#95a1b8] focus:outline-none transition-colors resize-none ${
+                      errors.comment ? "border-red-500 shadow-[inset_0_0_0_1px_#ef4444]" : "border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
+                    }`}
+                    style={
+                      errors.comment
+                        ? {
+                            borderColor: "#ef4444",
+                          }
+                        : undefined
+                    }
+                  />
+                  {errors.comment && (
+                    <p className="mt-1 text-xs text-red-500 text-left">{errors.comment.message}</p>
+                  )}
+                  <p className="mt-1 text-xs text-[#6b7280] text-left">
+                    
+                  </p>
+                </div>
+
+                <SelectField
+                  label="Traffic Channel"
+                  name="trafficSource"
+                  register={register}
+                  error={errors.trafficSource}
+                  required
+                  tooltip="Traffic Source like Google Ads"
+                  options={adPlatforms}
+                  visibleOptions={7}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InputField
+                    label="Revenue Per Click (RPC)"
+                    name="epc"
+                    register={(name, rules = {}) =>
+                      register(name, {
+                        ...rules,
+                        min: { value: 0, message: "RPC cannot be negative" },
+                      })
+                    }
+                    error={errors.epc}
+                    placeholder="0.00"
+                    type="number"
+                    min={0}
+                    preventNegative
+                    icon={<span className="text-sm">$</span>}
+                    tooltip="Revenue Per Click"
                   />
                   <InputField
-                    label="Comment"
-                    name="comment"
-                    register={register}
-                    error={errors.comment}
-                    placeholder="Add a brief description"
-                    tooltip="Comment for this campaign"
-                  />
-                  <SelectField
-                    label="Traffic Source"
-                    name="trafficSource"
-                    register={register}
-                    error={errors.trafficSource}
-                    required
-                    tooltip="Traffic Source like Google Ads"
-                    options={adPlatforms}
+                    label="Spend Per Click (SPC)"
+                    name="cpc"
+                    register={(name, rules = {}) =>
+                      register(name, {
+                        ...rules,
+                        min: { value: 0, message: "CPC cannot be negative" },
+                      })
+                    }
+                    error={errors.cpc}
+                    placeholder="0.00"
+                    type="number"
+                    min={0}
+                    preventNegative
+                    icon={<span className="text-sm">$</span>}
+                    tooltip="Spend Per Click"
+                    step="0.1"
                   />
                 </div>
 
-                <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-white">
-                    Financials & Status
-                  </h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    <InputField
-                      label="EPC (Earnings Per Click)"
-                      name="epc"
-                      register={register}
-                      error={errors.epc}
-                      placeholder="0.00"
-                      type="number"
-                      icon={<span className="text-sm">$</span>}
-                      tooltip="Earnings Per Click"
-                    />
-                    <InputField
-                      label="CPC (Cost Per Click)"
-                      name="cpc"
-                      register={(name) =>
-                        register(name, {
-                          min: { value: 0, message: "CPC cannot be negative" },
-                        })
-                      }
-                      error={errors.cpc}
-                      placeholder="0.00"
-                      type="number"
-                      icon={<span className="text-sm">$</span>}
-                      tooltip="Cost Per Click"
-                      step="0.1"
-                    />
-                  </div>
-
-                  <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
-                    <label className="flex items-center text-sm font-medium text-gray-300 mb-3">
-                      Campaign Status{" "}
-                      <span className="text-red-500 ml-1">*</span>
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {statusOptions.map((opt) => (
-                        <StatusButton
+                <div className="space-y-3">
+                  <label className="flex items-center text-[11px] font-extrabold uppercase text-[#52607a] tracking-wide">
+                    Campaign State <span className="text-red-500 ml-1">*</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {statusOptions.map((opt) => {
+                      const isOn = activeStatus === opt.name;
+                      return (
+                        <button
                           key={opt.name}
-                          label={opt.name}
-                          Icon={opt.icon}
-                          isActive={activeStatus === opt.name}
+                          type="button"
                           onClick={() => setActiveStatus(opt.name)}
-                        />
-                      ))}
-                    </div>
+                          className="flex items-center justify-between rounded-md border border-[#d5d9e4] bg-white px-3 py-2 cursor-pointer"
+                        >
+                          <span className="text-sm font-semibold text-[#2f3a52]">{opt.name}</span>
+                          <span
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                              isOn ? "bg-[#3c79ff]" : "bg-[#d1d5db]"
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                                isOn ? "translate-x-5" : "translate-x-1"
+                              }`}
+                            />
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-between mt-6">
-                <div></div>
+              <div className="max-w-3xl flex justify-end items-center gap-3 mt-6">
                 {location?.state?.mode === "edit" ? (
                     <button
                       type="button"
@@ -1019,8 +1699,8 @@ export default function CampaignBuilder() {
                       //     "You can preview changes before creating campaign"
                       //   );
                       // }}
-                      onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
+                      onClick={handleOpenReview}
+                      className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -1031,7 +1711,7 @@ export default function CampaignBuilder() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                 >
                   Proceed <span className="ml-2">&rarr;</span>
                 </button>
@@ -1041,53 +1721,35 @@ export default function CampaignBuilder() {
 
           {/* Step 2: Money Pages */}
           {step === 2 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <div
+              className="bg-transparent rounded-none p-0 shadow-none"
+              style={{ border: "none", boxShadow: "none" }}
+            >
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-white">
-                    Where do we send legit visitors (money pages)?
+                <div className="flex items-center">
+                  <h2 className="text-left text-[22px] font-extrabold text-[#141824]">
+                    Where do we send legit visitors (revenue pages)?
                   </h2>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-slate-300">
-                      <span className="text-sm">Append URL</span>
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded bg-slate-700"
-                        checked={appendUrl}
-                        onChange={() => setAppendUrl((v) => !v)}
-                      />
-                    </label>
-                  </div>
                 </div>
-
-                {appendUrl && (
-                  <InputField
-                    label="APPEND URL VALUE"
-                    name="append_url"
-                    register={register}
-                    placeholder="Enter URL to append"
-                    tooltip="Add the parameters in moneypage URL"
-                  />
-                )}
 
                 <div className="space-y-4">
                   {Array.isArray(moneyPages) && moneyPages.length > 0 ? (
                     moneyPages.map((page, index) => (
                       <div
                         key={index}
-                        className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-slate-800 border border-slate-700 p-4 rounded-lg"
+                        className="space-y-4"
                       >
                         <InputField
-                          label="Description"
+                          label="Page Description"
                           name={`money_page.${index}.description`}
                           register={register}
                           placeholder="Enter description"
                           defaultValue={page.description || ""}
-                          tooltip="Short name visible in reports"
+                          tooltip="Brief label shown in reports"
                         />
 
                         <InputField
-                          label="Money Page Url"
+                          label="Revenue Page Url"
                           name={`money_page.${index}.url`}
                           register={register}
                           error={errors.money_page?.[index]?.url}
@@ -1097,34 +1759,34 @@ export default function CampaignBuilder() {
                             value: /^(https?:\/\/[^\s$.?#].[^\s]*)$/i,
                             message: "Enter a valid URL",
                           }}
-                          tooltip="Money page for legit visitors"
+                          tooltip="Destination URL for valid visitors"
                         />
 
                         <InputField
-                          label="WEIGHT"
+                          label="Traffic Weight"
                           name={`money_page.${index}.weight`}
                           register={register}
                           error={errors.money_page?.[index]?.weight}
                           placeholder="100"
                           type="number"
-                          tooltip="Priority weight for money pages"
+                          tooltip="Distribution priority for revenue pages"
                         />
 
-                        <div className="flex items-center gap-2 justify-end">
+                        <div className="flex items-center gap-2 pt-1">
                           {moneyPages.length > 1 && (
                             <button
                               type="button"
                               onClick={() => removeMoneyPage(index)}
-                              className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition"
+                              className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition cursor-pointer"
                             >
-                              <XIcon className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           )}
                           {index === moneyPages.length - 1 && (
                             <button
                               type="button"
                               onClick={addMoneyPage}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 transition cursor-pointer"
+                              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                             >
                               <Plus className="w-4 h-4" /> Add
                             </button>
@@ -1140,7 +1802,7 @@ export default function CampaignBuilder() {
                       <button
                         type="button"
                         onClick={addMoneyPage}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 transition cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                       >
                         <Plus className="w-4 h-4" /> Add
                       </button>
@@ -1148,64 +1810,11 @@ export default function CampaignBuilder() {
                   )}
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                  <h3 className="text-md font-semibold text-white mb-2 flex items-center gap-2">
-                    Dynamic variables
-                    <Tooltip title="Dynamic variables are used to track custom parameters of money page">
-                      <span className="text-slate-400">
-                        <Info className="w-4 h-4" />
-                      </span>
-                    </Tooltip>
-                  </h3>
-                  <p className="text-slate-400 text-sm mb-3">
-                    Define variables and use [[name]] in money pages.
-                  </p>
-
-                  {dynamicVariables.map((variable, idx) => (
-                    <div
-                      key={idx}
-                      className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3 items-end"
-                    >
-                      <InputField
-                        label="VARIABLE NAME"
-                        name={`money_variable.${idx}.name`}
-                        register={register}
-                        placeholder="Enter variable name"
-                        defaultValue={variable.name}
-                      />
-                      <InputField
-                        label="VARIABLE VALUE"
-                        name={`money_variable.${idx}.value`}
-                        register={register}
-                        placeholder="Enter variable value"
-                        defaultValue={variable.value}
-                      />
-                      <div className="flex items-center justify-end">
-                        <button
-                          type="button"
-                          onClick={() => removeDynamicVariable(idx)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md cursor-pointer"
-                        >
-                          <XIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  <button
-                    type="button"
-                    onClick={addDynamicVariable}
-                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" /> Add variable
-                  </button>
-                </div>
-
                 <div className="flex justify-between mt-6">
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                   >
                     ‹ Previous
                   </button>
@@ -1217,7 +1826,7 @@ export default function CampaignBuilder() {
                       //     "You can preview changes before creating campaign"
                       //   );
                       // }}
-                      onClick={handleSubmit(onSubmit)}
+                      onClick={handleOpenReview}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
@@ -1230,7 +1839,7 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff]  hover:bg-[#356ee6] cursor-pointer !text-white"
                     >
                       Next ›
                     </button>
@@ -1249,84 +1858,34 @@ export default function CampaignBuilder() {
 
           {/* Step 3: Safe Page */}
           {step === 3 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <div
+              className="bg-transparent rounded-none p-0 shadow-none"
+              style={{ border: "none", boxShadow: "none" }}
+            >
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-white">Safe Page</h2>
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                <h2 className="text-left text-[22px] font-extrabold text-[#141824]">Protected Page</h2>
+                <div>
                   <InputField
-                    label="Safe Page Url"
+                    label="Protected Page Url"
                     name="safe_page"
                     register={register}
                     error={errors.safe_page}
                     required
-                    placeholder="https://www.youtube.com"
+                    placeholder="https://www.example.com"
                     defaultValue="https://www.youtube.com"
                     pattern={{
                       value: /^(https?:\/\/[^\s$.?#].[^\s]*)$/i,
                       message: "Enter a valid URL",
                     }}
-                    tooltip="Safe page where bots/reviewers go"
+                    tooltip="Protected page where bots/reviewers go"
                   />
-                </div>
-
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                  <h3 className="text-md font-semibold text-white mb-2 flex items-center gap-2">
-                    Dynamic variables for Safe Page{" "}
-                    <Tooltip title="Dynamic variables are used to track custom parameters of safe page">
-                      <span className="text-slate-400">
-                        <Info className="w-4 h-4" />
-                      </span>
-                    </Tooltip>
-                  </h3>
-                  <p className="text-slate-400 text-sm mb-3">
-                    Define variables for safe page use.
-                  </p>
-
-                  {dynamicVariables.map((variable, idx) => (
-                    <div
-                      key={idx}
-                      className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3 items-end"
-                    >
-                      <InputField
-                        label="VARIABLE NAME"
-                        name={`safe_page_variable.${idx}.name`}
-                        register={register}
-                        placeholder="Enter variable name"
-                        defaultValue={variable.name}
-                      />
-                      <InputField
-                        label="VARIABLE VALUE"
-                        name={`safe_page_variable.${idx}.value`}
-                        register={register}
-                        placeholder="Enter variable value"
-                        defaultValue={variable.value}
-                      />
-                      <div className="flex items-center justify-end">
-                        <button
-                          type="button"
-                          onClick={() => removeDynamicVariable(idx)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md cursor-pointer"
-                        >
-                          <XIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  <button
-                    type="button"
-                    onClick={addDynamicVariable}
-                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center gap-2 cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" /> Add variable
-                  </button>
                 </div>
 
                 <div className="flex justify-between mt-6">
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                   >
                     ‹ Previous
                   </button>
@@ -1338,7 +1897,7 @@ export default function CampaignBuilder() {
                       //     "You can preview changes before creating campaign"
                       //   );
                       // }}
-                      onClick={handleSubmit(onSubmit)}
+                      onClick={handleOpenReview}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
@@ -1351,7 +1910,7 @@ export default function CampaignBuilder() {
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                     >
                       Next ›
                     </button>
@@ -1364,7 +1923,10 @@ export default function CampaignBuilder() {
 
           {/* Step 4: Conditions */}
           {step === 4 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <div
+              className="bg-transparent rounded-none p-0 shadow-none"
+              style={{ border: "none", boxShadow: "none" }}
+            >
               <div className="space-y-6">
                 {/* ADD CONDITION DROPDOWN */}
                 <div>
@@ -1375,9 +1937,9 @@ export default function CampaignBuilder() {
                         e.target.value = "";
                       }
                     }}
-                    className="w-56 bg-slate-800 text-white text-sm px-3 py-2 rounded-md border border-slate-700"
+                    className="w-56 text-left bg-white text-[#141824] text-sm px-3 py-2.5 rounded-md border border-[#d5d9e4] focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff] transition-colors cursor-pointer"
                   >
-                    <option value="">+ Add condition</option>
+                    <option value="">+ Add Criteria</option>
 
                     {OPTIONS.filter(
                       (o) => !selectedTypes.includes(o.value)
@@ -1410,43 +1972,71 @@ export default function CampaignBuilder() {
                     return (
                       <div
                         key={fieldItem.id}
-                        className="bg-slate-800 border border-slate-700 rounded-lg p-4"
+                        className="bg-white border border-[#d5d9e4] rounded-sm p-4"
                       >
                         {/* HEADER */}
                         <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-semibold text-white">
+                          <h4 className="text-sm font-semibold text-[#1f2a44]">
                             {currentType.toUpperCase()}
                           </h4>
-                          <button
-                            type="button"
-                            onClick={() => remove(idx)}
-                            className="text-sm text-slate-400 hover:text-red-500 cursor-pointer"
+                          <Tooltip
+                            title="Delete"
+                            placement="top"
+                            arrow
+                            componentsProps={{
+                              tooltip: {
+                                sx: {
+                                  bgcolor: "#ffffff",
+                                  color: "#64748b",
+                                  border: "1px solid #d5d9e4",
+                                  fontSize: "12px",
+                                  fontWeight: 400,
+                                  boxShadow: "0 8px 24px rgba(15,23,42,0.08)",
+                                },
+                              },
+                              arrow: {
+                                sx: {
+                                  color: "#ffffff",
+                                  "&::before": { border: "1px solid #d5d9e4" },
+                                },
+                              },
+                            }}
                           >
-                            Remove
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => remove(idx)}
+                              className="inline-flex items-center justify-center p-1 text-red-500 hover:text-red-600 cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </Tooltip>
                         </div>
 
-                        {/* MODE BUTTONS */}
+                        {/* MODE RADIO */}
                         <Controller
                           control={control}
                           name={`conditions.${idx}.mode`}
                           render={({ field }) => (
-                            <div className="flex gap-2 mb-3">
-                              {["allow", "block"].map((mode) => (
-                                <button
-                                  key={mode}
-                                  type="button"
-                                  onClick={() => field.onChange(mode)}
-                                  className={`px-3 py-1.5 text-sm rounded-md border cursor-pointer ${field.value === mode
-                                      ? mode === "allow"
-                                        ? "bg-blue-600 text-white border-blue-600"
-                                        : "bg-red-600 text-white border-red-600"
-                                      : "bg-slate-700 text-slate-300 border-slate-700 hover:bg-slate-700/50"
-                                    }`}
-                                >
-                                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                                </button>
-                              ))}
+                            <div className="flex gap-5 mb-3">
+                              {["allow", "block"].map((mode) => {
+                                const isChecked = (field.value || "allow") === mode;
+                                return (
+                                  <label
+                                    key={mode}
+                                    className="inline-flex items-center gap-2 text-sm font-medium text-[#334155] cursor-pointer"
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`conditions-mode-${idx}`}
+                                      value={mode}
+                                      checked={isChecked}
+                                      onChange={() => field.onChange(mode)}
+                                      className="h-4 w-4 cursor-pointer accent-[#3c79ff]"
+                                    />
+                                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                                  </label>
+                                );
+                              })}
                             </div>
                           )}
                         />
@@ -1462,64 +2052,192 @@ export default function CampaignBuilder() {
                                 {field.value?.map((val, i) => (
                                   <span
                                     key={i}
-                                    className="inline-flex items-center bg-slate-700 text-slate-100 px-2.5 py-1 text-xs rounded-full border border-slate-600"
+                                    className="inline-flex items-center bg-slate-700  px-2.5 py-1 text-xs rounded-full border border-slate-600"
                                   >
+                                    {(() => {
+                                      const listSource =
+                                        currentType === "country"
+                                          ? COUNTRY_LIST
+                                          : currentType === "browser"
+                                          ? BROWSER_LIST
+                                          : currentType === "Device"
+                                          ? DEVICE_LIST
+                                          : [];
+                                      const itemMeta = listSource.find(
+                                        (entry) => getConditionOptionLabel(entry) === val
+                                      );
+                                      const iconNode = renderCriteriaOptionIcon(
+                                        currentType,
+                                        itemMeta,
+                                        val
+                                      );
+                                      if (!iconNode) return null;
+                                      return <span className="mr-1.5 inline-flex">{iconNode}</span>;
+                                    })()}
                                     {val}
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        field.onChange(
-                                          field.value.filter(
-                                            (_, id) => id !== i
-                                          )
-                                        )
-                                      }
-                                      className="ml-1 text-slate-400 hover:text-slate-200 cursor-pointer"
+                                    <Tooltip
+                                      title="Remove"
+                                      placement="top"
+                                      arrow
+                                      componentsProps={{
+                                        tooltip: {
+                                          sx: {
+                                            bgcolor: "#ffffff",
+                                            color: "#64748b",
+                                            border: "1px solid #d5d9e4",
+                                            fontSize: "12px",
+                                            fontWeight: 400,
+                                            boxShadow:
+                                              "0 8px 24px rgba(15,23,42,0.08)",
+                                          },
+                                        },
+                                        arrow: {
+                                          sx: {
+                                            color: "#ffffff",
+                                            "&::before": {
+                                              border: "1px solid #d5d9e4",
+                                            },
+                                          },
+                                        },
+                                      }}
                                     >
-                                      ×
-                                    </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          field.onChange(
+                                            field.value.filter((_, id) => id !== i)
+                                          )
+                                        }
+                                        className="ml-1 text-slate-600 hover:text-slate-800 cursor-pointer inline-flex items-center justify-center"
+                                      >
+                                        <XIcon className="w-3.5 h-3.5" />
+                                      </button>
+                                    </Tooltip>
                                   </span>
                                 ))}
                               </div>
 
                               {/* DROPDOWN OR TEXT INPUT */}
                               {isDropdown ? (
-                                <select
-                                  className="w-full bg-slate-800 text-white text-sm px-3 py-2 rounded-md border border-slate-700"
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (val && !field.value.includes(val)) {
-                                      field.onChange([...field.value, val]);
+                                <div
+                                  className="relative"
+                                  tabIndex={0}
+                                  onBlur={(e) => {
+                                    if (!e.currentTarget.contains(e.relatedTarget)) {
+                                      setOpenCountryDropdownIndex(null);
+                                      setCountrySearchByIndex((prev) => ({
+                                        ...prev,
+                                        [idx]: "",
+                                      }));
                                     }
-                                    e.target.value = "";
                                   }}
                                 >
-                                  <option value="">Select {currentType}</option>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setOpenCountryDropdownIndex((prev) =>
+                                        prev === idx ? null : idx
+                                      )
+                                    }
+                                    className="w-full flex items-center justify-between bg-white text-[#141824] text-sm px-3 py-2.5 rounded-sm border border-[#d5d9e4] focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff] cursor-pointer transition-colors"
+                                  >
+                                    <span>Select {currentType === "Device" ? "device" : currentType}</span>
+                                    <ChevronDown className="w-4 h-4 text-[#667085]" />
+                                  </button>
 
-                                  {dataList.map((item) => (
-                                    <option
-                                      key={item.id}
-                                      value={
-                                        item.country ||
-                                        item.state ||
-                                        item.name ||
-                                        item.browser ||
-                                        item.device
-                                      }
-                                    >
-                                      {item.country ||
-                                        item.state ||
-                                        item.name ||
-                                        item.browser ||
-                                        item.device}
-                                    </option>
-                                  ))}
-                                </select>
+                                  {openCountryDropdownIndex === idx ? (
+                                    <div className="absolute z-20 mt-1 w-full max-h-56 overflow-y-auto rounded-sm border border-[#d5d9e4] bg-white shadow-md">
+                                      <div className="sticky top-0 z-10 bg-white border-b border-[#e2e8f0] p-2">
+                                        <input
+                                          type="text"
+                                          value={getCountrySearchValue(idx)}
+                                          onChange={(e) =>
+                                            setCountrySearchByIndex((prev) => ({
+                                              ...prev,
+                                              [idx]: e.target.value,
+                                            }))
+                                          }
+                                          placeholder={`Search ${currentType === "Device" ? "device" : currentType}...`}
+                                          className="w-full bg-white text-[#141824] text-sm px-2.5 py-2 rounded-sm border border-[#d5d9e4] focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
+                                        />
+                                      </div>
+
+                                      {dataList.filter((item) => {
+                                        const optionLabel = getConditionOptionLabel(item);
+                                        const query = getCountrySearchValue(idx).trim().toLowerCase();
+                                        const codeMatch =
+                                          currentType === "country"
+                                            ? String(item.code || "")
+                                                .toLowerCase()
+                                                .includes(query)
+                                            : false;
+                                        if (!query) return true;
+                                        return optionLabel.toLowerCase().includes(query) || codeMatch;
+                                      }).length === 0 ? (
+                                        <div className="px-3 py-2 text-xs text-[#64748b]">
+                                          No {currentType === "Device" ? "device" : currentType} found
+                                        </div>
+                                      ) : null}
+
+                                      {dataList.map((item) => {
+                                        const optionLabel = getConditionOptionLabel(item);
+                                        const alreadyAdded = field.value.includes(optionLabel);
+                                        const query = getCountrySearchValue(idx).trim().toLowerCase();
+                                        const codeMatch =
+                                          currentType === "country"
+                                            ? String(item.code || "")
+                                                .toLowerCase()
+                                                .includes(query)
+                                            : false;
+                                        if (
+                                          query &&
+                                          !optionLabel.toLowerCase().includes(query) &&
+                                          !codeMatch
+                                        ) {
+                                          return null;
+                                        }
+
+                                        const iconNode = renderCriteriaOptionIcon(
+                                          currentType,
+                                          item,
+                                          optionLabel
+                                        );
+
+                                        return (
+                                          <button
+                                            key={item.id}
+                                            type="button"
+                                            onClick={() => {
+                                              if (!alreadyAdded) {
+                                                field.onChange([...field.value, optionLabel]);
+                                              }
+                                              setOpenCountryDropdownIndex(null);
+                                              setCountrySearchByIndex((prev) => ({
+                                                ...prev,
+                                                [idx]: "",
+                                              }));
+                                            }}
+                                            className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[#1f2a44] hover:bg-[#f4f7ff] cursor-pointer disabled:opacity-50"
+                                            disabled={alreadyAdded}
+                                          >
+                                            {iconNode ? iconNode : null}
+                                            <span className="truncate flex-1">{optionLabel}</span>
+                                            {alreadyAdded ? (
+                                              <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[#e8efff] text-[#2f6bff]">
+                                                Added
+                                              </span>
+                                            ) : null}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : null}
+                                </div>
                               ) : (
                                 <input
                                   type="text"
                                   placeholder={`Enter ${currentType}...`}
-                                  className="w-full text-sm bg-slate-800 text-white px-3 py-2 rounded-md border border-slate-700"
+                                  className="w-full text-sm bg-white text-[#141824] px-3 py-2.5 rounded-sm border border-[#d5d9e4] focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff] transition-colors cursor-pointer"
                                   onKeyDown={(e) => {
                                     if (
                                       e.key === "Enter" &&
@@ -1535,6 +2253,11 @@ export default function CampaignBuilder() {
                                   }}
                                 />
                               )}
+                              {errors?.conditions?.[idx]?.values?.message ? (
+                                <p className="mt-1 text-xs text-red-500 text-left">
+                                  {errors.conditions[idx].values.message}
+                                </p>
+                              ) : null}
                             </div>
                           )}
                         />
@@ -1548,7 +2271,7 @@ export default function CampaignBuilder() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                   >
                     ‹ Previous
                   </button>
@@ -1560,7 +2283,7 @@ export default function CampaignBuilder() {
                       //     "You can preview changes before creating campaign"
                       //   );
                       // }}
-                      onClick={handleSubmit(onSubmit)}
+                      onClick={handleOpenReview}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
@@ -1573,8 +2296,8 @@ export default function CampaignBuilder() {
                     {fields.length > 0 && (
                       <button
                         type="button"
-                        onClick={nextStep}
-                        className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                        onClick={handleNext}
+                        className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                       >
                         Next ›
                       </button>
@@ -1587,7 +2310,10 @@ export default function CampaignBuilder() {
 
           {/* Step 5: Filters */}
           {step === 5 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl w-full">
+            <div
+              className="bg-transparent rounded-none p-0 shadow-none w-full"
+              style={{ border: "none", boxShadow: "none" }}
+            >
               <div className="space-y-4">
                 <div className="flex justify-center">
                   <Controller
@@ -1607,21 +2333,27 @@ export default function CampaignBuilder() {
                       );
                       const [selectedLeft, setSelectedLeft] = useState([]);
                       const [selectedRight, setSelectedRight] = useState([]);
+                      const [searchLeft, setSearchLeft] = useState("");
+                      const [searchRight, setSearchRight] = useState("");
+                      const [activePane, setActivePane] = useState("left");
 
-                      const moveRight = () => {
+                      const moveRightByIds = (ids) => {
                         const moved = availableOptions.filter((o) =>
-                          selectedLeft.includes(o.id.toString())
+                          ids.includes(o.id.toString())
                         );
+                        if (!moved.length) return;
                         const updatedSelected = [...selectedOptions, ...moved];
                         setSelectedOptions(updatedSelected);
                         setAvailableOptions(
                           availableOptions.filter(
-                            (o) => !selectedLeft.includes(o.id.toString())
+                            (o) => !ids.includes(o.id.toString())
                           )
                         );
                         setSelectedLeft([]);
                         setValue("filters", updatedSelected);
+                        clearErrors("filters");
                       };
+                      const moveRight = () => moveRightByIds(selectedLeft);
                       const moveLeft = () => {
                         const moved = selectedOptions.filter((o) =>
                           selectedRight.includes(o.id.toString())
@@ -1637,6 +2369,9 @@ export default function CampaignBuilder() {
                         setSelectedOptions(updatedSelected);
                         setSelectedRight([]);
                         setValue("filters", updatedSelected);
+                        if (updatedSelected.length > 0) {
+                          clearErrors("filters");
+                        }
                       };
                       const moveAllRight = () => {
                         const updatedSelected = [
@@ -1647,6 +2382,7 @@ export default function CampaignBuilder() {
                         setAvailableOptions([]);
                         setSelectedLeft([]);
                         setValue("filters", updatedSelected);
+                        clearErrors("filters");
                       };
                       const moveAllLeft = () => {
                         const updatedAvailable = [
@@ -1659,184 +2395,247 @@ export default function CampaignBuilder() {
                         setValue("filters", []);
                       };
 
-                      return (
-                        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-10"
-                        >
-                          {/* LEFT COLUMN */}
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                            }}
-                          >
-                            <label className="text-white font-semibold mb-2">
-                              Available Filters
-                            </label>
+                      const filteredAvailable = availableOptions.filter((item) =>
+                        item.label.toLowerCase().includes(searchLeft.toLowerCase())
+                      );
+                      const filteredSelected = selectedOptions.filter((item) =>
+                        item.label.toLowerCase().includes(searchRight.toLowerCase())
+                      );
 
-                            <select
-                              className="w-72 md:w-80"
-                              multiple
-                              size="8"
-                              style={{
-                                border: "2px solid #272d3e",
-                                borderRadius: "6px",
-                                padding: "4px",
-                                background: "#0f172a", // optional dark background
-                                color: "white",
-                              }}
-                              value={selectedLeft}
-                              onChange={(e) =>
-                                setSelectedLeft(
-                                  Array.from(
-                                    e.target.selectedOptions,
-                                    (opt) => opt.value
-                                  )
-                                )
-                              }
-                            >
-                              {availableOptions.map((item) => (
-                                <option
-                                  key={item.id}
-                                  value={item.id}
-                                  style={{ color: "#6c788b" }}
-                                >
-                                  {item.label}
-                                </option>
-                              ))}
-                            </select>
+                      const toggleLeft = (id) => {
+                        const value = String(id);
+                        setSelectedLeft((prev) =>
+                          prev.includes(value)
+                            ? prev.filter((x) => x !== value)
+                            : [...prev, value]
+                        );
+                      };
+
+                      const toggleRight = (id) => {
+                        const value = String(id);
+                        setSelectedRight((prev) =>
+                          prev.includes(value)
+                            ? prev.filter((x) => x !== value)
+                            : [...prev, value]
+                        );
+                      };
+
+                      const handleTransferKeyDown = (e) => {
+                        const tag = e.target?.tagName?.toLowerCase();
+                        if (tag === "input" || tag === "textarea") return;
+
+                        if (e.key === "Enter" && activePane === "left") {
+                          e.preventDefault();
+                          const focusedLeftId =
+                            e.target?.dataset?.transferSide === "left"
+                              ? String(e.target.dataset.transferId)
+                              : null;
+                          const idsToMove =
+                            selectedLeft.length > 0
+                              ? selectedLeft
+                              : focusedLeftId
+                              ? [focusedLeftId]
+                              : [];
+                          moveRightByIds(idsToMove);
+                        }
+                        if (
+                          (e.key === "Backspace" || e.key === "Delete") &&
+                          activePane === "right"
+                        ) {
+                          e.preventDefault();
+                          moveLeft();
+                        }
+                      };
+
+                      return (
+                        <div
+                          className="w-full grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-4 lg:gap-6 items-start"
+                          onKeyDown={handleTransferKeyDown}
+                        >
+                          <div
+                            className="rounded-md border border-[#d5d9e4] bg-white p-3 transition-all duration-150"
+                            onFocusCapture={() => setActivePane("left")}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="text-[13px] font-semibold text-[#2f3a55]">
+                                Available Filters
+                              </label>
+                              <span className="text-[11px] text-[#64748b]">
+                                {availableOptions.length} total
+                              </span>
+                            </div>
+                            <input
+                              type="text"
+                              value={searchLeft}
+                              onChange={(e) => setSearchLeft(e.target.value)}
+                              placeholder="Search filters..."
+                              className="w-full mb-2 bg-white text-[#141824] text-sm px-3 py-2 rounded-sm border border-[#d5d9e4] focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
+                            />
+                            <div className="max-h-[320px] overflow-y-auto space-y-1 pr-1">
+                              {filteredAvailable.length === 0 ? (
+                                <p className="text-xs text-[#64748b] px-2 py-3 text-left">
+                                  No filters found
+                                </p>
+                              ) : (
+                                filteredAvailable.map((item) => {
+                                  const isSelected = selectedLeft.includes(String(item.id));
+                                  return (
+                                    <button
+                                      key={item.id}
+                                      type="button"
+                                      onClick={() => toggleLeft(item.id)}
+                                      data-transfer-side="left"
+                                      data-transfer-id={item.id}
+                                      className={`w-full text-left px-2.5 py-2 rounded-sm border transition-colors cursor-pointer text-[12px] ${
+                                        isSelected
+                                          ? "bg-[#eef4ff] border-[#3c79ff] text-[#1d4ed8]"
+                                          : "bg-white border-[#e2e8f0] text-[#334155] hover:bg-[#f8fafc]"
+                                      }`}
+                                    >
+                                      <span className="inline-flex items-center gap-2">
+                                        {isSelected ? (
+                                          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#3c79ff] text-white">
+                                            <Check className="w-2.5 h-2.5" />
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex h-4 w-4 rounded-full border border-[#cbd5e1]" />
+                                        )}
+                                        <span>{item.label}</span>
+                                        {["business", "government", "wireless"].includes(
+                                          String(item.label).toLowerCase()
+                                        ) ? (
+                                          <span className="ml-1 rounded-full border border-[#f5cfa1] bg-[#fff7ed] px-1.5 py-[1px] text-[10px] font-semibold uppercase tracking-wide text-[#b45309]">
+                                            Not Recommended
+                                          </span>
+                                        ) : null}
+                                      </span>
+                                    </button>
+                                  );
+                                })
+                              )}
+                            </div>
                           </div>
 
-                          {/* CENTER BUTTONS */}
-                          <div
-                            className="
-    flex flex-row md:flex-col 
-    items-center justify-center 
-    gap-3 
-    mt-4 md:mt-10
-  "
-                          >
+                          <div className="flex lg:flex-col items-center justify-center gap-2 lg:gap-3 py-1 lg:self-center">
                             <button
                               type="button"
                               onClick={moveRight}
-                              className="
-      w-7     h-7 flex items-center justify-center text-lg
-      rounded-md border border-slate-600 
-      bg-slate-800 hover:bg-slate-700 
-      hover:border-slate-500 hover:scale-105 
-      active:scale-95 transition-all duration-200
-      text-slate-200  cursor-pointer
-    "
-                              title="Move selected to right"
+                              className="w-8 h-8 rounded-md border border-[#d5d9e4] bg-white text-[#3c79ff] hover:bg-[#f4f7ff] cursor-pointer font-semibold transition-all duration-150"
+                              title="Move selected right"
                             >
-                              ›
+                              &gt;
                             </button>
-
                             <button
                               type="button"
                               onClick={moveLeft}
-                              className="
-      w-7 h-7 flex items-center justify-center text-lg
-      rounded-md border border-slate-600 
-      bg-slate-800 hover:bg-slate-700 
-      hover:border-slate-500 hover:scale-105 
-      active:scale-95 transition-all duration-200
-      text-slate-200  cursor-pointer
-    "
-                              title="Move selected to left"
+                              className="w-8 h-8 rounded-md border border-[#d5d9e4] bg-white text-[#3c79ff] hover:bg-[#f4f7ff] cursor-pointer font-semibold transition-all duration-150"
+                              title="Move selected left"
                             >
-                              ‹
+                              &lt;
                             </button>
-
                             <button
                               type="button"
                               onClick={moveAllRight}
-                              className="
-      w-7 h-7 flex items-center justify-center text-lg
-      rounded-md border border-slate-600 
-      bg-slate-800 hover:bg-slate-700 
-      hover:border-slate-500 hover:scale-105 
-      active:scale-95 transition-all duration-200
-      text-slate-200  cursor-pointer
-    "
+                              className="w-8 h-8 rounded-md border border-[#d5d9e4] bg-white text-[#3c79ff] hover:bg-[#f4f7ff] cursor-pointer font-semibold transition-all duration-150"
                               title="Move all right"
                             >
-                              »
+                              {" >> "}
                             </button>
-
                             <button
                               type="button"
                               onClick={moveAllLeft}
-                              className="
-      w-7 h-7 flex items-center justify-center text-lg
-      rounded-md border border-slate-600 
-      bg-slate-800 hover:bg-slate-700 
-      hover:border-slate-500 hover:scale-105 
-      active:scale-95 transition-all duration-200
-      text-slate-200  cursor-pointer
-    "
+                              className="w-8 h-8 rounded-md border border-[#d5d9e4] bg-white text-[#3c79ff] hover:bg-[#f4f7ff] cursor-pointer font-semibold transition-all duration-150"
                               title="Move all left"
                             >
-                              «
+                              {" << "}
                             </button>
                           </div>
 
-
-                          {/* RIGHT COLUMN */}
                           <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                            }}
+                            className="rounded-md border border-[#d5d9e4] bg-white p-3 transition-all duration-150"
+                            onFocusCapture={() => setActivePane("right")}
                           >
-                            <label className="text-white font-semibold mb-2">
-                              Enabled Filters
-                            </label>
-
-                            <select
-                              multiple
-                              size="8"
-                              className="w-72 md:w-80"
-                              style={{
-                                border: "2px solid  #272d3e",
-                                borderRadius: "6px",
-                                padding: "4px",
-                                background: "#0f172a",
-                                color: "white",
-                              }}
-                              value={selectedRight}
-                              onChange={(e) =>
-                                setSelectedRight(
-                                  Array.from(
-                                    e.target.selectedOptions,
-                                    (opt) => opt.value
-                                  )
-                                )
-                              }
-                            >
-                              {selectedOptions.map((item) => (
-                                <option
-                                  key={item.id}
-                                  value={item.id}
-                                  style={{ color: "#6c788b" }}
-                                >
-                                  {item.label}
-                                </option>
-                              ))}
-                            </select>
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="text-[13px] font-semibold text-[#2f3a55]">
+                                Enabled Filters
+                              </label>
+                              <span className="text-[11px] text-[#64748b]">
+                                {selectedOptions.length} selected
+                              </span>
+                            </div>
+                            <input
+                              type="text"
+                              value={searchRight}
+                              onChange={(e) => setSearchRight(e.target.value)}
+                              placeholder="Search enabled..."
+                              className="w-full mb-2 bg-white text-[#141824] text-sm px-3 py-2 rounded-sm border border-[#d5d9e4] focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
+                            />
+                            <div className="max-h-[320px] overflow-y-auto space-y-1 pr-1">
+                              {filteredSelected.length === 0 ? (
+                                <p className="text-xs text-[#64748b] px-2 py-3 text-left">
+                                  No enabled filters
+                                </p>
+                              ) : (
+                                filteredSelected.map((item) => {
+                                  const isSelected = selectedRight.includes(String(item.id));
+                                  return (
+                                    <button
+                                      key={item.id}
+                                      type="button"
+                                      onClick={() => toggleRight(item.id)}
+                                      data-transfer-side="right"
+                                      data-transfer-id={item.id}
+                                      className={`w-full text-left px-2.5 py-2 rounded-sm border transition-colors cursor-pointer text-[12px] ${
+                                        isSelected
+                                          ? "bg-[#eef4ff] border-[#3c79ff] text-[#1d4ed8]"
+                                          : "bg-white border-[#e2e8f0] text-[#334155] hover:bg-[#f8fafc]"
+                                      }`}
+                                    >
+                                      <span className="inline-flex items-center gap-2">
+                                        {isSelected ? (
+                                          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#3c79ff] text-white">
+                                            <Check className="w-2.5 h-2.5" />
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex h-4 w-4 rounded-full border border-[#cbd5e1]" />
+                                        )}
+                                        <span>{item.label}</span>
+                                        {["business", "government", "wireless"].includes(
+                                          String(item.label).toLowerCase()
+                                        ) ? (
+                                          <span className="ml-1 rounded-full border border-[#f5cfa1] bg-[#fff7ed] px-1.5 py-[1px] text-[10px] font-semibold uppercase tracking-wide text-[#b45309]">
+                                            Not Recommended
+                                          </span>
+                                        ) : null}
+                                      </span>
+                                    </button>
+                                  );
+                                })
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
                     }}
                   />
                 </div>
+                <div className="rounded-sm border border-[#d5d9e4] bg-[#f8fbff] px-3 py-2 text-[12px] text-[#475569] flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-[#2f3a55]">Live Summary:</span>
+                  <span>Enabled: {selectedFiltersCount}</span>
+                  <span className="text-[#94a3b8]">|</span>
+                  <span>Available: {Math.max(0, fixedOptions.length - selectedFiltersCount)}</span>
+                  <span className="text-[#94a3b8]">|</span>
+                  <span className="text-[#64748b]">Tip: Use Enter to move right, Backspace/Delete to move left.</span>
+                </div>
+                {errors?.filters?.message ? (
+                  <p className="mt-1 text-xs text-red-500 text-left">{errors.filters.message}</p>
+                ) : null}
                 {/* =========BUTTONS LOWER */}
                 <div className="flex justify-between mt-6">
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer "
+                    className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                   >
                     ‹ Previous
                   </button>
@@ -1848,8 +2647,8 @@ export default function CampaignBuilder() {
                       //     "You can preview changes before creating campaign"
                       //   );
                       // }}
-                      onClick={handleSubmit(onSubmit)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md  cursor-pointer"
+                      onClick={handleOpenReview}
+                      className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                     >
                       <svg class="svg-inline--fa fa-floppy-disk me-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="floppy-disk" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.1 129.1l-83.9-83.9C342.3 38.32 327.1 32 316.1 32H64C28.65 32 0 60.65 0 96v320c0 35.35 28.65 64 64 64h320c35.35 0 64-28.65 64-64V163.9C448 152.9 441.7 137.7 433.1 129.1zM224 416c-35.34 0-64-28.66-64-64s28.66-64 64-64s64 28.66 64 64S259.3 416 224 416zM320 208C320 216.8 312.8 224 304 224h-224C71.16 224 64 216.8 64 208v-96C64 103.2 71.16 96 80 96h224C312.8 96 320 103.2 320 112V208z"></path></svg>
                       <span>
@@ -1860,8 +2659,8 @@ export default function CampaignBuilder() {
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      onClick={nextStep}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
+                      onClick={handleNext}
+                      className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
                     >
                       Next ›
                     </button>
@@ -1874,221 +2673,431 @@ export default function CampaignBuilder() {
 
           {/* Step 6: Automate */}
           {step === 6 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
-  <label className="flex items-center gap-2">
-    <input
-      type="checkbox"
-      checked={showInputs.afterX>0 ? true:false}
-      onChange={() =>
-        setShowInputs((p) => ({
-          ...p,
-          afterX: !p.afterX,
-        }))
-      }
-    />
-    <span className="text-white">
-      Activate after X unique real visitors
-    </span>
-  </label>
-
-  {showInputs.afterX && (
-    <InputField
-      label="Enter value"
-      name="afterX"
-      register={register}
-      type="number"
-      placeholder="Enter number of visitors"
-    />
-  )}
-</div>
-
-
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={showInputs.frequencyCap}
-                        onChange={() =>
-                          setShowInputs((p) => ({
-                            ...p,
-                            frequencyCap: !p.frequencyCap,
-                          }))
-                        }
-                      />
-                      <span className="text-white">Frequency Cap</span>
-                    </label>
-                    {showInputs.frequencyCap && (
-                      <InputField
-                        label="Enter value"
-                        name="automate.frequencyCap.value"
-                        register={register}
-                        type="number"
-                        placeholder="Enter frequency value"
-                      />
-                    )}
-                  </div>
-
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={showInputs.zeroRedirect}
-                        onChange={() =>
-                          setShowInputs((p) => ({
-                            ...p,
-                            zeroRedirect: !p.zeroRedirect,
-                          }))
-                        }
-                      />
-                      <span className="text-white">Zero Redirect Cloaking</span>
-                    </label>
-                    {showInputs.zeroRedirect && (
-                      <div className="flex gap-4 mt-2">
-                        <label className="flex items-center gap-2 text-slate-300">
-                          <input
-                            type="checkbox"
-                            checked={watch("automate.zeroRedirect.curl")}
-                            onChange={(e) => {
-                              setValue(
-                                "automate.zeroRedirect.curl",
-                                e.target.checked
-                              );
-                              if (e.target.checked)
-                                setValue("automate.zeroRedirect.iframe", false);
-                            }}
-                          />{" "}
-                          CURL
-                        </label>
-                        <label className="flex items-center gap-2 text-slate-300">
-                          <input
-                            type="checkbox"
-                            checked={watch("automate.zeroRedirect.iframe")}
-                            onChange={(e) => {
-                              setValue(
-                                "automate.zeroRedirect.iframe",
-                                e.target.checked
-                              );
-                              if (e.target.checked)
-                                setValue("automate.zeroRedirect.curl", false);
-                            }}
-                          />{" "}
-                          IFRAME
-                        </label>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" {...register("automate.gclid")} />
-                      <span className="text-white">
-                        GCLID (Google Click ID)
-                      </span>
-                    </label>
-                  </div>
-
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" {...register("automate.ipCap")} />
-                      <span className="text-white">IP Cap</span>
-                    </label>
-                  </div>
-
-                  <div className="bg-slate-800 p-4 rounded border border-slate-700">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={showInputs.pageGuard}
-                        onChange={() =>
-                          setShowInputs((p) => ({
-                            ...p,
-                            pageGuard: !p.pageGuard,
-                          }))
-                        }
-                      />
-                      <span className="text-white">Page Guard Key</span>
-                    </label>
-                    {showInputs.pageGuard && (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-                        <InputField
-                          label="Key"
-                          name="page_guard.key"
-                          register={register}
-                          placeholder="Enter key"
-                        />
-                        <InputField
-                          label="URL"
-                          name="page_guard.url"
-                          register={register}
-                          error={errors.page_guard?.url}
-                          placeholder="Enter URL"
-                          pattern={{
-                            value: /^(https?:\/\/[^\s$.?#].[^\s]*)$/i,
-                            message: "Enter a valid URL ",
-                          }}
-                        />
-                        <InputField
-                          label="Second"
-                          name="page_guard.second"
-                          register={register}
-                          placeholder="Enter second field"
-                        />
-                      </div>
-                    )}
-                  </div>
+            <div
+              className="bg-transparent rounded-none p-0 shadow-none"
+              style={{ border: "none", boxShadow: "none" }}
+            >
+              <div className="space-y-6">
+                <div className="rounded-md border border-[#d5d9e4] bg-gradient-to-b from-white to-[#f9fbff] px-5 py-4 text-left">
+                  <h3 className="text-[22px] leading-tight font-extrabold text-[#141824]">Automation Command Center</h3>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-[#64748b]">
+                    Configure launch-time behavior, response mode, and runtime protection.
+                  </p>
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded border border-slate-700">
-                  <label className="flex items-center gap-4">
-                    <input
-                      type="radio"
-                      value="301"
-                      {...register("http_code")}
-                    />
-                    <span className="text-white">301</span>
-                    <input
-                      type="radio"
-                      value="302"
-                      {...register("http_code")}
-                    />
-                    <span className="text-white">302</span>
-                  </label>
-                </div>
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                  <div className="xl:col-span-2 space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="rounded-md border border-[#d5d9e4] bg-white p-5 text-left">
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-[15px] font-semibold text-[#1e293b]">Activate After Unique Real Visitors</p>
+                            <p className="text-[12px] leading-relaxed text-[#64748b] mt-1.5">
+                              Trigger rule only after minimum real visits.
+                            </p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer items-center">
+                            <input
+                              type="checkbox"
+                              checked={Boolean(showInputs.afterX)}
+                              onChange={() =>
+                                setShowInputs((p) => ({
+                                  ...p,
+                                  afterX: !p.afterX,
+                                }))
+                              }
+                              className="peer sr-only"
+                            />
+                            <span className="h-6 w-11 rounded-full bg-[#d5d9e4] transition peer-checked:bg-[#3c79ff]" />
+                            <span className="absolute left-[2px] h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-5" />
+                          </label>
+                        </div>
 
-                <div className="flex justify-between mt-6">
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md cursor-pointer"
-                  >
-                    ‹ Previous
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-md shadow cursor-pointer"
-                  >
-                    {location?.state?.mode === "edit" ? "Update" : "Create"}{" "}
-                    Campaign
-                  </button>
+                        {showInputs.afterX && (
+                          <div className="mt-4">
+                            <InputField
+                              label="Unique Visitor Count"
+                              name="afterX"
+                              register={register}
+                              type="number"
+                              placeholder="Enter number of visitors"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="rounded-md border border-[#d5d9e4] bg-white p-5 text-left">
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-[15px] font-semibold text-[#1e293b]">Frequency Cap</p>
+                            <p className="text-[12px] leading-relaxed text-[#64748b] mt-1.5">
+                              Control how often the same user is redirected.
+                            </p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer items-center">
+                            <input
+                              type="checkbox"
+                              checked={showInputs.frequencyCap}
+                              onChange={() =>
+                                setShowInputs((p) => ({
+                                  ...p,
+                                  frequencyCap: !p.frequencyCap,
+                                }))
+                              }
+                              className="peer sr-only"
+                            />
+                            <span className="h-6 w-11 rounded-full bg-[#d5d9e4] transition peer-checked:bg-[#3c79ff]" />
+                            <span className="absolute left-[2px] h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-5" />
+                          </label>
+                        </div>
+
+                        {showInputs.frequencyCap && (
+                          <div className="mt-4">
+                            <InputField
+                              label="Cap Value"
+                              name="automate.frequencyCap.value"
+                              register={register}
+                              type="number"
+                              placeholder="Enter frequency value"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="rounded-md border border-[#d5d9e4] bg-white p-5 text-left">
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-[15px] font-semibold text-[#1e293b]">Zero Redirect Cloaking</p>
+                            <p className="text-[12px] leading-relaxed text-[#64748b] mt-1.5">
+                              Choose one delivery method at a time.
+                            </p>
+                          </div>
+                          <label className="relative inline-flex cursor-pointer items-center">
+                            <input
+                              type="checkbox"
+                              checked={showInputs.zeroRedirect}
+                              onChange={() =>
+                                setShowInputs((p) => ({
+                                  ...p,
+                                  zeroRedirect: !p.zeroRedirect,
+                                }))
+                              }
+                              className="peer sr-only"
+                            />
+                            <span className="h-6 w-11 rounded-full bg-[#d5d9e4] transition peer-checked:bg-[#3c79ff]" />
+                            <span className="absolute left-[2px] h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-5" />
+                          </label>
+                        </div>
+
+                        {showInputs.zeroRedirect && (
+                          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <label className="flex items-center gap-2 rounded-md border border-[#d5d9e4] bg-[#f8fafc] px-3.5 py-2.5 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={watch("automate.zeroRedirect.curl")}
+                                onChange={(e) => {
+                                  setValue("automate.zeroRedirect.curl", e.target.checked);
+                                  if (e.target.checked) setValue("automate.zeroRedirect.iframe", false);
+                                }}
+                              />
+                              <span className="text-[13px] font-semibold text-[#334155]">CURL</span>
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border border-[#d5d9e4] bg-[#f8fafc] px-3.5 py-2.5 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={watch("automate.zeroRedirect.iframe")}
+                                onChange={(e) => {
+                                  setValue("automate.zeroRedirect.iframe", e.target.checked);
+                                  if (e.target.checked) setValue("automate.zeroRedirect.curl", false);
+                                }}
+                              />
+                              <span className="text-[13px] font-semibold text-[#334155]">IFRAME</span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="rounded-md border border-[#d5d9e4] bg-white p-5 text-left">
+                        <p className="text-[15px] font-semibold text-[#1e293b]">Tracking Controls</p>
+                        <p className="text-[12px] leading-relaxed text-[#64748b] mt-1.5">Enable/disable support identifiers.</p>
+                        <div className="mt-4 space-y-2.5">
+                          <label className="flex items-center justify-between rounded-md border border-[#d5d9e4] bg-[#f8fafc] px-3.5 py-2.5 cursor-pointer">
+                            <span className="text-[13px] font-semibold text-[#334155]">GCLID (Google Click ID)</span>
+                            <input type="checkbox" {...register("automate.gclid")} className="h-4 w-4 accent-[#3c79ff]" />
+                          </label>
+                          <label className="flex items-center justify-between rounded-md border border-[#d5d9e4] bg-[#f8fafc] px-3.5 py-2.5 cursor-pointer">
+                            <span className="text-[13px] font-semibold text-[#334155]">IP Cap</span>
+                            <input type="checkbox" {...register("automate.ipCap")} className="h-4 w-4 accent-[#3c79ff]" />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-[#d5d9e4] bg-white p-5 text-left">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-[15px] font-semibold text-[#1e293b]">Page Guard Key</p>
+                          <p className="text-[12px] leading-relaxed text-[#64748b] mt-1.5">
+                            Configure secret key, URL, and wait duration.
+                          </p>
+                        </div>
+                        <label className="relative inline-flex cursor-pointer items-center">
+                          <input
+                            type="checkbox"
+                            checked={showInputs.pageGuard}
+                            onChange={() =>
+                              setShowInputs((p) => ({
+                                ...p,
+                                pageGuard: !p.pageGuard,
+                              }))
+                            }
+                            className="peer sr-only"
+                          />
+                          <span className="h-6 w-11 rounded-full bg-[#d5d9e4] transition peer-checked:bg-[#3c79ff]" />
+                          <span className="absolute left-[2px] h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-5" />
+                        </label>
+                      </div>
+
+                      {showInputs.pageGuard && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                          <InputField
+                            label="Key"
+                            name="page_guard.key"
+                            register={register}
+                            placeholder="Enter key"
+                          />
+                          <InputField
+                            label="URL"
+                            name="page_guard.url"
+                            register={register}
+                            error={errors.page_guard?.url}
+                            placeholder="Enter URL"
+                            pattern={{
+                              value: /^(https?:\/\/[^\s$.?#].[^\s]*)$/i,
+                              message: "Enter a valid URL ",
+                            }}
+                          />
+                          <InputField
+                            label="Second"
+                            name="page_guard.second"
+                            register={register}
+                            placeholder="Enter second field"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="rounded-md border border-[#d5d9e4] bg-white p-5 text-left">
+                      <p className="text-[15px] font-semibold text-[#1e293b]">HTTP Redirect Code</p>
+                      <div className="mt-4 flex flex-wrap items-center gap-3">
+                        <label className="inline-flex items-center gap-2 rounded-md border border-[#d5d9e4] px-3.5 py-2.5 bg-[#f8fafc] cursor-pointer">
+                          <input type="radio" value="301" {...register("http_code")} className="accent-[#3c79ff]" />
+                          <span className="text-[13px] font-semibold text-[#334155]">301</span>
+                        </label>
+                        <label className="inline-flex items-center gap-2 rounded-md border border-[#d5d9e4] px-3.5 py-2.5 bg-[#f8fafc] cursor-pointer">
+                          <input type="radio" value="302" {...register("http_code")} className="accent-[#3c79ff]" />
+                          <span className="text-[13px] font-semibold text-[#334155]">302</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-1">
+                    <div className="xl:sticky xl:top-24 rounded-md border border-[#d5d9e4] bg-white p-5 text-left">
+                      <h4 className="text-[18px] font-extrabold text-[#141824]">Launch Readiness</h4>
+                      <p className="mt-1.5 text-[12px] leading-relaxed text-[#64748b]">Quick snapshot before you submit.</p>
+                      <div className="mt-4 space-y-2.5">
+                        <div className="flex items-center justify-between rounded-sm border border-[#e2e8f0] px-3.5 py-2.5">
+                          <span className="text-[12px] text-[#64748b]">Campaign Name</span>
+                          <span className="text-[12px] font-semibold text-[#1e293b] truncate max-w-[150px]">
+                            {watch("campaignName") || "-"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-sm border border-[#e2e8f0] px-3.5 py-2.5">
+                          <span className="text-[12px] text-[#64748b]">Revenue Pages</span>
+                          <span className="text-[12px] font-semibold text-[#1e293b]">{(watch("money_page") || []).length}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-sm border border-[#e2e8f0] px-3.5 py-2.5">
+                          <span className="text-[12px] text-[#64748b]">Criteria Rules</span>
+                          <span className="text-[12px] font-semibold text-[#1e293b]">{(watch("conditions") || []).length}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-sm border border-[#e2e8f0] px-3.5 py-2.5">
+                          <span className="text-[12px] text-[#64748b]">Filters Enabled</span>
+                          <span className="text-[12px] font-semibold text-[#1e293b]">{(watch("filters") || []).length}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-sm border border-[#e2e8f0] px-3.5 py-2.5">
+                          <span className="text-[12px] text-[#64748b]">HTTP Code</span>
+                          <span className="text-[12px] font-semibold text-[#1e293b]">{watch("http_code") || "301"}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-sm border border-[#e2e8f0] px-3.5 py-2.5">
+                          <span className="text-[12px] text-[#64748b]">Campaign Status</span>
+                          <span className="text-[12px] font-semibold text-[#1e293b]">{activeStatus || "-"}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 flex flex-col gap-2.5">
+                        <button
+                          type="button"
+                          onClick={handleOpenReview}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
+                        >
+                          {location?.state?.mode === "edit" ? "Update" : "Create"} Campaign
+                        </button>
+                        <button
+                          type="button"
+                          onClick={prevStep}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-semibold text-[13px] border border-[#d5d9e4] text-[#475569] bg-white hover:bg-[#f8fafc] cursor-pointer"
+                        >
+                          ‹ Previous
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </form>
 
-        {/* small footer note */}
-        <div className="text-xs text-slate-500">
-          Pro-tip: Use the Preview or validation to verify money pages &
-          conditions before creating.
+        </div>
+
+          <aside className="hidden xl:block sticky top-24">
+            <nav aria-label="Progress">
+              <ol role="list" className="relative pl-0 space-y-6">
+                {steps.map((s, idx) => {
+                  const isCurrent = idx + 1 === step;
+                  const isDone = idx + 1 <= step;
+                  const isConnectorDone = idx + 1 < step;
+                  return (
+                    <li key={s.name} className="relative flex items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => handleStepClick(idx + 1)}
+                        className={`z-10 flex h-9 w-9 items-center justify-center rounded-full border-[6px] cursor-pointer transition-colors ${
+                          isDone
+                            ? "border-[#3c79ff] bg-[#3c79ff] text-white"
+                            : "border-[#ccd1dd] bg-[#f2f5fa] text-[#525B75]"
+                        }`}
+                      >
+                        <s.icon
+                          className="h-4 w-4"
+                          strokeWidth={2.6}
+                          style={{ color: isDone ? "#ffffff" : "#525B75" }}
+                        />
+                      </button>
+                      <span
+                        className={`text-[15px] leading-none ${
+                          isCurrent ? "text-[#3c79ff] font-semibold" : "text-[#4f5d79]"
+                        }`}
+                      >
+                        {s.name}
+                      </span>
+                      {idx < steps.length - 1 && (
+                        <span
+                          className={`absolute left-[17px] top-[36px] h-6 w-[2px] ${
+                            isConnectorDone ? "bg-[#3c79ff]" : "bg-[#525B75]"
+                          }`}
+                        />
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
+          </aside>
         </div>
 
         {showAlert && (
           <CustomAlertModal message={alertMessage} onClose={hideCustomAlert} />
         )}
+        {showReviewModal && (
+          <div className="fixed inset-0 z-[1200] bg-black/40 flex items-center justify-center p-4">
+            <div className="w-full max-w-3xl rounded-lg border border-[#d5d9e4] bg-white p-5">
+              <h3 className="text-lg font-semibold text-[#141824] text-left">Review Campaign</h3>
+              <p className="text-sm text-[#64748b] text-left mt-1">
+                Please verify the key values before final submit.
+              </p>
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Campaign</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1">
+                    {reviewData?.campaignName || "-"}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Traffic Source</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1">
+                    {reviewData?.trafficSource || "-"}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Revenue Pages</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1">
+                    {(reviewData?.money_page || []).length}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Filters Enabled</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1">
+                    {(reviewData?.filters || []).length}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Safe Page</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1 break-all">
+                    {reviewData?.safe_page || "-"}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">HTTP Code</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1">
+                    {reviewData?.http_code || "301"}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Status</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1">
+                    {reviewData?.status || activeStatus || "-"}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">EPC / CPC</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1">
+                    {reviewData?.epc ?? "-"} / {reviewData?.cpc ?? "-"}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-[#e2e8f0] p-3 text-left">
+                  <p className="text-[11px] uppercase tracking-wide text-[#64748b]">Conditions</p>
+                  <p className="text-sm font-semibold text-[#1e293b] mt-1">
+                    {(reviewData?.conditions || []).length}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
+                >
+                  ‹ Back to Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSubmit(reviewData || getValues())}
+                  className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
+                >
+                  Confirm & Submit ›
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
 }
+
+
+
+
+

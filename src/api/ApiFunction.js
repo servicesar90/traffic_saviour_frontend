@@ -60,6 +60,15 @@ export const apiFunction = async (
         break;
       }
 
+      case "put": {
+        response = await axios.put(
+          `${api}${params ? `/${params}` : ""}`,
+          data,
+          { headers, signal }
+        );
+        break;
+      }
+
       case "delete": {
         response = await axios.delete(
           `${api}${params ? `/${params}` : ""}`,

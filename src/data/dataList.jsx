@@ -205,18 +205,16 @@ export const BROWSER_LIST=[
   {id:1, browser:"Samsung Browser"},
   {id:2, browser:"Xiaomi Browser"},
   {id:3, browser:"Nokia Browser"},
-  {id:4, browser:"Samsung Browser"},
-  {id:5, browser:"UC Browser"},
-  {id:6, browser:"Flock"},
-  {id:7, browser:"Edge"},
-  {id:8, browser:"Opera"},
-  {id:9, browser:"Internt Explorer"},
-  {id:10, browser:"Chrome"},
-  {id:11, browser:"Firefox"},
-  {id:12, browser:"Safari"},
-  {id:13, browser:"IBrowser"},
-  {id:14, browser:"Ubuntu Web Browser"},
-
+  {id:4, browser:"UC Browser"},
+  {id:5, browser:"Flock"},
+  {id:6, browser:"Edge"},
+  {id:7, browser:"Opera"},
+  {id:8, browser:"Internt Explorer"},
+  {id:9, browser:"Chrome"},
+  {id:10, browser:"Firefox"},
+  {id:11, browser:"Safari"},
+  {id:12, browser:"IBrowser"},
+  {id:13, browser:"Ubuntu Web Browser"},
 ];
 
 

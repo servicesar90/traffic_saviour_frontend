@@ -19,6 +19,8 @@ const Campaign = lazy(() => import("../pages/campaignCreation"));
 const CampaignNew = lazy(() => import("../pages/new"));
 const CloakingIntegration = lazy(() => import("../pages/CampaignIntegration"));
 const IpListings = lazy(() => import("../pages/IpListings"));
+const BlacklistIp = lazy(() => import("../pages/BlacklistIp"));
+const WhitelistIp = lazy(() => import("../pages/WhitelistIp"));
 const Analytics = lazy(() => import("../pages/Analytics"));
 const SignupPage = lazy(() => import("../auth/SignUpForm"));
 const LoginPage = lazy(() => import("../auth/SignInForm"));
@@ -138,6 +140,8 @@ export default function Routess() {
                 element={<CloakingIntegration />}
               />
               <Route path="ipListings" element={<IpListings />} />
+              <Route path="ip-blacklist" element={<IpListings />} />
+              <Route path="ip-whitelist" element={<WhitelistIp />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="test" element={<Test />} />
               {/* <Route path="clickLogs" element={<ClickLogs />} /> */}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronDown, ChevronUp, NotepadText, ChevronLeft } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,6 +13,7 @@ import { signOutApi } from "../../api/Apis";
 const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCollapse }) => {
   const location = useLocation();
   const [databaseOpen, setDatabaseOpen] = useState(false);
+  const [manageIpOpen, setManageIpOpen] = useState(false);
   const showFull = !isCollapsed;
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -47,9 +48,13 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
       route: "/Dashboard/billing",
     },
     {
-      label: "Capital",
+      label: "Manage IP",
       icon: <FontAwesomeIcon icon={faBan} size="lg" />,
-      route: "/Dashboard/IpListings",
+      collapsible: true,
+      subItems: [
+        { label: "Blacklist IP", route: "/Dashboard/ip-blacklist" },
+        { label: "Whitelist IP", route: "/Dashboard/ip-whitelist" },
+      ],
     },
     {
       label: "Accounts",
@@ -95,6 +100,14 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
   };
 
   const isDatabaseActive = false;
+  useEffect(() => {
+    if (
+      location.pathname === "/Dashboard/ip-blacklist" ||
+      location.pathname === "/Dashboard/ip-whitelist"
+    ) {
+      setManageIpOpen(true);
+    }
+  }, [location.pathname]);
 
   return (
     <div
@@ -140,7 +153,11 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
       {/* Navigation */}
       <nav className={`flex flex-col gap-1 text-slate-200 ${showFull ? "overflow-hidden" : "overflow-visible"}`}>
         {navItems.map((item, index) => {
-          const isActive = location.pathname === item.route;
+          const hasSubItems = Array.isArray(item.subItems) && item.subItems.length > 0;
+          const isSubItemActive = hasSubItems
+            ? item.subItems.some((sub) => location.pathname === sub.route)
+            : false;
+          const isActive = location.pathname === item.route || isSubItemActive;
           const isItemActive = isActive || (item.collapsible && isDatabaseActive);
 
           return (
@@ -148,7 +165,9 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
               <div
                 id={item.label}
                 onClick={() => {
-                  if (item.collapsible) {
+                  if (item.label === "Manage IP") {
+                    setManageIpOpen(!manageIpOpen);
+                  } else if (item.collapsible) {
                     setDatabaseOpen(!databaseOpen);
                   } else if (item.route) {
                     handleNavigate(item.route);
@@ -172,9 +191,15 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                     {item.label}
                   </span>
                 )}
-                {item.collapsible && showFull && (
+                {(item.collapsible || hasSubItems) && showFull && (
                   <span className="text-slate-300/70 sidebar-text">
-                    {databaseOpen ? (
+                    {item.label === "Manage IP" ? (
+                      manageIpOpen ? (
+                        <ChevronUp size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
+                      ) : (
+                        <ChevronDown size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
+                      )
+                    ) : databaseOpen ? (
                       <ChevronUp size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
                     ) : (
                       <ChevronDown size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
@@ -183,6 +208,24 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                 )}
               </div>
 
+              {hasSubItems && showFull && manageIpOpen && (
+                <div className="ml-4 mt-1 flex flex-col gap-1">
+                  {item.subItems.map((sub) => {
+                    const subActive = location.pathname === sub.route;
+                    return (
+                      <div
+                        key={sub.route}
+                        onClick={() => handleNavigate(sub.route)}
+                        className={`px-2 py-1 text-[13px] rounded-lg cursor-pointer transition-colors ${
+                          subActive ? "text-[#3874ff]" : "text-slate-600 hover:text-slate-700"
+                        }`}
+                      >
+                        {sub.label}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}

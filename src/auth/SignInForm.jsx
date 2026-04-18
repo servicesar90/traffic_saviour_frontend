@@ -180,10 +180,7 @@ export default function LoginPage() {
                 Email <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-                <path fill="currentColor" d="M12 2.2l8.3 3.3v6.1c0 5-3.7 8.9-8.3 10.6-4.6-1.7-8.3-5.6-8.3-10.6V5.5L12 2.2z" />
-                <path fill="currentColor" opacity="0.25" d="M12 5.3l5.3 2.1v4.2c0 3.3-2.2 6-5.3 7.2-3.1-1.2-5.3-3.9-5.3-7.2V7.4L12 5.3z" />
-              </svg>
+                
                 <input
                   type="email"
                   name="email"
@@ -204,10 +201,7 @@ export default function LoginPage() {
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-                <path fill="currentColor" d="M12 2.2l8.3 3.3v6.1c0 5-3.7 8.9-8.3 10.6-4.6-1.7-8.3-5.6-8.3-10.6V5.5L12 2.2z" />
-                <path fill="currentColor" opacity="0.25" d="M12 5.3l5.3 2.1v4.2c0 3.3-2.2 6-5.3 7.2-3.1-1.2-5.3-3.9-5.3-7.2V7.4L12 5.3z" />
-              </svg>
+               
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"

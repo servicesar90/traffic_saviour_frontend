@@ -41,11 +41,11 @@ export default function DashboardGuard({ children }) {
     <>
       {children}
 
-      <PlanRequiredModal
+      {/* <PlanRequiredModal
         open={showPlanModal}
         onLogout={handleLogout}
         onUpgrade={() => navigate("/Dashboard/pricing")}
-      />
+      /> */}
     </>
   );
 }

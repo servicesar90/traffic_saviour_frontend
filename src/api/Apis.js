@@ -43,6 +43,8 @@ export const getAllAnalyticsCamp=`${base_url}/api/v2/webanalytics`;
 
 export const blacklistIpApi = `${base_url}/api/v2/blacklisted-ip`;
 
+export const getWhitelistApi = `${base_url}/api/v2/blacklisted-ip/whitelisted`;
+
 export const javascriptIntegrationCheckApi = `${base_url}/api/v2/trafficfilter/check`;
 
 
