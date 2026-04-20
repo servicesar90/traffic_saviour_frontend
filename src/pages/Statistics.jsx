@@ -22,7 +22,15 @@ import {
   Tooltip as LeafletTooltip,
   ZoomControl,
 } from "react-leaflet";
-import { Activity, Fingerprint, ShieldCheck, TriangleAlert } from "lucide-react";
+import {
+  Activity,
+  Fingerprint,
+  ShieldCheck,
+  TriangleAlert,
+  ExternalLink,
+  Network,
+  Monitor,
+} from "lucide-react";
 
 const dropdownStyle = {
   backgroundImage:
@@ -40,21 +48,110 @@ const TOOLTIP_STYLE = {
   color: "#141824",
 };
 const DEMO_ROWS = [
-  { ip: "87.122.142.147", proxy: "yes", risk: 81, status: 1, country: "Germany", os: "Windows", device: "desktop", referrer: "google.com", isp: "Deutsche Telekom AG", user_agent: "Chrome Desktop" },
-  { ip: "2a02:908:15a7:c20:75de:7207:be7c:c10c", proxy: "no", risk: 24, status: 0, country: "Germany", os: "OS X", device: "desktop", referrer: "youtube.com", isp: "Vodafone GmbH", user_agent: "Safari Mac" },
-  { ip: "145.239.86.111", proxy: "yes", risk: 74, status: 1, country: "France", os: "Linux", device: "robot", referrer: "doubleclick.net", isp: "OVH SAS", user_agent: "Bot Agent" },
-  { ip: "205.147.17.34", proxy: "no", risk: 19, status: 0, country: "United States", os: "Android", device: "phone", referrer: "facebook.com", isp: "AT&T", user_agent: "Chrome Android" },
-  { ip: "91.180.53.248", proxy: "yes", risk: 92, status: 1, country: "Belgium", os: "Windows", device: "desktop", referrer: "googleadservices.com", isp: "Proximus", user_agent: "Edge Windows" },
-  { ip: "87.65.125.33", proxy: "yes", risk: 88, status: 1, country: "Belgium", os: "Windows", device: "desktop", referrer: "google.com", isp: "Telenet", user_agent: "Chrome Desktop" },
-  { ip: "91.180.53.248", proxy: "yes", risk: 90, status: 1, country: "Belgium", os: "Windows", device: "desktop", referrer: "googleadservices.com", isp: "Proximus", user_agent: "Edge Windows" },
-  { ip: "87.122.142.147", proxy: "no", risk: 45, status: 0, country: "Germany", os: "Windows", device: "desktop", referrer: "bing.com", isp: "Deutsche Telekom AG", user_agent: "Chrome Desktop" },
+  {
+    ip: "87.122.142.147",
+    proxy: "yes",
+    risk: 81,
+    status: 1,
+    country: "Germany",
+    os: "Windows",
+    device: "desktop",
+    referrer: "google.com",
+    isp: "Deutsche Telekom AG",
+    user_agent: "Chrome Desktop",
+  },
+  {
+    ip: "2a02:908:15a7:c20:75de:7207:be7c:c10c",
+    proxy: "no",
+    risk: 24,
+    status: 0,
+    country: "Germany",
+    os: "OS X",
+    device: "desktop",
+    referrer: "youtube.com",
+    isp: "Vodafone GmbH",
+    user_agent: "Safari Mac",
+  },
+  {
+    ip: "145.239.86.111",
+    proxy: "yes",
+    risk: 74,
+    status: 1,
+    country: "France",
+    os: "Linux",
+    device: "robot",
+    referrer: "doubleclick.net",
+    isp: "OVH SAS",
+    user_agent: "Bot Agent",
+  },
+  {
+    ip: "205.147.17.34",
+    proxy: "no",
+    risk: 19,
+    status: 0,
+    country: "United States",
+    os: "Android",
+    device: "phone",
+    referrer: "facebook.com",
+    isp: "AT&T",
+    user_agent: "Chrome Android",
+  },
+  {
+    ip: "91.180.53.248",
+    proxy: "yes",
+    risk: 92,
+    status: 1,
+    country: "Belgium",
+    os: "Windows",
+    device: "desktop",
+    referrer: "googleadservices.com",
+    isp: "Proximus",
+    user_agent: "Edge Windows",
+  },
+  {
+    ip: "87.65.125.33",
+    proxy: "yes",
+    risk: 88,
+    status: 1,
+    country: "Belgium",
+    os: "Windows",
+    device: "desktop",
+    referrer: "google.com",
+    isp: "Telenet",
+    user_agent: "Chrome Desktop",
+  },
+  {
+    ip: "91.180.53.248",
+    proxy: "yes",
+    risk: 90,
+    status: 1,
+    country: "Belgium",
+    os: "Windows",
+    device: "desktop",
+    referrer: "googleadservices.com",
+    isp: "Proximus",
+    user_agent: "Edge Windows",
+  },
+  {
+    ip: "87.122.142.147",
+    proxy: "no",
+    risk: 45,
+    status: 0,
+    country: "Germany",
+    os: "Windows",
+    device: "desktop",
+    referrer: "bing.com",
+    isp: "Deutsche Telekom AG",
+    user_agent: "Chrome Desktop",
+  },
 ];
 
 const normalizeText = (value, fallback = "Unknown") => {
   if (value === null || value === undefined) return fallback;
   const text = String(value).trim();
   if (!text) return fallback;
-  if (text.toLowerCase() === "n/a" || text.toLowerCase() === "unknown") return fallback;
+  if (text.toLowerCase() === "n/a" || text.toLowerCase() === "unknown")
+    return fallback;
   return text;
 };
 
@@ -82,9 +179,9 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
   today.setHours(0, 0, 0, 0);
 
   return (
-    <div className="flex-grow max-w-xs min-w-s">
+    <div className="w-full">
       <label className="block text-[11px] uppercase font-extrabold tracking-wide text-[#52607a] mb-1 text-left">
-        Date Range {customRequired && <span className="text-red-500">*</span>}
+        Date Range <span className="text-red-500">*</span>
       </label>
 
       <DatePicker
@@ -120,7 +217,7 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
 };
 
 const CampaignDropdown = ({ campId, setCampId, campaigns }) => (
-  <div className="flex-grow max-w-xs">
+  <div className="w-full">
     <label className="block text-[11px] uppercase font-extrabold tracking-wide text-[#52607a] mb-1 text-left">
       Campaign <span className="text-red-500">*</span>
     </label>
@@ -152,42 +249,93 @@ const Tile = ({ title, subTitle, value, accent, icon }) => (
         {icon}
       </span>
       <div>
-        <h4 className="text-[20px] leading-[20px] text-[#121824] font-bold text-left">{value}</h4>
-        <p className="text-[0.8rem] leading-none text-[#3e465b] font-normal mt-1 text-left">{title}</p>
-        <p className="text-[11px] leading-none text-[#94a3b8] mt-1 text-left">{subTitle}</p>
+        <h4 className="text-[20px] leading-[20px] text-[#121824] font-bold text-left">
+          {value}
+        </h4>
+        <p className="text-[0.8rem] leading-none text-[#3e465b] font-normal mt-1 text-left">
+          {title}
+        </p>
+        <p className="text-[11px] leading-none text-[#94a3b8] mt-1 text-left">
+          {subTitle}
+        </p>
       </div>
     </div>
   </div>
 );
 
 const Panel = ({ title, children }) => (
-  <div className="bg-white border border-[#d5d9e4] rounded-2xl p-5 shadow-[0_20px_45px_rgba(15,23,42,0.06)]">
-    <h3 className="text-[#141824] text-[16px] uppercase tracking-[0.08em] font-extrabold mb-3">{title}</h3>
+  <div className="bg-transparent border-0 rounded-2xl p-5 shadow-none">
+    <h3 className="text-[#141824] text-[16px] uppercase tracking-[0.08em] font-extrabold mb-3">
+      {title}
+    </h3>
     {children}
   </div>
 );
 
-const ListPanel = ({ title, items, valueLabel = "Clicks" }) => (
-  <Panel title={title}>
-    {items.length === 0 ? (
-      <p className="text-sm text-[#64748b]">No data found.</p>
-    ) : (
-      <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
-        {items.map((item, index) => (
-          <div
-            key={`${item.label}-${index}`}
-            className="flex items-center justify-between rounded-lg border border-[#d5d9e4] bg-[#f8fbff] px-3 py-2"
-          >
-            <span className="text-sm text-[#334155] truncate pr-3">{index + 1}. {item.label}</span>
-            <span className="text-xs font-semibold text-[#3c79ff]">
-              {item.value} {valueLabel}
-            </span>
-          </div>
-        ))}
+const LIST_PANEL_THEME = {
+  referrer: {
+    badge: "bg-[#edf4ff] text-[#3874FF]",
+    pill: "bg-[#f4f8ff] text-[#3874FF]",
+  },
+  ip: {
+    badge: "bg-[#ecf7ff] text-[#0b6ad6]",
+    pill: "bg-[#f2f9ff] text-[#0b6ad6]",
+  },
+  os: {
+    badge: "bg-[#f1f5f9] text-[#475569]",
+    pill: "bg-[#f8fafc] text-[#475569]",
+  },
+};
+
+const ListPanel = ({
+  title,
+  items,
+  valueLabel = "Clicks",
+  type = "referrer",
+  icon,
+}) => {
+  const theme = LIST_PANEL_THEME[type] || LIST_PANEL_THEME.referrer;
+  return (
+    <div className="rounded-md border border-[#d5d9e4] bg-white p-4 shadow-none">
+      <div className="mb-3 flex items-center gap-2">
+        <span
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-md ${theme.badge}`}
+        >
+          {icon}
+        </span>
+        <h3 className="text-[13px] uppercase tracking-[0.06em] font-extrabold text-[#141824] text-left">
+          {title}
+        </h3>
       </div>
-    )}
-  </Panel>
-);
+      {items.length === 0 ? (
+        <p className="text-sm text-[#64748b]">No data found.</p>
+      ) : (
+        <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1 stats-card-scrollbar">
+          {items.map((item, index) => (
+            <div
+              key={`${item.label}-${index}`}
+              className="flex items-center justify-between rounded-md border border-[#d5d9e4] bg-white px-3 py-2"
+            >
+              <div className="min-w-0 flex items-center gap-2">
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded bg-[#f8fafc] px-1 text-[10px] font-bold text-[#475569] border border-[#d5d9e4]">
+                  {index + 1}
+                </span>
+                <span className="text-sm text-[#334155] truncate pr-2">
+                  {item.label}
+                </span>
+              </div>
+              <span
+                className={`text-xs font-semibold rounded-full px-2 py-1 ${theme.pill}`}
+              >
+                {item.value} {valueLabel}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const TrendChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload || !payload.length) return null;
@@ -196,8 +344,14 @@ const TrendChartTooltip = ({ active, payload, label }) => {
       <div className="mb-1 text-xs font-semibold text-[#475569]">{label}</div>
       <div className="space-y-1">
         {payload.map((entry) => (
-          <div key={entry.dataKey} className="flex items-center gap-2 text-xs text-[#334155]">
-            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
+          <div
+            key={entry.dataKey}
+            className="flex items-center gap-2 text-xs text-[#334155]"
+          >
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
             <span className="font-semibold">{entry.name}:</span>
             <span>{entry.value}</span>
           </div>
@@ -266,7 +420,7 @@ const Statistics = () => {
           getAllCampNames,
           null,
           null,
-          campaignControllerRef.current.signal
+          campaignControllerRef.current.signal,
         );
         setCampaigns(res?.data?.data || []);
       } catch {
@@ -299,7 +453,7 @@ const Statistics = () => {
         `${clicksbycampaign}?startdate=${startDate}&enddate=${endDate}&campId=${campId}`,
         null,
         null,
-        tableControllerRef.current.signal
+        tableControllerRef.current.signal,
       );
       setTableData(res?.data?.data || []);
     } catch {
@@ -329,13 +483,19 @@ const Statistics = () => {
   const derived = useMemo(() => {
     const totalClicks = sourceRows.length;
     const uniqueClicks = new Set(
-      sourceRows.map((item) => normalizeText(item?.ip, "Unknown"))
+      sourceRows.map((item) => normalizeText(item?.ip, "Unknown")),
     ).size;
-    const vpnClicks = sourceRows.filter((item) => isTruthyProxy(item?.proxy)).length;
-    const highRiskClicks = sourceRows.filter((item) => Number(item?.risk || 0) >= 70).length;
+    const vpnClicks = sourceRows.filter((item) =>
+      isTruthyProxy(item?.proxy),
+    ).length;
+    const highRiskClicks = sourceRows.filter(
+      (item) => Number(item?.risk || 0) >= 70,
+    ).length;
 
     const safeClicks = sourceRows.filter((item) => !item?.status).length;
-    const moneyClicks = sourceRows.filter((item) => Boolean(item?.status)).length;
+    const moneyClicks = sourceRows.filter((item) =>
+      Boolean(item?.status),
+    ).length;
     const pieData = [
       { name: "Safe", value: safeClicks },
       { name: "Money", value: moneyClicks },
@@ -344,7 +504,8 @@ const Statistics = () => {
     const groupedTrend = new Map();
     sourceRows.forEach((item, index) => {
       const date = getDateLabelFromRow(item, index);
-      if (!groupedTrend.has(date)) groupedTrend.set(date, { date, Safe: 0, Money: 0 });
+      if (!groupedTrend.has(date))
+        groupedTrend.set(date, { date, Safe: 0, Money: 0 });
       const current = groupedTrend.get(date);
       if (item?.status) current.Money += 1;
       else current.Safe += 1;
@@ -366,28 +527,55 @@ const Statistics = () => {
     });
 
     const riskBandData = [
-      { label: "Low (<30)", value: sourceRows.filter((r) => Number(r.risk || 0) < 30).length },
+      {
+        label: "Low (<30)",
+        value: sourceRows.filter((r) => Number(r.risk || 0) < 30).length,
+      },
       {
         label: "Medium (30-69)",
-        value: sourceRows.filter((r) => Number(r.risk || 0) >= 30 && Number(r.risk || 0) < 70).length,
+        value: sourceRows.filter(
+          (r) => Number(r.risk || 0) >= 30 && Number(r.risk || 0) < 70,
+        ).length,
       },
-      { label: "High (70+)", value: sourceRows.filter((r) => Number(r.risk || 0) >= 70).length },
+      {
+        label: "High (70+)",
+        value: sourceRows.filter((r) => Number(r.risk || 0) >= 70).length,
+      },
     ];
 
-    const topCountries = getTopCounts(sourceRows, (item) => item?.country, 7, true);
-    const topReferrers = getTopCounts(sourceRows, (item) => item?.referrer, 7, true);
+    const topCountries = getTopCounts(
+      sourceRows,
+      (item) => item?.country,
+      7,
+      true,
+    );
+    const topReferrers = getTopCounts(
+      sourceRows,
+      (item) => item?.referrer,
+      7,
+      true,
+    );
     const topIps = getTopCounts(sourceRows, (item) => item?.ip, 7, true);
     const topOs = getTopCounts(sourceRows, (item) => item?.os, 7, true);
 
-    const safePercent = totalClicks ? Math.round((safeClicks / totalClicks) * 100) : 0;
-    const moneyPercent = totalClicks ? Math.round((moneyClicks / totalClicks) * 100) : 0;
+    const safePercent = totalClicks
+      ? Math.round((safeClicks / totalClicks) * 100)
+      : 0;
+    const moneyPercent = totalClicks
+      ? Math.round((moneyClicks / totalClicks) * 100)
+      : 0;
     const miniBarSeries = baseTrendData.flatMap((d) => [d.Money, d.Safe]);
     const miniBarMax = Math.max(...miniBarSeries, 1);
     const countryTraffic = topCountries
       .map((item) => {
         const coords = getCountryLatLng(item.label);
         return coords
-          ? { country: item.label, value: item.value, lat: coords[0], lng: coords[1] }
+          ? {
+              country: item.label,
+              value: item.value,
+              lat: coords[0],
+              lng: coords[1],
+            }
           : null;
       })
       .filter(Boolean);
@@ -417,11 +605,14 @@ const Statistics = () => {
   const COUNTRIES_PER_PAGE = 5;
   const countryTotalPages = Math.max(
     1,
-    Math.ceil(derived.topCountries.length / COUNTRIES_PER_PAGE)
+    Math.ceil(derived.topCountries.length / COUNTRIES_PER_PAGE),
   );
   const countryPageSafe = Math.min(countryPage, countryTotalPages);
   const countryStart = (countryPageSafe - 1) * COUNTRIES_PER_PAGE;
-  const countryEnd = Math.min(countryStart + COUNTRIES_PER_PAGE, derived.topCountries.length);
+  const countryEnd = Math.min(
+    countryStart + COUNTRIES_PER_PAGE,
+    derived.topCountries.length,
+  );
   const countrySlice = derived.topCountries.slice(countryStart, countryEnd);
 
   return (
@@ -429,23 +620,36 @@ const Statistics = () => {
       <div className="mx-auto max-w-[1320px] space-y-6">
         <header className="p-0">
           <h1 className="dashboard-heading text-left">Statistics Studio</h1>
-          <p className="dashboard-subheading text-left">Fully rebuilt analytics surface with consistent alignment and spacing.</p>
+          <p className="dashboard-subheading text-left">
+            Fully rebuilt analytics surface with consistent alignment and
+            spacing.
+          </p>
         </header>
 
         <section className="p-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_1fr_auto_auto] gap-4 items-end">
-            <CampaignDropdown campId={campId} setCampId={setCampId} campaigns={campaigns} />
-            <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} customRequired={false} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <CampaignDropdown
+              campId={campId}
+              setCampId={setCampId}
+              campaigns={campaigns}
+            />
+            <DateRangePicker
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              customRequired={false}
+            />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <button
               onClick={fetchData}
-              className="h-[42px] flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
+              className="min-w-[120px] h-[42px] flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
             >
               Apply
             </button>
             <button
               onClick={handleReset}
               disabled={isResetting}
-              className={`h-[42px] flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] border transition-all duration-200 ${
+              className={`min-w-[120px] h-[42px] flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] border transition-all duration-200 ${
                 isResetting
                   ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed opacity-80"
                   : "bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
@@ -457,12 +661,15 @@ const Statistics = () => {
         </section>
 
         {loading ? (
-          <div className="rounded-2xl border border-[#d5d9e4] bg-white p-6 text-[#64748b]">Loading stats...</div>
+          <div className="rounded-2xl border border-[#d5d9e4] bg-white p-6 text-[#64748b]">
+            Loading stats...
+          </div>
         ) : (
           <div className="space-y-6">
             {isPreviewMode && (
               <div className="rounded-xl border border-[#fcd34d] bg-[#fffbeb] px-4 py-3 text-sm text-[#92400e]">
-                Preview mode: sample data is displayed until live API data is available.
+                Preview mode: sample data is displayed until live API data is
+                available.
               </div>
             )}
 
@@ -500,40 +707,89 @@ const Statistics = () => {
             <section className="grid gap-6 lg:grid-cols-[3fr_2fr]">
               <div className="bg-[#F5F7FA] rounded-3xl p-6">
                 <div className="mb-4">
-                  <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">Traffic Clicks</h3>
-                  <p className="text-[#525b75] leading-[1.2] text-sm">
+                  <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">
+                    Traffic Clicks
+                  </h3>
+                  <p className="text-[#525b75] leading-[1.2] text-sm text-left">
                     Safe and money page clicks over the selected timeframe
                   </p>
                 </div>
-                <div className="bg-[#F5F7FA]" style={{ width: "100%", height: 280 }}>
+                <div
+                  className="bg-[#F5F7FA]"
+                  style={{ width: "100%", height: 280 }}
+                >
                   <ResponsiveContainer>
-                    <LineChart data={derived.trendData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
-                      <CartesianGrid stroke="#E3E6ED" strokeOpacity={1} strokeDasharray="0" horizontal={false} vertical />
+                    <LineChart
+                      data={derived.trendData}
+                      margin={{ top: 8, right: 0, left: 0, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        stroke="#E3E6ED"
+                        strokeOpacity={1}
+                        strokeDasharray="0"
+                        horizontal={false}
+                        vertical
+                      />
                       <XAxis
                         dataKey="date"
-                        tick={{ fill: "#5f6b84", fontSize: 12, fontWeight: 600 }}
-                        tickFormatter={(value) => (derived.trendLabelSet.has(value) ? value : "")}
+                        tick={{
+                          fill: "#5f6b84",
+                          fontSize: 12,
+                          fontWeight: 600,
+                        }}
+                        tickFormatter={(value) =>
+                          derived.trendLabelSet.has(value) ? value : ""
+                        }
                         tickLine={false}
-                        axisLine={{ stroke: "#CBD0DD", strokeWidth: 1, strokeOpacity: 1, strokeDasharray: "0" }}
+                        axisLine={{
+                          stroke: "#CBD0DD",
+                          strokeWidth: 1,
+                          strokeOpacity: 1,
+                          strokeDasharray: "0",
+                        }}
                         height={28}
                         tickMargin={10}
                         interval={0}
                         padding={{ left: 0, right: 0 }}
                       />
-                      <YAxis tick={false} tickLine={false} axisLine={false} width={0} />
+                      <YAxis
+                        tick={false}
+                        tickLine={false}
+                        axisLine={false}
+                        width={0}
+                      />
                       <Tooltip content={<TrendChartTooltip />} cursor={false} />
-                      <Line type="linear" dataKey="Safe" stroke="#3874FF" strokeWidth={2} dot={false} />
-                      <Line type="linear" dataKey="Money" stroke="#0097EB" strokeWidth={2} strokeDasharray="4 3" dot={false} />
+                      <Line
+                        type="linear"
+                        dataKey="Safe"
+                        stroke="#3874FF"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                      <Line
+                        type="linear"
+                        dataKey="Money"
+                        stroke="#0097EB"
+                        strokeWidth={2}
+                        strokeDasharray="4 3"
+                        dot={false}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-3 flex items-center gap-6 text-sm text-[#5f6b84]">
                   <div className="flex items-center gap-2">
-                    <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: "#3874FF" }} />
+                    <span
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{ backgroundColor: "#3874FF" }}
+                    />
                     <span>Safe page clicks</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: "#0097EB" }} />
+                    <span
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{ backgroundColor: "#0097EB" }}
+                    />
                     <span>Money page clicks</span>
                   </div>
                 </div>
@@ -543,14 +799,25 @@ const Statistics = () => {
                 <div className="bg-white border border-slate-200/70 rounded-md p-5">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm font-bold text-slate-900">Safe share</p>
+                      <p className="text-sm font-bold text-slate-900 text-left">
+                        Safe share
+                      </p>
                       <p className="text-xs text-slate-400">Selected period</p>
                     </div>
-                    <div className="text-xs text-slate-500">{derived.safePercent}%</div>
+                    <div className="text-xs text-slate-500">
+                      {derived.safePercent}%
+                    </div>
                   </div>
                   <div className="mt-4 h-20 flex items-center justify-center">
                     <svg viewBox="0 0 60 60" className="h-22 w-22">
-                      <circle cx="30" cy="30" r="24" stroke="#E7EDF9" strokeWidth="4" fill="none" />
+                      <circle
+                        cx="30"
+                        cy="30"
+                        r="24"
+                        stroke="#E7EDF9"
+                        strokeWidth="4"
+                        fill="none"
+                      />
                       <circle
                         cx="30"
                         cy="30"
@@ -559,11 +826,20 @@ const Statistics = () => {
                         strokeWidth="4"
                         fill="none"
                         strokeDasharray="151"
-                        strokeDashoffset={151 - (151 * derived.safePercent) / 100}
+                        strokeDashoffset={
+                          151 - (151 * derived.safePercent) / 100
+                        }
                         strokeLinecap="round"
                         transform="rotate(-90 30 30)"
                       />
-                      <text x="30" y="34" textAnchor="middle" fontSize="12" fill="#2b1f57" fontWeight="700">
+                      <text
+                        x="30"
+                        y="34"
+                        textAnchor="middle"
+                        fontSize="12"
+                        fill="#2b1f57"
+                        fontWeight="700"
+                      >
                         {derived.safePercent}%
                       </text>
                     </svg>
@@ -577,14 +853,25 @@ const Statistics = () => {
                 <div className="bg-white border border-slate-200/70 rounded-md p-5">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm font-bold text-slate-900">Money share</p>
+                      <p className="text-sm font-bold text-slate-900">
+                        Money share
+                      </p>
                       <p className="text-xs text-slate-400">Selected period</p>
                     </div>
-                    <div className="text-xs text-slate-500">{derived.moneyPercent}%</div>
+                    <div className="text-xs text-slate-500">
+                      {derived.moneyPercent}%
+                    </div>
                   </div>
                   <div className="mt-4 h-20 flex items-center justify-center">
                     <svg viewBox="0 0 60 60" className="h-22 w-22">
-                      <circle cx="30" cy="30" r="24" stroke="#E7EDF9" strokeWidth="4" fill="none" />
+                      <circle
+                        cx="30"
+                        cy="30"
+                        r="24"
+                        stroke="#E7EDF9"
+                        strokeWidth="4"
+                        fill="none"
+                      />
                       <circle
                         cx="30"
                         cy="30"
@@ -593,11 +880,20 @@ const Statistics = () => {
                         strokeWidth="4"
                         fill="none"
                         strokeDasharray="151"
-                        strokeDashoffset={151 - (151 * derived.moneyPercent) / 100}
+                        strokeDashoffset={
+                          151 - (151 * derived.moneyPercent) / 100
+                        }
                         strokeLinecap="round"
                         transform="rotate(-90 30 30)"
                       />
-                      <text x="30" y="34" textAnchor="middle" fontSize="12" fill="#2b1f57" fontWeight="700">
+                      <text
+                        x="30"
+                        y="34"
+                        textAnchor="middle"
+                        fontSize="12"
+                        fill="#2b1f57"
+                        fontWeight="700"
+                      >
                         {derived.moneyPercent}%
                       </text>
                     </svg>
@@ -611,23 +907,39 @@ const Statistics = () => {
                 <div className="bg-white border border-slate-200/70 rounded-md p-5 sm:col-span-2">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm font-bold text-slate-900">Risk bands</p>
-                      <p className="text-xs text-slate-400">Low / Medium / High distribution</p>
+                      <p className="text-sm font-bold text-slate-900 text-left">
+                        Risk bands
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Low / Medium / High distribution
+                      </p>
                     </div>
                   </div>
                   <div className="mt-4 h-20 px-3">
                     {(() => {
-                      const values = derived.riskBandData.flatMap((d) => [d.value, d.value]);
+                      const values = derived.riskBandData.flatMap((d) => [
+                        d.value,
+                        d.value,
+                      ]);
                       const max = Math.max(...values, 1);
                       const barWidth = 4;
                       const gap = values.length > 10 ? 4 : 8;
-                      const totalWidth = values.length * barWidth + Math.max(0, values.length - 1) * gap + 12;
+                      const totalWidth =
+                        values.length * barWidth +
+                        Math.max(0, values.length - 1) * gap +
+                        12;
                       return (
-                        <svg viewBox={`0 0 ${totalWidth} 60`} className="w-full h-full">
+                        <svg
+                          viewBox={`0 0 ${totalWidth} 60`}
+                          className="w-full h-full"
+                        >
                           <g transform="translate(6,4)">
                             {values.map((value, idx) => {
                               const x = idx * (barWidth + gap);
-                              const height = Math.max(8, Math.round((value / max) * 50));
+                              const height = Math.max(
+                                8,
+                                Math.round((value / max) * 50),
+                              );
                               const y = 54 - height;
                               const isSafe = idx % 2 !== 0;
                               return (
@@ -666,31 +978,47 @@ const Statistics = () => {
 
             <section
               className="bg-[#F5F7FA] overflow-hidden border-y"
-              style={{ borderColor: "var(--app-border)",  borderLeft: "none", borderRight: "none" }}
+              style={{
+                borderColor: "var(--app-border)",
+                borderLeft: "none",
+                borderRight: "none",
+              }}
             >
               <div className="grid gap-0 grid-cols-1 lg:grid-cols-2 items-stretch">
                 <div className="px-6 py-8 min-h-[380px]">
                   <div className="mb-6">
-                    <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">Traffic by Country</h3>
+                    <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">
+                      Traffic by Country
+                    </h3>
                     <p className="text-[#525b75] leading-[1.2] text-sm text-left">
-                      Country level distribution from current statistics API data.
+                      Country level distribution from current statistics API
+                      data.
                     </p>
                   </div>
                   <div className="space-y-4">
                     {countrySlice.map((row) => (
                       <div key={row.label} className="flex items-center gap-4">
-                        <div className="w-28 text-xs text-slate-700">{row.label}</div>
+                        <div className="w-28 text-xs text-slate-700">
+                          {row.label}
+                        </div>
                         <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
                           <div
                             className="h-full rounded-full bg-[#3874FF]"
                             style={{
                               width: `${Math.round(
-                                (row.value / Math.max(...derived.topCountries.map((c) => c.value), 1)) * 100
+                                (row.value /
+                                  Math.max(
+                                    ...derived.topCountries.map((c) => c.value),
+                                    1,
+                                  )) *
+                                  100,
                               )}%`,
                             }}
                           />
                         </div>
-                        <div className="w-16 text-right text-xs text-slate-500">{row.value.toLocaleString("en-US")}</div>
+                        <div className="w-16 text-right text-xs text-slate-500">
+                          {row.value.toLocaleString("en-US")}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -703,18 +1031,25 @@ const Statistics = () => {
                     <div className="flex items-center gap-4 text-sm">
                       <button
                         disabled={countryPageSafe === 1}
-                        onClick={() => setCountryPage((p) => Math.max(1, p - 1))}
+                        onClick={() =>
+                          setCountryPage((p) => Math.max(1, p - 1))
+                        }
                         className={`flex items-center gap-1 ${
                           countryPageSafe === 1
                             ? "text-slate-300 cursor-not-allowed"
                             : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
                         }`}
                       >
+                        <span className="text-base leading-none">&lt;</span>
                         Previous
                       </button>
                       <button
                         disabled={countryPageSafe === countryTotalPages}
-                        onClick={() => setCountryPage((p) => Math.min(countryTotalPages, p + 1))}
+                        onClick={() =>
+                          setCountryPage((p) =>
+                            Math.min(countryTotalPages, p + 1),
+                          )
+                        }
                         className={`flex items-center gap-1 ${
                           countryPageSafe === countryTotalPages
                             ? "text-slate-300 cursor-not-allowed"
@@ -722,25 +1057,45 @@ const Statistics = () => {
                         }`}
                       >
                         Next
+                        <span className="text-base leading-none">&gt;</span>
                       </button>
                     </div>
                   </div>
                 </div>
 
                 <div className="relative  border-slate-200/70 bg-[#F7F9FC] p-0 overflow-hidden h-[380px]">
-                  <MapContainer center={[20, 10]} zoom={2} zoomControl={false} style={{ height: "100%", width: "100%" }}>
+                  <MapContainer
+                    center={[20, 10]}
+                    zoom={2}
+                    zoomControl={false}
+                    style={{ height: "100%", width: "100%" }}
+                  >
                     <ZoomControl position="topleft" />
-                    <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" attribution="" />
+                    <TileLayer
+                      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                      attribution=""
+                    />
                     {derived.countryTraffic.map((row) => {
-                      const radius = Math.max(6, Math.round((row.value / derived.maxTrafficValue) * 16));
+                      const radius = Math.max(
+                        6,
+                        Math.round((row.value / derived.maxTrafficValue) * 16),
+                      );
                       return (
                         <CircleMarker
                           key={row.country}
                           center={[row.lat, row.lng]}
                           radius={radius}
-                          pathOptions={{ color: "#3874FF", fillColor: "#3874FF", fillOpacity: 0.35 }}
+                          pathOptions={{
+                            color: "#3874FF",
+                            fillColor: "#3874FF",
+                            fillOpacity: 0.35,
+                          }}
                         >
-                          <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                          <LeafletTooltip
+                            direction="top"
+                            offset={[0, -6]}
+                            opacity={1}
+                          >
                             {row.country}: {row.value.toLocaleString("en-US")}
                           </LeafletTooltip>
                         </CircleMarker>
@@ -752,9 +1107,24 @@ const Statistics = () => {
             </section>
 
             <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <ListPanel title="Top Referrers" items={derived.topReferrers} />
-              <ListPanel title="Top IPs" items={derived.topIps} />
-              <ListPanel title="Top OS" items={derived.topOs} />
+              <ListPanel
+                title="Top Referrers"
+                items={derived.topReferrers}
+                type="referrer"
+                icon={<ExternalLink size={15} />}
+              />
+              <ListPanel
+                title="Top IPs"
+                items={derived.topIps}
+                type="ip"
+                icon={<Network size={15} />}
+              />
+              <ListPanel
+                title="Top OS"
+                items={derived.topOs}
+                type="os"
+                icon={<Monitor size={15} />}
+              />
             </section>
           </div>
         )}
