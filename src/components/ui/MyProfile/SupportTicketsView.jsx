@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+const SUPPORT_EMAIL = "support@trafficsaviour.com";
+
 export function SupportTicketsView() {
   const [form, setForm] = useState({
     name: "",
@@ -22,7 +24,7 @@ export function SupportTicketsView() {
     setLoading(true);
 
     try {
-      await fetch("https://formsubmit.co/ffedefd76b08c830449f6c87dba9206a", {
+      await fetch(`https://formsubmit.co/64a5507a55b4c06ba816a83c245eb1c4`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -33,7 +35,6 @@ export function SupportTicketsView() {
         }),
       });
 
-      // ✅ SUCCESS
       setSuccess(true);
       setForm({
         name: "",
@@ -53,117 +54,94 @@ export function SupportTicketsView() {
   };
 
   return (
-    <div className="bg-slate-900 min-h-screen text-white w-full">
-
-      {/* HEADER */}
-   
-
-      {/* SUCCESS NOTIFICATION */}
+    <div className="w-full">
       {success && (
-        <div className="mb-6 bg-green-600/20 border border-green-500 text-green-400 p-4 rounded-lg">
-          ✅ Ticket submitted successfully. Our support team will contact you soon.
+        <div className="mb-4 rounded-md border border-[#bbf7d0] bg-[#f0fdf4] px-4 py-3 text-[13px] font-semibold text-[#15803d]">
+          Request submitted successfully. Our support team will get back to you shortly.
         </div>
       )}
 
-      {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-6 w-full"
+        className="bg-white border border-[#d5d9e4] rounded-md p-5 md:p-6 space-y-5 w-full"
       >
-        {/* NAME */}
-        <div>
-          <label className="block mb-1 text-sm">Full Name</label>
-          <input
-            type="text"
-            name="name"
-            required
-            value={form.name}
-            onChange={handleChange}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2"
-          />
+        <h2 className="text-[22px] font-extrabold text-[#141824]">Raise a Support Request</h2>
+        <p className="text-[13px] text-[#64748b]">
+          Response updates will be managed by <span className="font-semibold text-[#1e293b]">{SUPPORT_EMAIL}</span>.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField label="Contact Name" name="name" value={form.name} onChange={handleChange} required />
+          <InputField label="Contact Email" type="email" name="email" value={form.email} onChange={handleChange} required />
         </div>
 
-        {/* EMAIL */}
-        <div>
-          <label className="block mb-1 text-sm">Email Address</label>
-          <input
-            type="email"
-            name="email"
-            required
-            value={form.email}
-            onChange={handleChange}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2"
-          />
-        </div>
+        <InputField label="Issue Subject" name="subject" value={form.subject} onChange={handleChange} required />
 
-        {/* SUBJECT */}
-        <div>
-          <label className="block mb-1 text-sm">Subject</label>
-          <input
-            type="text"
-            name="subject"
-            required
-            value={form.subject}
-            onChange={handleChange}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2"
-          />
-        </div>
-
-        {/* CATEGORY */}
-        <div>
-          <label className="block mb-1 text-sm">Category</label>
-          <select
-            name="category"
-            required
-            value={form.category}
-            onChange={handleChange}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2"
-          >
-            <option value="">Select category</option>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SelectField label="Issue Category" name="category" value={form.category} onChange={handleChange} required>
+            <option value="">Choose a category</option>
             <option>Billing</option>
             <option>Subscription</option>
             <option>Technical Issue</option>
             <option>Account</option>
             <option>Other</option>
-          </select>
-        </div>
+          </SelectField>
 
-        {/* PRIORITY */}
-        <div>
-          <label className="block mb-1 text-sm">Priority</label>
-          <select
-            name="priority"
-            value={form.priority}
-            onChange={handleChange}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2"
-          >
+          <SelectField label="Urgency Level" name="priority" value={form.priority} onChange={handleChange}>
             <option>Low</option>
             <option>Medium</option>
             <option>High</option>
-          </select>
+          </SelectField>
         </div>
 
-        {/* MESSAGE */}
         <div>
-          <label className="block mb-1 text-sm">Message</label>
+          <label className="flex items-center text-[11px] font-extrabold uppercase tracking-wide text-[#52607a] mb-2">Issue Details</label>
           <textarea
             name="message"
             required
             rows={5}
             value={form.message}
             onChange={handleChange}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 resize-none"
+            className="w-full bg-white border text-sm rounded-md py-2.5 px-4 text-[#141824] placeholder-[#95a1b8] focus:outline-none transition-colors resize-none border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
           />
         </div>
 
-        {/* SUBMIT */}
         <button
           disabled={loading}
-          className="bg-orange-600 px-6 py-2 rounded-lg font-medium hover:bg-orange-700 transition cursor-pointer disabled:opacity-50"
+          className="px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] transition cursor-pointer disabled:opacity-50"
         >
-          {loading ? "Submitting..." : "Submit Ticket"}
+          {loading ? "Sending..." : "Submit Request"}
         </button>
       </form>
     </div>
   );
 }
+
+const InputField = ({ label, type = "text", name, value, onChange, required = false }) => (
+  <div>
+    <label className="flex items-center text-[11px] font-extrabold uppercase tracking-wide text-[#52607a] mb-2">{label}</label>
+    <input
+      type={type}
+      name={name}
+      required={required}
+      value={value}
+      onChange={onChange}
+      className="w-full bg-white border text-sm rounded-md py-2.5 px-4 text-[#141824] placeholder-[#95a1b8] focus:outline-none transition-colors border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
+    />
+  </div>
+);
+
+const SelectField = ({ label, name, value, onChange, required = false, children }) => (
+  <div>
+    <label className="flex items-center text-[11px] font-extrabold uppercase tracking-wide text-[#52607a] mb-2">{label}</label>
+    <select
+      name={name}
+      required={required}
+      value={value}
+      onChange={onChange}
+      className="w-full bg-white border rounded-md py-2.5 px-4 text-[#141824] text-sm focus:outline-none transition-colors border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
+    >
+      {children}
+    </select>
+  </div>
+);

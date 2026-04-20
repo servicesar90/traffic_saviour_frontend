@@ -5,6 +5,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { showErrorToast } from "../components/toast/toast";
 import {
+  LineChart,
+  Line,
   BarChart,
   Bar,
   XAxis,
@@ -12,31 +14,30 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-  PieChart,
-  Pie,
-  Cell,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
 } from "recharts";
+import {
+  MapContainer,
+  TileLayer,
+  CircleMarker,
+  Tooltip as LeafletTooltip,
+  ZoomControl,
+} from "react-leaflet";
+import { Activity, Fingerprint, ShieldCheck, TriangleAlert } from "lucide-react";
 
 const dropdownStyle = {
   backgroundImage:
-    "url(\"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E\")",
+    "url(\"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23475569'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E\")",
   backgroundRepeat: "no-repeat",
   backgroundPosition: "right 0.75rem center",
   backgroundSize: "1em 1em",
 };
 
-const PIE_COLORS = ["#3b82f6", "#22c55e"];
-const AXIS_TICK = { fill: "#9ca3af", fontSize: 12 };
+const AXIS_TICK = { fill: "#64748b", fontSize: 12 };
 const TOOLTIP_STYLE = {
-  background: "#0f172a",
-  border: "1px solid #1e293b",
+  background: "#ffffff",
+  border: "1px solid #d5d9e4",
   borderRadius: "6px",
-  color: "#fff",
+  color: "#141824",
 };
 const DEMO_ROWS = [
   { ip: "87.122.142.147", proxy: "yes", risk: 81, status: 1, country: "Germany", os: "Windows", device: "desktop", referrer: "google.com", isp: "Deutsche Telekom AG", user_agent: "Chrome Desktop" },
@@ -82,7 +83,7 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
 
   return (
     <div className="flex-grow max-w-xs min-w-s">
-      <label className="block text-[10px] uppercase font-medium text-gray-400 mb-1">
+      <label className="block text-[11px] uppercase font-extrabold tracking-wide text-[#52607a] mb-1 text-left">
         Date Range {customRequired && <span className="text-red-500">*</span>}
       </label>
 
@@ -112,7 +113,7 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
         wrapperClassName="w-full"
         popperClassName="dashboard-datepicker-popper"
         calendarClassName="dashboard-datepicker-calendar"
-        className="dashboard-datepicker-input w-full text-sm py-2 px-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white cursor-pointer"
+        className="dashboard-datepicker-input w-full text-[13px] py-2.5 px-3.5 border border-slate-200 rounded-md bg-white text-slate-700 placeholder-[#95a1b8] cursor-pointer focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
       />
     </div>
   );
@@ -120,7 +121,7 @@ const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
 
 const CampaignDropdown = ({ campId, setCampId, campaigns }) => (
   <div className="flex-grow max-w-xs">
-    <label className="block text-[10px] uppercase font-medium text-gray-400 mb-1">
+    <label className="block text-[11px] uppercase font-extrabold tracking-wide text-[#52607a] mb-1 text-left">
       Campaign <span className="text-red-500">*</span>
     </label>
     <div className="relative">
@@ -128,7 +129,7 @@ const CampaignDropdown = ({ campId, setCampId, campaigns }) => (
         id="campaign"
         value={campId || ""}
         onChange={(e) => setCampId(e.target.value)}
-        className="w-full text-sm py-2 px-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white appearance-none pr-8 cursor-pointer"
+        className="w-full text-[13px] py-2.5 px-3.5 border border-slate-200 rounded-md bg-white text-slate-700 appearance-none pr-8 cursor-pointer focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
         style={dropdownStyle}
       >
         <option value="" disabled>
@@ -144,16 +145,24 @@ const CampaignDropdown = ({ campId, setCampId, campaigns }) => (
   </div>
 );
 
-const Tile = ({ title, value, accent }) => (
-  <div className={`rounded-xl border border-gray-700 p-4 ${accent}`}>
-    <p className="text-xs uppercase tracking-wider text-gray-300">{title}</p>
-    <p className="mt-2 text-3xl font-semibold text-white">{value}</p>
+const Tile = ({ title, subTitle, value, accent, icon }) => (
+  <div className={`rounded-md border border-slate-200/70 p-4 ${accent}`}>
+    <div className="flex items-center gap-3">
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#eaf1ff] text-[#3874FF]">
+        {icon}
+      </span>
+      <div>
+        <h4 className="text-[20px] leading-[20px] text-[#121824] font-bold text-left">{value}</h4>
+        <p className="text-[0.8rem] leading-none text-[#3e465b] font-normal mt-1 text-left">{title}</p>
+        <p className="text-[11px] leading-none text-[#94a3b8] mt-1 text-left">{subTitle}</p>
+      </div>
+    </div>
   </div>
 );
 
 const Panel = ({ title, children }) => (
-  <div className="bg-gray-850/40 border border-gray-700 rounded-lg p-6">
-    <h3 className="text-white text-lg font-semibold mb-2">{title}</h3>
+  <div className="bg-white border border-[#d5d9e4] rounded-2xl p-5 shadow-[0_20px_45px_rgba(15,23,42,0.06)]">
+    <h3 className="text-[#141824] text-[16px] uppercase tracking-[0.08em] font-extrabold mb-3">{title}</h3>
     {children}
   </div>
 );
@@ -161,16 +170,16 @@ const Panel = ({ title, children }) => (
 const ListPanel = ({ title, items, valueLabel = "Clicks" }) => (
   <Panel title={title}>
     {items.length === 0 ? (
-      <p className="text-sm text-gray-500">No data found.</p>
+      <p className="text-sm text-[#64748b]">No data found.</p>
     ) : (
       <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
         {items.map((item, index) => (
           <div
             key={`${item.label}-${index}`}
-            className="flex items-center justify-between rounded-lg bg-gray-800 px-3 py-2"
+            className="flex items-center justify-between rounded-lg border border-[#d5d9e4] bg-[#f8fbff] px-3 py-2"
           >
-            <span className="text-sm text-gray-200 truncate pr-3">{item.label}</span>
-            <span className="text-xs font-semibold text-blue-400">
+            <span className="text-sm text-[#334155] truncate pr-3">{index + 1}. {item.label}</span>
+            <span className="text-xs font-semibold text-[#3c79ff]">
               {item.value} {valueLabel}
             </span>
           </div>
@@ -180,6 +189,63 @@ const ListPanel = ({ title, items, valueLabel = "Clicks" }) => (
   </Panel>
 );
 
+const TrendChartTooltip = ({ active, payload, label }) => {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="rounded-lg border border-[#d5d9e4] bg-white px-3 py-2 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+      <div className="mb-1 text-xs font-semibold text-[#475569]">{label}</div>
+      <div className="space-y-1">
+        {payload.map((entry) => (
+          <div key={entry.dataKey} className="flex items-center gap-2 text-xs text-[#334155]">
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
+            <span className="font-semibold">{entry.name}:</span>
+            <span>{entry.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const COUNTRY_COORDINATES = {
+  india: [20.5937, 78.9629],
+  "united states": [37.0902, -95.7129],
+  usa: [37.0902, -95.7129],
+  "united kingdom": [55.3781, -3.436],
+  uk: [55.3781, -3.436],
+  germany: [51.1657, 10.4515],
+  france: [46.2276, 2.2137],
+  belgium: [50.5039, 4.4699],
+  canada: [56.1304, -106.3468],
+  brazil: [-14.235, -51.9253],
+  australia: [-25.2744, 133.7751],
+};
+
+const getCountryLatLng = (country) => {
+  const key = normalizeText(country, "Unknown").toLowerCase();
+  return COUNTRY_COORDINATES[key] || null;
+};
+
+const getDateLabelFromRow = (row, index) => {
+  const raw =
+    row?.date ||
+    row?.date_time ||
+    row?.createdAt ||
+    row?.created_at ||
+    row?.timestamp ||
+    row?.time;
+  if (raw) {
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+      });
+    }
+  }
+  return `P${index + 1}`;
+};
+
 const Statistics = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [campaigns, setCampaigns] = useState([]);
@@ -187,6 +253,7 @@ const Statistics = () => {
   const [loading, setLoading] = useState(false);
   const [campId, setCampId] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
+  const [countryPage, setCountryPage] = useState(1);
   const campaignControllerRef = useRef(null);
   const tableControllerRef = useRef(null);
 
@@ -274,12 +341,29 @@ const Statistics = () => {
       { name: "Money", value: moneyClicks },
     ];
 
-    const trendData = sourceRows.map((item, index) => ({
-      slot: `P${index + 1}`,
-      risk: Number(item?.risk || 0),
-      proxy: isTruthyProxy(item?.proxy) ? 1 : 0,
-      clicks: index + 1,
-    }));
+    const groupedTrend = new Map();
+    sourceRows.forEach((item, index) => {
+      const date = getDateLabelFromRow(item, index);
+      if (!groupedTrend.has(date)) groupedTrend.set(date, { date, Safe: 0, Money: 0 });
+      const current = groupedTrend.get(date);
+      if (item?.status) current.Money += 1;
+      else current.Safe += 1;
+    });
+    const baseTrendData = [...groupedTrend.values()];
+
+    const denseTrendData = [];
+    const trendLabelSet = new Set();
+    baseTrendData.forEach((item, index) => {
+      denseTrendData.push(item);
+      trendLabelSet.add(item.date);
+      const next = baseTrendData[index + 1];
+      if (!next) return;
+      denseTrendData.push({
+        date: "",
+        Safe: (item.Safe + next.Safe) / 2,
+        Money: (item.Money + next.Money) / 2,
+      });
+    });
 
     const riskBandData = [
       { label: "Low (<30)", value: sourceRows.filter((r) => Number(r.risk || 0) < 30).length },
@@ -290,25 +374,39 @@ const Statistics = () => {
       { label: "High (70+)", value: sourceRows.filter((r) => Number(r.risk || 0) >= 70).length },
     ];
 
-    const deviceRadar = getTopCounts(sourceRows, (item) => item?.device, 6, true).map((d) => ({
-      device: d.label,
-      value: d.value,
-    }));
-
     const topCountries = getTopCounts(sourceRows, (item) => item?.country, 7, true);
     const topReferrers = getTopCounts(sourceRows, (item) => item?.referrer, 7, true);
     const topIps = getTopCounts(sourceRows, (item) => item?.ip, 7, true);
     const topOs = getTopCounts(sourceRows, (item) => item?.os, 7, true);
+
+    const safePercent = totalClicks ? Math.round((safeClicks / totalClicks) * 100) : 0;
+    const moneyPercent = totalClicks ? Math.round((moneyClicks / totalClicks) * 100) : 0;
+    const miniBarSeries = baseTrendData.flatMap((d) => [d.Money, d.Safe]);
+    const miniBarMax = Math.max(...miniBarSeries, 1);
+    const countryTraffic = topCountries
+      .map((item) => {
+        const coords = getCountryLatLng(item.label);
+        return coords
+          ? { country: item.label, value: item.value, lat: coords[0], lng: coords[1] }
+          : null;
+      })
+      .filter(Boolean);
+    const maxTrafficValue = Math.max(...countryTraffic.map((c) => c.value), 1);
 
     return {
       totalClicks,
       uniqueClicks,
       vpnClicks,
       highRiskClicks,
-      pieData,
-      trendData,
+      trendData: denseTrendData,
+      trendLabelSet,
       riskBandData,
-      deviceRadar,
+      safePercent,
+      moneyPercent,
+      miniBarSeries,
+      miniBarMax,
+      countryTraffic,
+      maxTrafficValue,
       topCountries,
       topReferrers,
       topIps,
@@ -316,181 +414,351 @@ const Statistics = () => {
     };
   }, [sourceRows]);
 
+  const COUNTRIES_PER_PAGE = 5;
+  const countryTotalPages = Math.max(
+    1,
+    Math.ceil(derived.topCountries.length / COUNTRIES_PER_PAGE)
+  );
+  const countryPageSafe = Math.min(countryPage, countryTotalPages);
+  const countryStart = (countryPageSafe - 1) * COUNTRIES_PER_PAGE;
+  const countryEnd = Math.min(countryStart + COUNTRIES_PER_PAGE, derived.topCountries.length);
+  const countrySlice = derived.topCountries.slice(countryStart, countryEnd);
+
   return (
-    <div className="min-h-screen bg-[#0b0d14] text-gray-100 p-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">Statistics</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Reframed performance view with alternate chart placement
-        </p>
-      </header>
+    <div className="min-h-screen bg-[#f4f7fc] p-4 md:p-6">
+      <div className="mx-auto max-w-[1320px] space-y-6">
+        <header className="p-0">
+          <h1 className="dashboard-heading text-left">Statistics Studio</h1>
+          <p className="dashboard-subheading text-left">Fully rebuilt analytics surface with consistent alignment and spacing.</p>
+        </header>
 
-      <div className="border border-gray-700 rounded-xl p-5 bg-gray-900/40 mb-6">
-        <div className="flex flex-row flex-wrap items-end gap-4">
-          <CampaignDropdown campId={campId} setCampId={setCampId} campaigns={campaigns} />
-          <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} customRequired={false} />
-          <button
-            onClick={fetchData}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md h-[38px] text-sm font-medium cursor-pointer transition"
-          >
-            Apply
-          </button>
-          <button
-            onClick={handleReset}
-            disabled={isResetting}
-            className={`px-4 py-2 text-sm border border-gray-700 rounded-md h-[38px] transition cursor-pointer ${
-              isResetting ? "bg-gray-700 text-gray-500 cursor-not-allowed" : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-            }`}
-          >
-            {isResetting ? "Resetting..." : "Reset"}
-          </button>
-        </div>
-      </div>
+        <section className="p-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_1fr_auto_auto] gap-4 items-end">
+            <CampaignDropdown campId={campId} setCampId={setCampId} campaigns={campaigns} />
+            <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} customRequired={false} />
+            <button
+              onClick={fetchData}
+              className="h-[42px] flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
+            >
+              Apply
+            </button>
+            <button
+              onClick={handleReset}
+              disabled={isResetting}
+              className={`h-[42px] flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] border transition-all duration-200 ${
+                isResetting
+                  ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed opacity-80"
+                  : "bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
+              }`}
+            >
+              {isResetting ? "Resetting..." : "Reset"}
+            </button>
+          </div>
+        </section>
 
-      {loading ? (
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 text-gray-400">Loading stats...</div>
-      ) : (
-        <div className="space-y-6">
-          {isPreviewMode && (
-            <div className="rounded-lg border border-blue-700/50 bg-blue-900/20 px-4 py-3 text-sm text-blue-200">
-              Preview mode: sample data is displayed until live API data is available.
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-            <div className="xl:col-span-8 bg-gray-850/40 border border-gray-700 rounded-lg p-6">
-              <h3 className="text-white text-lg font-semibold mb-2">Risk Trend Timeline</h3>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={derived.trendData} margin={{ top: 8, right: 12, left: -22, bottom: 4 }}>
-                    <defs>
-                      <linearGradient id="safeGradientStats" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.2} />
-                      </linearGradient>
-                      <linearGradient id="moneyGradientStats" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.9} />
-                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0.2} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="#1e293b" vertical={false} strokeDasharray="3 3" />
-                    <XAxis dataKey="slot" tick={AXIS_TICK} tickLine={false} axisLine={false} />
-                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} />
-                    <Tooltip
-                      contentStyle={TOOLTIP_STYLE}
-                      cursor={{ fill: "rgba(255,255,255,0.05)" }}
-                    />
-                    <Bar dataKey="clicks" fill="url(#safeGradientStats)" barSize={14} radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="risk" fill="url(#moneyGradientStats)" barSize={14} radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+        {loading ? (
+          <div className="rounded-2xl border border-[#d5d9e4] bg-white p-6 text-[#64748b]">Loading stats...</div>
+        ) : (
+          <div className="space-y-6">
+            {isPreviewMode && (
+              <div className="rounded-xl border border-[#fcd34d] bg-[#fffbeb] px-4 py-3 text-sm text-[#92400e]">
+                Preview mode: sample data is displayed until live API data is available.
               </div>
-            </div>
+            )}
 
-            <div className="xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4">
-              <Tile title="Total Clicks" value={derived.totalClicks} accent="bg-gradient-to-br from-slate-800 to-slate-900" />
-              <Tile title="Unique Clicks" value={derived.uniqueClicks} accent="bg-gradient-to-br from-sky-900/40 to-slate-900" />
-              <Tile title="VPN Clicks" value={derived.vpnClicks} accent="bg-gradient-to-br from-indigo-900/40 to-slate-900" />
-              <Tile title="High Risk Clicks" value={derived.highRiskClicks} accent="bg-gradient-to-br from-red-900/30 to-slate-900" />
-            </div>
-          </div>
+            <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <Tile
+                title="Total clicks"
+                subTitle="All tracked traffic hits"
+                value={derived.totalClicks}
+                icon={<Activity size={18} />}
+                accent="bg-white"
+              />
+              <Tile
+                title="Unique clicks"
+                subTitle="Distinct IP interactions"
+                value={derived.uniqueClicks}
+                icon={<Fingerprint size={18} />}
+                accent="bg-white"
+              />
+              <Tile
+                title="VPN clicks"
+                subTitle="Proxy or tunnel traffic"
+                value={derived.vpnClicks}
+                icon={<ShieldCheck size={18} />}
+                accent="bg-white"
+              />
+              <Tile
+                title="High risk clicks"
+                subTitle="Risk score above threshold"
+                value={derived.highRiskClicks}
+                icon={<TriangleAlert size={18} />}
+                accent="bg-white"
+              />
+            </section>
 
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-            <div className="xl:col-span-4">
-              <Panel title="Safe vs Money Split">
-                <div className="h-[260px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={derived.pieData} cx="50%" cy="50%" innerRadius={72} outerRadius={92} paddingAngle={3} dataKey="value">
-                        {derived.pieData.map((entry, index) => (
-                          <Cell key={entry.name} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={TOOLTIP_STYLE} />
-                    </PieChart>
+            <section className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+              <div className="bg-[#F5F7FA] rounded-3xl p-6">
+                <div className="mb-4">
+                  <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">Traffic Clicks</h3>
+                  <p className="text-[#525b75] leading-[1.2] text-sm">
+                    Safe and money page clicks over the selected timeframe
+                  </p>
+                </div>
+                <div className="bg-[#F5F7FA]" style={{ width: "100%", height: 280 }}>
+                  <ResponsiveContainer>
+                    <LineChart data={derived.trendData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="#E3E6ED" strokeOpacity={1} strokeDasharray="0" horizontal={false} vertical />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fill: "#5f6b84", fontSize: 12, fontWeight: 600 }}
+                        tickFormatter={(value) => (derived.trendLabelSet.has(value) ? value : "")}
+                        tickLine={false}
+                        axisLine={{ stroke: "#CBD0DD", strokeWidth: 1, strokeOpacity: 1, strokeDasharray: "0" }}
+                        height={28}
+                        tickMargin={10}
+                        interval={0}
+                        padding={{ left: 0, right: 0 }}
+                      />
+                      <YAxis tick={false} tickLine={false} axisLine={false} width={0} />
+                      <Tooltip content={<TrendChartTooltip />} cursor={false} />
+                      <Line type="linear" dataKey="Safe" stroke="#3874FF" strokeWidth={2} dot={false} />
+                      <Line type="linear" dataKey="Money" stroke="#0097EB" strokeWidth={2} strokeDasharray="4 3" dot={false} />
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
-              </Panel>
-            </div>
-
-            <div className="xl:col-span-4">
-              <Panel title="Risk Bands">
-                <div className="h-[260px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={derived.riskBandData} margin={{ top: 8, right: 8, left: -20, bottom: 8 }}>
-                      <defs>
-                        <linearGradient id="safeGradientRiskBand" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9} />
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.2} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid stroke="#1e293b" vertical={false} strokeDasharray="3 3" />
-                      <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} />
-                      <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} />
-                      <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
-                      <Bar dataKey="value" fill="url(#safeGradientRiskBand)" barSize={12} radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="mt-3 flex items-center gap-6 text-sm text-[#5f6b84]">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: "#3874FF" }} />
+                    <span>Safe page clicks</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: "#0097EB" }} />
+                    <span>Money page clicks</span>
+                  </div>
                 </div>
-              </Panel>
-            </div>
+              </div>
 
-            <div className="xl:col-span-4">
-              <Panel title="Device Radar">
-                <div className="h-[260px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={derived.deviceRadar}>
-                      <PolarGrid stroke="#1e293b" />
-                      <PolarAngleAxis dataKey="device" tick={{ fill: "#9ca3af", fontSize: 11 }} />
-                      <PolarRadiusAxis tick={{ fill: "#9ca3af", fontSize: 10 }} />
-                      <Radar name="Devices" dataKey="value" stroke="#22c55e" fill="#22c55e" fillOpacity={0.25} />
-                      <Tooltip contentStyle={TOOLTIP_STYLE} />
-                    </RadarChart>
-                  </ResponsiveContainer>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                <div className="bg-white border border-slate-200/70 rounded-md p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Safe share</p>
+                      <p className="text-xs text-slate-400">Selected period</p>
+                    </div>
+                    <div className="text-xs text-slate-500">{derived.safePercent}%</div>
+                  </div>
+                  <div className="mt-4 h-20 flex items-center justify-center">
+                    <svg viewBox="0 0 60 60" className="h-22 w-22">
+                      <circle cx="30" cy="30" r="24" stroke="#E7EDF9" strokeWidth="4" fill="none" />
+                      <circle
+                        cx="30"
+                        cy="30"
+                        r="24"
+                        stroke="#3874FF"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeDasharray="151"
+                        strokeDashoffset={151 - (151 * derived.safePercent) / 100}
+                        strokeLinecap="round"
+                        transform="rotate(-90 30 30)"
+                      />
+                      <text x="30" y="34" textAnchor="middle" fontSize="12" fill="#2b1f57" fontWeight="700">
+                        {derived.safePercent}%
+                      </text>
+                    </svg>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+                    <span>Safe</span>
+                    <span>of total</span>
+                  </div>
                 </div>
-              </Panel>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-            <div className="xl:col-span-2">
+                <div className="bg-white border border-slate-200/70 rounded-md p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Money share</p>
+                      <p className="text-xs text-slate-400">Selected period</p>
+                    </div>
+                    <div className="text-xs text-slate-500">{derived.moneyPercent}%</div>
+                  </div>
+                  <div className="mt-4 h-20 flex items-center justify-center">
+                    <svg viewBox="0 0 60 60" className="h-22 w-22">
+                      <circle cx="30" cy="30" r="24" stroke="#E7EDF9" strokeWidth="4" fill="none" />
+                      <circle
+                        cx="30"
+                        cy="30"
+                        r="24"
+                        stroke="#0097EB"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeDasharray="151"
+                        strokeDashoffset={151 - (151 * derived.moneyPercent) / 100}
+                        strokeLinecap="round"
+                        transform="rotate(-90 30 30)"
+                      />
+                      <text x="30" y="34" textAnchor="middle" fontSize="12" fill="#2b1f57" fontWeight="700">
+                        {derived.moneyPercent}%
+                      </text>
+                    </svg>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+                    <span>Money</span>
+                    <span>of total</span>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-slate-200/70 rounded-md p-5 sm:col-span-2">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Risk bands</p>
+                      <p className="text-xs text-slate-400">Low / Medium / High distribution</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 h-20 px-3">
+                    {(() => {
+                      const values = derived.riskBandData.flatMap((d) => [d.value, d.value]);
+                      const max = Math.max(...values, 1);
+                      const barWidth = 4;
+                      const gap = values.length > 10 ? 4 : 8;
+                      const totalWidth = values.length * barWidth + Math.max(0, values.length - 1) * gap + 12;
+                      return (
+                        <svg viewBox={`0 0 ${totalWidth} 60`} className="w-full h-full">
+                          <g transform="translate(6,4)">
+                            {values.map((value, idx) => {
+                              const x = idx * (barWidth + gap);
+                              const height = Math.max(8, Math.round((value / max) * 50));
+                              const y = 54 - height;
+                              const isSafe = idx % 2 !== 0;
+                              return (
+                                <rect
+                                  key={`risk-mini-bar-${idx}`}
+                                  x={x}
+                                  y={y}
+                                  width={barWidth}
+                                  height={height}
+                                  rx="3"
+                                  fill={isSafe ? "#3874FF" : "#0097EB"}
+                                />
+                              );
+                            })}
+                          </g>
+                        </svg>
+                      );
+                    })()}
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                    <span className="inline-flex items-center gap-4">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-2 w-4 rounded-sm bg-[#3874FF]" />
+                        Safe
+                      </span>
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-2 w-4 rounded-sm bg-[#0097EB]" />
+                        Money
+                      </span>
+                    </span>
+                    <span>{derived.totalClicks} clicks</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section
+              className="bg-[#F5F7FA] overflow-hidden border-y"
+              style={{ borderColor: "var(--app-border)",  borderLeft: "none", borderRight: "none" }}
+            >
+              <div className="grid gap-0 grid-cols-1 lg:grid-cols-2 items-stretch">
+                <div className="px-6 py-8 min-h-[380px]">
+                  <div className="mb-6">
+                    <h3 className="text-[24px] font-extrabold text-slate-900 mb-1 text-left">Traffic by Country</h3>
+                    <p className="text-[#525b75] leading-[1.2] text-sm text-left">
+                      Country level distribution from current statistics API data.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    {countrySlice.map((row) => (
+                      <div key={row.label} className="flex items-center gap-4">
+                        <div className="w-28 text-xs text-slate-700">{row.label}</div>
+                        <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[#3874FF]"
+                            style={{
+                              width: `${Math.round(
+                                (row.value / Math.max(...derived.topCountries.map((c) => c.value), 1)) * 100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="w-16 text-right text-xs text-slate-500">{row.value.toLocaleString("en-US")}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 flex items-center justify-between text-sm text-slate-500">
+                    <div>
+                      {derived.topCountries.length === 0
+                        ? "0 items"
+                        : `${countryStart + 1} to ${countryEnd} items of ${derived.topCountries.length}`}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <button
+                        disabled={countryPageSafe === 1}
+                        onClick={() => setCountryPage((p) => Math.max(1, p - 1))}
+                        className={`flex items-center gap-1 ${
+                          countryPageSafe === 1
+                            ? "text-slate-300 cursor-not-allowed"
+                            : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                        }`}
+                      >
+                        Previous
+                      </button>
+                      <button
+                        disabled={countryPageSafe === countryTotalPages}
+                        onClick={() => setCountryPage((p) => Math.min(countryTotalPages, p + 1))}
+                        className={`flex items-center gap-1 ${
+                          countryPageSafe === countryTotalPages
+                            ? "text-slate-300 cursor-not-allowed"
+                            : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+                        }`}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative  border-slate-200/70 bg-[#F7F9FC] p-0 overflow-hidden h-[380px]">
+                  <MapContainer center={[20, 10]} zoom={2} zoomControl={false} style={{ height: "100%", width: "100%" }}>
+                    <ZoomControl position="topleft" />
+                    <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" attribution="" />
+                    {derived.countryTraffic.map((row) => {
+                      const radius = Math.max(6, Math.round((row.value / derived.maxTrafficValue) * 16));
+                      return (
+                        <CircleMarker
+                          key={row.country}
+                          center={[row.lat, row.lng]}
+                          radius={radius}
+                          pathOptions={{ color: "#3874FF", fillColor: "#3874FF", fillOpacity: 0.35 }}
+                        >
+                          <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                            {row.country}: {row.value.toLocaleString("en-US")}
+                          </LeafletTooltip>
+                        </CircleMarker>
+                      );
+                    })}
+                  </MapContainer>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <ListPanel title="Top Referrers" items={derived.topReferrers} />
-            </div>
-            <div>
               <ListPanel title="Top IPs" items={derived.topIps} />
-            </div>
-            <div>
               <ListPanel title="Top OS" items={derived.topOs} />
-            </div>
+            </section>
           </div>
-
-          <div className="grid grid-cols-1">
-            <Panel title="Top Countries (Ranked)">
-              <div className="h-[240px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    layout="vertical"
-                    data={derived.topCountries}
-                    margin={{ top: 8, right: 18, left: 18, bottom: 4 }}
-                  >
-                    <defs>
-                      <linearGradient id="safeGradientCountryRank" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" tick={AXIS_TICK} tickLine={false} axisLine={false} />
-                    <YAxis type="category" dataKey="label" width={120} tick={AXIS_TICK} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
-                    <Bar dataKey="value" fill="url(#safeGradientCountryRank)" barSize={12} radius={[0, 6, 6, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Panel>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

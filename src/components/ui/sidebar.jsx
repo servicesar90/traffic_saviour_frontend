@@ -22,9 +22,14 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
 
   const navItems = [
     {
-      label: "Home",
+      label: "View Statistics",
       icon: <FontAwesomeIcon icon={faChartPie} size="lg" />,
       route: "/Dashboard/allStats",
+    },
+    {
+      label: "Stats Overview",
+      icon: <FontAwesomeIcon icon={faChartSimple} size="lg" />,
+      route: "/Dashboard/stats",
     },
     {
       label: "Tasks",
@@ -67,7 +72,7 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
     { label: "Bill Pay", icon: <NotepadText size={18} />, route: "/Dashboard/billing" },
     { label: "Invoicing", icon: <NotepadText size={18} />, route: "/Dashboard/pricing" },
     { label: "Reimbursements", icon: <NotepadText size={18} />, route: "/Dashboard/analytics" },
-    { label: "Accounting", icon: <NotepadText size={18} />, route: "/Dashboard/reports" },
+    { label: "View Logs", icon: <NotepadText size={18} />, route: "/Dashboard/reports" },
   ];
 
   const handleNavigate = (route) => {

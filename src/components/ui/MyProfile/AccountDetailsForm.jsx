@@ -1,17 +1,18 @@
-import Recat, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const FormGroup = ({ label, required, value="" ,onChange, defaultValue, sub }) => (
-  <div className="space-y-1">
-    <label className="block text-sm font-medium">
+const FormGroup = ({ label, required, value = "", onChange, sub, type = "text", placeholder }) => (
+  <div className="space-y-1.5">
+    <label className="block text-[11px] font-extrabold uppercase tracking-wide text-[#52607a]">
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <input
+      type={type}
+      placeholder={placeholder}
       value={value}
-      defaultValue={defaultValue}
       onChange={onChange}
-      className="w-full bg-slate-900 border border-slate-700 rounded-md px-3 py-2 focus:outline-none"
+      className="w-full bg-white border text-sm rounded-md py-2.5 px-4 text-[#141824] placeholder-[#95a1b8] focus:outline-none transition-colors border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
     />
-    {sub && <p className="text-xs text-slate-400">{sub}</p>}
+    {sub && <p className="text-xs text-[#64748b]">{sub}</p>}
   </div>
 );
 
@@ -19,92 +20,56 @@ const FormInput = ({ placeholder, type = "text" }) => (
   <input
     type={type}
     placeholder={placeholder}
-    className="w-full mt-3 bg-slate-900 border border-slate-700 rounded-md px-3 py-2 focus:outline-none"
+    className="w-full mt-3 bg-white border text-sm rounded-md py-2.5 px-4 text-[#141824] placeholder-[#95a1b8] focus:outline-none transition-colors border-[#d5d9e4] focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff]"
   />
 );
 
 export function AccountDetailsForm() {
+  const [user, setUser] = useState(null);
 
-  const [user, setUser] = useState(null); 
-
-  // Load user AFTER component mounts
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
-      setUser(JSON.parse(stored)); 
+      setUser(JSON.parse(stored));
     }
   }, []);
 
-
   return (
-    <>
-      <div className=" w-full min-h-screen text-white ">
-        {/* PAGE TITLE */}
-        {/* <h1 className="text-3xl font-semibold mb-2">Account Details</h1>
-              <p className="text-slate-400 mb-8">My Account &gt; Account details</p> */}
+    <div className="w-full">
+      <div className="bg-white border border-[#d5d9e4] rounded-md p-5 md:p-6">
+        <form className="space-y-7">
+          <FormGroup
+            label="Display Name"
+            required
+            placeholder="Enter display name"
+            value={user?.name || ""}
+            onChange={(e) => setUser({ ...user, name: e.target.value })}
+          />
 
-        <div className="grid grid-cols-7 gap-2">
-          {/* LEFT SIDEBAR */}
+          <FormGroup
+            label="Email ID"
+            required
+            type="email"
+            placeholder="Enter your email ID"
+            value={user?.email || ""}
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
+          />
 
-          {/* RIGHT FORM */}
-          <div className="col-span-9 bg-slate-800 border border-slate-700 rounded-xl p-8">
-            <form className="space-y-8">
-              {/* FIRST + LAST NAME */}
-              {/* <div className="grid grid-cols-2 gap-6">
-                <FormGroup
-                  label="First name"
-                  required
-                  defaultValue="Abhishek"
-                />
-                <FormGroup label="Last name" required defaultValue="Jha" />
-              </div> */}
-
-              {/* DISPLAY NAME */}
-              <FormGroup
-                label="Name"
-                required
-                value={user?.name} // safe fallback
-                onChange={(e) => setUser({ ...user, name: e.target.value })}
-                // sub="This will be shown on Dashboard & Reviews"
-              />
-
-              {/* EMAIL */}
-              <FormGroup
-                label="Email address"
-                required
-                value={user?.email}
-                onChange={(e) => setUser({...user, email: e.target.value})}
-                // defaultValue="ajha838301@gmail.com"
-              />
-
-              {/* PASSWORD CHANGE */}
-              <div>
-                <label className="block font-medium mb-2">
-                  Password change
-                </label>
-
-                <FormInput
-                  placeholder="Current password (leave blank to keep)"
-                  type="password"
-                />
-                <FormInput
-                  placeholder="New password (leave blank to keep)"
-                  type="password"
-                />
-                <FormInput placeholder="Confirm new password" type="password" />
-              </div>
-
-              {/* SAVE */}
-              <button
-                type="submit"
-                className="bg-orange-600 hover:bg-orange-700 px-6 py-2 rounded-md font-semibold cursor-pointer"
-              >
-                SAVE CHANGES
-              </button>
-            </form>
+          <div>
+            <label className="block text-[11px] font-extrabold uppercase tracking-wide text-[#52607a] mb-1">Password Update</label>
+            <FormInput placeholder="Current password (leave empty to keep)" type="password" />
+            <FormInput placeholder="New password (optional)" type="password" />
+            <FormInput placeholder="Confirm new password" type="password" />
           </div>
-        </div>
+
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer"
+          >
+            Save Changes
+          </button>
+        </form>
       </div>
-    </>
+    </div>
   );
 }
