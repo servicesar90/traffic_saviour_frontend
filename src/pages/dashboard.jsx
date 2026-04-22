@@ -255,19 +255,56 @@ const Dashboard = () => {
       </div>
       {/* TELEGRAM SUPPORT BUTTON */}
 
-      <a
+            <a
         href="https://t.me/trafficsaviour"
         target="_blank"
         rel="noreferrer"
         aria-label="Chat on Telegram"
-        className="fixed bottom-[22px] right-[22px] z-[9999] flex items-center gap-[10px] rounded-[50px] bg-[#229ED9] px-[18px] py-3 text-sm font-semibold text-white no-underline shadow-[0_10px_25px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-[1.08] hover:shadow-[0_18px_35px_rgba(0,0,0,0.35)]"
+        className="fixed bottom-[22px] right-[22px] z-[9999] no-underline transition-all duration-200 hover:scale-[1.08] hover:-translate-y-[2px]"
       >
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
-          alt="Telegram"
-          className="h-[26px] w-[26px] block"
-        />
-        Support
+        <span className="relative flex h-[86px] w-[86px] items-center justify-center rounded-full bg-transparent">
+          <svg
+            className="absolute inset-0 h-full w-full"
+            viewBox="0 0 86 86"
+            aria-hidden="true"
+          >
+            <defs>
+              <path
+                id="supportCirclePath"
+                d="M 43,43 m -33,0 a 33,33 0 1,1 66,0 a 33,33 0 1,1 -66,0"
+              />
+            </defs>
+            <g>
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from="0 43 43"
+                to="360 43 43"
+                dur="9s"
+                repeatCount="indefinite"
+              />
+              <text
+                fill="#1f2a44"
+                fontSize="9.6"
+                fontWeight="900"
+                letterSpacing="2.3"
+                textTransform="uppercase"
+              >
+                <textPath href="#supportCirclePath" startOffset="0%">
+                  SUPPORT - SUPPORT 
+                </textPath>
+              </text>
+            </g>
+          </svg>
+
+          <span className="relative flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#229ED9] shadow-[0_10px_22px_rgba(34,158,217,0.45)]">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
+              alt="Telegram"
+              className="h-[21px] w-[21px] block"
+            />
+          </span>
+        </span>
       </a>
 
       

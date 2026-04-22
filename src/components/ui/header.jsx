@@ -1,17 +1,17 @@
 import {
   Menu,
   LogOut,
-  User,
-  HelpCircle,
-  DollarSign,
+  Settings,
+  Headphones,
+  CreditCard,
   Search,
   Bell,
-  Settings,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFunction } from "../../api/ApiFunction";
 import { getUpdatedPlan, signOutApi } from "../../api/Apis";
+import profileCharacter from "../../assets/vecteezy_friendly-3d-animated-character-with-glasses-smiling_57357673.png";
 
 const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
@@ -97,40 +97,27 @@ const Header = ({ onMenuClick }) => {
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="h-9 w-9 rounded-lg border border-slate-200 flex items-center justify-center text-[#2b1f57] hover:bg-slate-100 transition"
+          className="h-9 w-9 rounded-lg flex items-center justify-center text-[#2b1f57] hover:bg-slate-100 cursor-pointer transition"
           aria-label="Toggle sidebar"
         >
           <Menu size={18} />
         </button>
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
+        <div className="flex items-center gap-2 rounded-xl  bg-white px-3 py-2 ">
           <img src="/logo2.svg" alt="TrafficSaviour" className="w-7 h-7" />
           <div className="leading-tight">
-            <p className="text-sm font-semibold text-slate-900">TrafficSaviour</p>
-            <p className="text-xs text-slate-500">Agency Dashboard</p>
+            <p className="text-xl font-semibold text-slate-900">TrafficSaviour</p>
+            
           </div>
         </div>
       </div>
 
       {/* Right: Search + Actions + Avatar */}
-      <div className="flex items-center gap-4">
-        <div className="hidden lg:flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-500 w-[300px] shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
-          <Search size={16} className="text-slate-400" />
-          <input
-            className="bg-transparent outline-none w-full text-slate-700 placeholder:text-slate-400"
-            placeholder="Search campaigns, reports..."
-          />
-        </div>
+      <div className="flex items-center gap-4 flex-shrink-0">
+        
 
-        <div className="hidden md:flex items-center gap-2">
-          <button className="h-9 w-9 rounded-lg border border-slate-200 flex items-center justify-center text-[#2b1f57] hover:bg-slate-100 transition">
-            <Bell size={16} />
-          </button>
-          <button className="h-9 w-9 rounded-lg border border-slate-200 flex items-center justify-center text-[#2b1f57] hover:bg-slate-100 transition">
-            <Settings size={16} />
-          </button>
-        </div>
+       
 
-        <div className="hidden md:flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 shadow-[0_6px_16px_rgba(15,23,42,0.05)]">
+        <div className="hidden md:flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 shadow-[0_6px_16px_rgba(15,23,42,0.05)] flex-shrink-0">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           <span className="font-medium">{planName || "Starter"}</span>
           <span className="text-slate-400">|</span>
@@ -140,54 +127,65 @@ const Header = ({ onMenuClick }) => {
         </div>
 
         {/* Avatar + Dropdown */}
-        <div className="relative" ref={avatarRef}>
+        <div className="relative flex-shrink-0 ml-auto" ref={avatarRef}>
           <div
             onClick={() => setShowProfileModal(!showProfileModal)}
-            className="cursor-pointer"
+            className="cursor-pointer relative group"
           >
-            {user?.image ? (
-              <img
-                src={user.image}
-                alt="Profile"
-                className="w-9 h-9 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-semibold text-sm">
-                {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
-              </div>
-            )}
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border-8 border-slate-400 hover:border-slate-500 transition">
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <img
+                  src={profileCharacter}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              )}
+            </div>
+            <div className="absolute -bottom-1 -right-1 bg-white border-2 border-slate-400 rounded-full p-0.5 flex items-center justify-center">
+              <svg className="w-3 h-3 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </div>
           </div>
 
           {/* Dropdown Menu */}
           {showProfileModal && (
-            <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black/5 z-50 border border-slate-200">
+            <div className="absolute right-0 mt-3 w-56 rounded-lg bg-white shadow-[0_10px_30px_rgba(15,23,42,0.15)] z-50 border border-slate-200 overflow-hidden font-['Nunito_Sans']">
               <div className="py-2">
                 <button
                   onClick={() => navigate("/myProfile")}
-                  className="flex items-center w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer"
+                  className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
                 >
-                  <User className="w-4 h-4 mr-2" /> My Profile
+                  <Settings className="w-4 h-4 mr-3 text-slate-500" /> Account Settings
                 </button>
 
                 <button
                   onClick={() => navigate("/Dashboard/pricing")}
-                  className="flex items-center w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer"
+                  className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
                 >
-                  <DollarSign className="w-4 h-4 mr-2" /> Pricing
+                  <CreditCard className="w-4 h-4 mr-3 text-slate-500" /> Billing & Plans
                 </button>
 
                 <button
                   onClick={() => navigate("/help")}
-                  className="flex items-center w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer"
+                  className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
                 >
-                  <HelpCircle className="w-4 h-4 mr-2" /> Help
+                  <Headphones className="w-4 h-4 mr-3 text-slate-500" /> Support Center
                 </button>
+
+                <div className="border-t border-slate-100 my-1" />
 
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 cursor-pointer"
+                  className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition font-medium"
                 >
-                  <LogOut className="w-4 h-4 mr-2" /> Logout
+                  <LogOut className="w-4 h-4 mr-3" /> Sign Out
                 </button>
               </div>
             </div>

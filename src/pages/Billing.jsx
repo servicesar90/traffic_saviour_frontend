@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import { apiFunction } from "../api/ApiFunction";
 import { showErrorToast } from "../components/toast/toast";
 import { cryptoPayment } from "../api/Apis";
-import { Download } from "lucide-react";
+import {
+  FaCalendarAlt,
+  FaCreditCard,
+  FaFileInvoiceDollar,
+  FaFingerprint,
+  FaShieldAlt,
+  FaTag,
+} from "react-icons/fa";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { createRoot } from "react-dom/client";
@@ -291,84 +298,127 @@ const handleDownloadInvoice = async (item) => {
     return () => controller.abort();
   }, []);
 
+  const paidCount = billingList.filter((item) => item.status === "Paid").length;
+  const pendingCount = billingList.filter((item) => item.status === "Pending").length;
+  const rejectedCount = billingList.filter((item) => item.status === "Rejected").length;
+
   return (
-    <div className="min-h-screen bg-[#0b0d14] text-gray-100 p-4 md:p-8">
+    <div className="min-h-screen bg-[#f5f7fa] p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* HEADER */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white tracking-tight">
+        
+          <h1 className="dashboard-heading text-left">
             Billing
           </h1>
-          <p className="text-sm text-gray-400 mt-2">
-            View your subscriptions and payment history
+          <p className="mt-2 text-[14px] font-medium text-[#64748b] text-left">
+            Track plan payments, transaction records, and invoice downloads.
           </p>
+        
+
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-md border border-[#d5d9e4] bg-white p-4">
+            <p className="text-[11px] uppercase tracking-wide text-[#64748b] font-extrabold">
+              Successful
+            </p>
+            <p className="mt-1 text-[24px] leading-none font-extrabold text-[#16a34a]">
+              {paidCount}
+            </p>
+          </div>
+          <div className="rounded-md border border-[#d5d9e4] bg-white p-4">
+            <p className="text-[11px] uppercase tracking-wide text-[#64748b] font-extrabold">
+              Pending
+            </p>
+            <p className="mt-1 text-[24px] leading-none font-extrabold text-[#d97706]">
+              {pendingCount}
+            </p>
+          </div>
+          <div className="rounded-md border border-[#d5d9e4] bg-white p-4">
+            <p className="text-[11px] uppercase tracking-wide text-[#64748b] font-extrabold">
+              Rejected
+            </p>
+            <p className="mt-1 text-[24px] leading-none font-extrabold text-[#dc2626]">
+              {rejectedCount}
+            </p>
+          </div>
         </div>
 
-        {/* TABLE CONTAINER */}
-        <div className="bg-[#111827] rounded-2xl shadow-2xl border border-gray-800 overflow-hidden">
+        <div
+          className="mt-4 rounded-md border border-[#d5d9e4] bg-white overflow-hidden"
+          style={{ borderTop: "none" }}
+        >
           <div className="overflow-x-auto">
             <div className="min-w-[1000px]">
-              {/* TABLE HEADER */}
               <div
-                className={`${gridLayout} px-6 py-4 bg-[#1e293b] text-gray-400 text-[11px] font-bold uppercase tracking-widest border-b border-gray-700`}
+                className={`${gridLayout} px-6 py-3.5 bg-[#f8fafc] text-[#52607a] text-[11px] font-extrabold uppercase tracking-wide border-b border-[#d5d9e4]`}
               >
-                <div>Plan Name</div>
-                <div>Method</div>
-                <div>Amount</div>
-                <div>Payment ID</div>
-                <div>Status</div>
-                <div>Start Date</div>
-                <div>End Date</div>
-                <div className="text-center">Invoice</div>
+                <div className="flex items-center gap-2 text-center">
+                  <FaTag className="text-[#64748b]" />
+                  Subscription
+                </div>
+                <div className="flex items-center gap-2">
+                  <FaCreditCard className="text-[#64748b]" />
+                  Payment Mode
+                </div>
+                <div>Charge</div>
+                <div className="flex items-center gap-2">
+                  <FaFingerprint className="text-[#64748b]" />
+                  Reference ID
+                </div>
+                <div className="flex items-center gap-2">
+                  <FaShieldAlt className="text-[#64748b]" />
+                  State
+                </div>
+                <div className="flex items-center gap-2">
+                  <FaCalendarAlt className="text-[#64748b]" />
+                  Activated On
+                </div>
+                <div className="flex items-center gap-2">
+                  <FaCalendarAlt className="text-[#64748b]" />
+                  Renews On
+                </div>
+                <div className="text-center">Receipt</div>
               </div>
 
-              {/* TABLE BODY */}
-              <div className="max-h-[450px] overflow-y-auto divide-y divide-gray-800 custom-scrollbar">
+              <div className="max-h-[450px] overflow-y-auto divide-y divide-[#e2e8f0] custom-scrollbar">
                 {loading ? (
-                  <div className="px-6 py-12 text-center text-gray-500">
+                  <div className="px-6 py-12 text-center text-[#64748b]">
                     Loading records...
                   </div>
                 ) : billingList.length === 0 ? (
-                  <div className="px-6 py-12 text-center text-gray-500 italic">
+                  <div className="px-6 py-12 text-center text-[#64748b] italic">
                     No billing history found
                   </div>
                 ) : (
                   billingList.map((item, index) => (
                     <div
                       key={item.id || index}
-                      className={`${gridLayout} px-6 py-4 text-sm text-gray-300 hover:bg-[#1e293b]/50 transition-colors group`}
+                      className={`${gridLayout} px-6 py-4 text-sm text-[#334155] hover:bg-[#f8fbff] transition-colors duration-200 group`}
                     >
-                      {/* Plan - N/A Check */}
                       <div
-                        className="font-semibold text-white truncate"
+                        className="font-semibold text-[#141824] truncate"
                         title={item.plan_name || "N/A"}
                       >
                         {item.plan_name || "N/A"}
                       </div>
 
-                      {/* Method - N/A Check */}
-                      <div className="text-gray-400">
+                      <div className="text-[#52607a]">
                         {item.method || "N/A"}
                       </div>
 
-                      {/* Amount - N/A Check */}
-                      <div className="font-mono font-bold text-emerald-400">
+                      <div className="font-mono font-bold text-[#3c79ff]">
                         {item.amount ? `$${item.amount}` : "N/A"}
                       </div>
 
-                      {/* Payment ID - Truncation with Hover Tooltip */}
                       <div className="relative group/id max-w-[180px]">
                         <div
-                          className="font-mono text-xs text-gray-500 truncate cursor-help hover:text-blue-400 transition-colors"
+                          className="font-mono text-xs text-[#64748b] truncate cursor-help hover:text-[#3c79ff] transition-colors"
                           title={item.payment_id || "N/A"}
                         >
                           {item.payment_id || "N/A"}
                         </div>
 
-                        {/* Tooltip Fix: Using top-full to show it below the row, avoiding header collision */}
                         {item.payment_id && (
-                          <div className="absolute top-full left-0 mt-2 hidden group-hover/id:block bg-gray-900 text-white text-[10px] p-3 rounded-lg shadow-2xl border border-gray-700 z-[100] break-all w-64 backdrop-blur-md">
-                            <p className="text-gray-400 mb-1 border-b border-gray-700 pb-1 uppercase text-[9px] font-bold tracking-widest">
+                          <div className="absolute top-full left-0 mt-2 hidden group-hover/id:block bg-[#141824] text-white text-[10px] p-3 rounded-md shadow-lg border border-[#334155] z-[100] break-all w-64">
+                            <p className="text-[#cbd5e1] mb-1 border-b border-[#334155] pb-1 uppercase text-[9px] font-bold tracking-wide">
                               Full Payment ID
                             </p>
                             {item.payment_id}
@@ -376,44 +426,41 @@ const handleDownloadInvoice = async (item) => {
                         )}
                       </div>
 
-                      {/* Status */}
                       <div>
                         <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter border
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border
                           ${
                             item.status === "Paid"
-                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                              ? "bg-[#ecfdf3] text-[#027a48] border-[#abefc6]"
                               : item.status === "Rejected"
-                              ? "bg-red-500/10 text-red-500 border-red-500/20"
-                              : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                              ? "bg-[#fff1f3] text-[#be123c] border-[#fecdd3]"
+                              : "bg-[#fffbeb] text-[#b45309] border-[#fde68a]"
                           }`}
                         >
                           {item.status || "N/A"}
                         </span>
                       </div>
 
-                      {/* Dates - N/A Check */}
-                      <div className="text-gray-400">
+                      <div className="text-[#52607a]">
                         {item.start_date
                           ? new Date(item.start_date).toLocaleDateString(
                               "en-IN"
                             )
                           : "N/A"}
                       </div>
-                      <div className="text-gray-400">
+                      <div className="text-[#52607a]">
                         {item.end_date
                           ? new Date(item.end_date).toLocaleDateString("en-IN")
                           : "N/A"}
                       </div>
 
-                      {/* Action - Invoice Download Icon */}
                       <div className="flex justify-center">
                         <button
                           onClick={() => handleDownloadInvoice(item)}
-                          className="p-2 rounded-lg cursor-pointer bg-gray-800 hover:bg-blue-600 text-gray-400 hover:text-white transition-all"
-                          title="Download Invoice"
+                          className="inline-flex items-center justify-center h-9 w-9 rounded-md border border-[#d5d9e4] bg-white hover:bg-[#3c79ff] text-[#52607a] hover:text-white transition-colors cursor-pointer"
+                          title="Download Receipt"
                         >
-                         <Download size={18}/>
+                         <FaFileInvoiceDollar size={15} />
                         </button>
                       </div>
                     </div>
@@ -424,9 +471,7 @@ const handleDownloadInvoice = async (item) => {
           </div>
         </div>
 
-        <p className="mt-6 text-center text-gray-600 text-[10px] tracking-widest uppercase font-bold opacity-50">
-          Secure Billing Dashboard • Powered by CryptoPay
-        </p>
+        
       </div>
     </div>
   );

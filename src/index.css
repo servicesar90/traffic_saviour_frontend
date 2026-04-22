@@ -266,7 +266,7 @@ html {
 }
 
 .dashboard-datepicker-popper {
-  z-index: 60;
+  z-index: 10050 !important;
 }
 
 .dashboard-datepicker-input {

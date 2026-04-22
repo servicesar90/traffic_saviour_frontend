@@ -141,17 +141,17 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
           </div>
           {showFull && (
             <div className="flex-1 leading-tight sidebar-text">
-              <p className="text-xs text-slate-500">Agency</p>
-              <p className="text-sm font-semibold text-slate-900 truncate">
+             
+              <p className="text-md font-bold text-slate-900 truncate">
                 {user?.name || "Orbix Studio Team"}
               </p>
             </div>
           )}
-          {showFull && (
+          {/* {showFull && (
             <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center text-slate-500">
               <span className="text-xs">...</span>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
