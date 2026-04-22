@@ -85,7 +85,7 @@ const handleSubscribe = async (priceId) => {
 const dodoPaymentCheckout = async (priceId) => {
   if (!priceId) return alert("Price ID is required for subscription");
   try {
-    const response = await fetch("http://localhost:2000/api/v2/dodo/checkout", {
+    const response = await fetch("https://api.trafficsaviour.com/api/v2/dodo/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json",
         "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -370,11 +370,11 @@ const dodoPaymentCheckout = async (priceId) => {
               >
                 {isCurrentPlan(plan)
                   ? "Current Plan"
-                  : plan.name.includes("Starter")
-                  ? "Start Starter"
-                  : plan.name.includes("Pro")
-                    ? "Go Pro"
-                    : "Scale with Enterprise"}
+                  : plan.name.includes("Core")
+                  ? "Start Core"
+                  : plan.name.includes("Edge")
+                    ? "Go Edege"
+                    : "Scale with Apex"}
               </button>
             </div>
             ))}
@@ -424,7 +424,7 @@ const dodoPaymentCheckout = async (priceId) => {
                 <div className="mt-6 space-y-2.5">
                   {[
                     { key: "USDT", title: "USDT", hint: "Crypto transfer with TX hash verification" },
-                    { key: "card", title: "Card", hint: "Pay quickly using card checkout" },
+                    // { key: "card", title: "Card", hint: "Pay quickly using card checkout" },
                     { key: "dodo", title: "Dodo", hint: "Continue via Dodo payment gateway" },
                   ].map((m) => (
                     <button
@@ -633,7 +633,7 @@ const dodoPaymentCheckout = async (priceId) => {
                  <p className="text-[12px] text-[#64748b] mt-1">You will be redirected securely to complete payment.</p>
                  <button
                     className="mt-6 cursor-pointer py-2 px-4 mr-2 rounded-md bg-[#3c79ff] hover:bg-[#356ee6] !text-white"
-                    onClick={() => dodoPaymentCheckout("fdsjdghdfu")}
+                    onClick={() => dodoPaymentCheckout(selectedPlan.stripePriceId)}
                     style={{ color: "#ffffff" }}
                   >
                     Continue to Pay
