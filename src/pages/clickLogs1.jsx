@@ -198,11 +198,11 @@ const tableControllerRef = useRef(null);
   const getOutcomeMeta = (status) =>
     status
       ? {
-          label: "Money Page",
+          label: "Revenue Page",
           cls: "bg-[#ecfdf3] text-[#027a48] border border-[#abefc6]",
         }
       : {
-          label: "Safe Page",
+          label: "Protected Page",
           cls: "bg-[#eef4ff] text-[#1d4ed8] border border-[#bfdbfe]",
         };
 
@@ -302,13 +302,13 @@ const tableControllerRef = useRef(null);
           </section>
 
           <div>
-            <div className="mt-4 overflow-x-auto rounded-md border border-[#d5d9e4] bg-white shadow-none">
+            <div className="traffic-log-scrollbar mt-4 overflow-x-auto rounded-md  border bg-white shadow-none">
               {/* Outer container with flex to separate header and body */}
               <div className="flex flex-col">
                 {/* Sticky Table Header */}
 
                 {/* Scrollable Table Body Container */}
-                <div className="overflow-y-auto" style={{ maxHeight: "400px" }}>
+                <div className="traffic-log-scrollbar overflow-y-auto" style={{ maxHeight: "400px" }}>
                   <table className="min-w-full table-fixed">
                     <thead className="bg-[#f8fafc] sticky top-0 z-10 border-b border-[#d5d9e4]">
                       <tr>
@@ -351,12 +351,12 @@ const tableControllerRef = useRef(null);
                       </tr>
                     </thead>
 
-                    <tbody className="bg-gray-900 divide-y divide-gray-800">
+                    <tbody className="bg-white">
                       {loading ? (
                         <tr>
                           <td
                             colSpan="12"
-                            className="py-8 text-center text-gray-400"
+                            className="py-8 text-center text-[#64748b]"
                           >
                             Loading...
                           </td>
@@ -365,50 +365,59 @@ const tableControllerRef = useRef(null);
                         <tr>
                           <td
                             colSpan="12"
-                            className="py-8 text-center text-gray-400"
+                            className="py-8 text-center text-[#64748b]"
                           >
                             No data found
                           </td>
                         </tr>
                       ) : (
                         tableData.map((item, index) => (
-                          <tr key={item.tid}>
+                          <tr key={item.tid} className="border-b border-[#e8edf5] hover:bg-[#f8fbff] transition-colors">
                             {/* S.No */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 w-16">
-                              {index + 1}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#141824] font-semibold w-16">
+                              <div className="flex items-center justify-center gap-2">
+                                <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#3c79ff]" />
+                                {index + 1}
+                              </div>
                             </td>
 
                             {/* Date & Time */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 min-w-40">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#334155] min-w-40">
                               {item.created_at ? (
-                                new Date(item.created_at).toLocaleString()
+                                <div className="text-left">
+                                  <p className="font-semibold text-[#1f2a44]">
+                                    {new Date(item.created_at).toLocaleDateString()}
+                                  </p>
+                                  <p className="text-[11px] text-[#64748b] mt-0.5">
+                                    {new Date(item.created_at).toLocaleTimeString()}
+                                  </p>
+                                </div>
                               ) : (
-                                <span className="text-gray-500">Unknown</span>
+                                <span className="text-[#94a3b8]">Unknown</span>
                               )}
                             </td>
 
                             {/* Result Icon – if missing show Unknown */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-300">
-                              {item.status ? (
-                                <span className="text-gray-500">
-                                  Money Page
-                                </span>
-                              ) : (
-                                <span className="text-gray-500">Save Page</span>
-                              )}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-[#334155]">
+                              <span
+                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${getOutcomeMeta(item.status).cls}`}
+                              >
+                                {getOutcomeMeta(item.status).label}
+                              </span>
                             </td>
 
                             {/* Country + Browser + OS + Device icons */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 w-32 flex items-center gap-2">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#334155] w-32">
+                              <div className="flex items-center gap-2">
                               {/* COUNTRY FLAG */}
                               {item?.isocode ? (
                                 <img
                                   title={item?.country}
                                   data-tooltip-id={`tooltip-${item?.isocode?.toLowerCase()}`}
                                   data-tooltip-content={item?.country}
-                                  src={`https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/${
+                                  src={`https://flagcdn.com/w40/${
                                     item?.isocode?.toLowerCase() || "in"
-                                  }.svg`}
+                                  }.png`}
                                   style={{
                                     width: "18px",
                                     height: "18px",
@@ -485,65 +494,76 @@ const tableControllerRef = useRef(null);
                                   src={`/icons/fallback-que.jpg`}
                                 />
                               )}
+                              </div>
                             </td>
 
                             {/* City */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#334155]">
                               {item.city || (
-                                <span className="text-gray-500">N/A</span>
+                                <span className="text-[#94a3b8]">N/A</span>
                               )}
                             </td>
 
                             {/* IP */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#334155]">
                               {item.ip || (
-                                <span className="text-gray-500">Unknown</span>
+                                <span className="text-[#94a3b8]">Unknown</span>
                               )}
                             </td>
 
                             {/* IP Score */}
-                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-300">
+                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-[#334155]">
                               {item.risk !== undefined && item.risk !== null ? (
-                                item.risk
+                                <div className="min-w-[120px] mx-auto text-left">
+                                  <p className="text-[12px] font-semibold text-[#334155]">
+                                    {item.risk}
+                                  </p>
+                                  <div className="mt-1 h-[4px] w-full rounded-full bg-[#e2e8f0]">
+                                    <div
+                                      className="h-[4px] rounded-full bg-[#16a34a]"
+                                      style={{ width: `${getRiskPercent(item.risk)}%` }}
+                                    />
+                                  </div>
+                                </div>
                               ) : (
-                                <span className="text-gray-500">N/A</span>
+                                <span className="text-[#94a3b8]">N/A</span>
                               )}
                             </td>
 
                             {/* Proxy */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#334155]">
                               {item.proxy || (
-                                <span className="text-gray-500">N/A</span>
+                                <span className="text-[#94a3b8]">N/A</span>
                               )}
                             </td>
 
                             {/* ISP */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#334155]">
                               {item.isp || (
-                                <span className="text-gray-500">Unknown</span>
+                                <span className="text-[#94a3b8]">Unknown</span>
                               )}
                             </td>
 
                             {/* ASN */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#334155]">
                               {item.asn || (
-                                <span className="text-gray-500">Unknown</span>
+                                <span className="text-[#94a3b8]">Unknown</span>
                               )}
                             </td>
 
                             {/* REFERRER */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-left text-gray-300 min-w-48">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-left text-[#334155] min-w-48">
                               {item.referrer || (
-                                <span className="text-gray-500">
+                                <span className="text-[#94a3b8]">
                                   No Referrer
                                 </span>
                               )}
                             </td>
 
                             {/* USER AGENT */}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-left text-gray-300 min-w-48">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-left text-[#334155] min-w-48">
                               {item.user_agent || (
-                                <span className="text-gray-500">
+                                <span className="text-[#94a3b8]">
                                   No User Agent
                                 </span>
                               )}
@@ -557,19 +577,8 @@ const tableControllerRef = useRef(null);
               </div>
 
               {/* Pagination (Unchanged) */}
-              <div className="flex items-center justify-center pt-4 pb-4 bg-gray-800 rounded-b-lg">
-                <button className="h-8 w-8 text-gray-600 hover:text-white">
-                  &lt;
-                </button>
-                <button className="h-8 w-8 mx-1 bg-blue-600 text-white rounded-full text-sm">
-                  1
-                </button>
-                <button className="h-8 w-8 mx-1 text-gray-400 hover:text-white text-sm">
-                  2
-                </button>
-                <button className="h-8 w-8 text-gray-600 hover:text-white">
-                  &gt;
-                </button>
+              <div className="flex items-center justify-center pt-4 pb-4 bg-white border-t border-[#e6eaf2] rounded-b-md">
+                
               </div>
             </div>
           </div>

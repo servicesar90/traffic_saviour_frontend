@@ -612,5 +612,30 @@ html {
   background: #8da3c6;
 }
 
+/* Scrollbar style for Traffic Logbook table (vertical + horizontal) */
+.traffic-log-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #aebed7 #eaf0f8;
+}
+.traffic-log-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.traffic-log-scrollbar::-webkit-scrollbar-track {
+  background: #eaf0f8;
+  border-radius: 999px;
+}
+.traffic-log-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b8c8df 0%, #9fb2d2 100%);
+  border-radius: 999px;
+  border: 2px solid #eaf0f8;
+}
+.traffic-log-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #9fb2d2 0%, #8ba2c7 100%);
+}
+.traffic-log-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 
 

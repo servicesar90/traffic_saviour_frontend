@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronDown, ChevronUp, NotepadText, ChevronLeft } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList, faBan, faChartPie, faChartSimple } from "@fortawesome/free-solid-svg-icons";
 import { CreditCard, Layers } from "lucide-react";
@@ -12,7 +12,6 @@ import { signOutApi } from "../../api/Apis";
 
 const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCollapse }) => {
   const location = useLocation();
-  const [databaseOpen, setDatabaseOpen] = useState(false);
   const [manageIpOpen, setManageIpOpen] = useState(false);
   const showFull = !isCollapsed;
 
@@ -22,35 +21,24 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
 
   const navItems = [
     {
-      label: "View Statistics",
+      label: "Dashboard",
       icon: <FontAwesomeIcon icon={faChartPie} size="lg" />,
       route: "/Dashboard/allStats",
+    },
+    {
+      label: "Campaigns",
+      icon: <FontAwesomeIcon icon={faList} size="lg" />,
+      route: "/Dashboard/allCampaign",
+    },
+    {
+      label: "Traffic Logs",
+      icon: <FontAwesomeIcon icon={faChartSimple} size="lg" />,
+      route: "/Dashboard/reports",
     },
     {
       label: "Stats Overview",
       icon: <FontAwesomeIcon icon={faChartSimple} size="lg" />,
       route: "/Dashboard/stats",
-    },
-    {
-      label: "Tasks",
-      icon: <FontAwesomeIcon icon={faList} size="lg" />,
-      route: "/Dashboard/allCampaign",
-    },
-    {
-      label: "Transactions",
-      icon: <FontAwesomeIcon icon={faChartSimple} size="lg" />,
-      route: "/Dashboard/analytics",
-    },
-    {
-      label: "Payments",
-      icon: <CreditCard size={20} />,
-      route: "/Dashboard/pricing",
-      collapsible: true,
-    },
-    {
-      label: "Cards",
-      icon: <Layers size={20} />,
-      route: "/Dashboard/billing",
     },
     {
       label: "Manage IP",
@@ -62,17 +50,15 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
       ],
     },
     {
-      label: "Accounts",
-      icon: <NotepadText size={18} />,
-      collapsible: true,
+      label: "Pricing",
+      icon: <CreditCard size={20} />,
+      route: "/Dashboard/pricing",
     },
-  ];
-
-  const workflowItems = [
-    { label: "Bill Pay", icon: <NotepadText size={18} />, route: "/Dashboard/billing" },
-    { label: "Invoicing", icon: <NotepadText size={18} />, route: "/Dashboard/pricing" },
-    { label: "Reimbursements", icon: <NotepadText size={18} />, route: "/Dashboard/analytics" },
-    { label: "View Logs", icon: <NotepadText size={18} />, route: "/Dashboard/reports" },
+    {
+      label: "Transactions",
+      icon: <Layers size={20} />,
+      route: "/Dashboard/billing",
+    },
   ];
 
   const handleNavigate = (route) => {
@@ -104,7 +90,6 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
     
   };
 
-  const isDatabaseActive = false;
   useEffect(() => {
     if (
       location.pathname === "/Dashboard/ip-blacklist" ||
@@ -163,7 +148,7 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
             ? item.subItems.some((sub) => location.pathname === sub.route)
             : false;
           const isActive = location.pathname === item.route || isSubItemActive;
-          const isItemActive = isActive || (item.collapsible && isDatabaseActive);
+          const isItemActive = isActive;
 
           return (
             <div key={index}>
@@ -172,8 +157,6 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                 onClick={() => {
                   if (item.label === "Manage IP") {
                     setManageIpOpen(!manageIpOpen);
-                  } else if (item.collapsible) {
-                    setDatabaseOpen(!databaseOpen);
                   } else if (item.route) {
                     handleNavigate(item.route);
                   }
@@ -204,8 +187,6 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                       ) : (
                         <ChevronDown size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
                       )
-                    ) : databaseOpen ? (
-                      <ChevronUp size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
                     ) : (
                       <ChevronDown size={16} className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`} />
                     )}
@@ -235,40 +216,6 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
           );
         })}
       </nav>
-      <div className="mt-4">
-        <div className={`px-2 ${showFull ? "block" : "hidden"}`}>
-          <div className="h-px w-full bg-white/10" />
-        </div>
-        <p className={`px-2 text-[11px] font-semibold text-slate-300/70 uppercase tracking-[0.12em] ${showFull ? "block" : "hidden"}`}>
-          Workflows
-        </p>
-        <div className="mt-2 flex flex-col gap-1">
-          {workflowItems.map((item, idx) => {
-            const isActive = location.pathname === item.route;
-            return (
-              <div
-                key={idx}
-                onClick={() => item.route && handleNavigate(item.route)}
-                className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors ${!showFull ? "sidebar-item-collapsed justify-center" : ""} ${isActive
-                  ? "sidebar-item-active"
-                  : "text-slate-600"
-                  } relative group`}
-              >
-                <span className={`sidebar-item-icon ${isActive ? "sidebar-item-active" : ""}`}>
-                  {item.icon}
-                </span>
-                {showFull && <span className="text-sm font-medium sidebar-text">{item.label}</span>}
-                {!showFull && (
-                  <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md group-hover:block z-50 whitespace-nowrap">
-                    {item.label}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       <div className="mt-auto pb-2">
         <div className="-mx-3">
           <div className="h-px w-full bg-[#CBD0DD]" />
