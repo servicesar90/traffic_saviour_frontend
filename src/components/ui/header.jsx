@@ -103,7 +103,7 @@ const Header = ({ onMenuClick }) => {
           <Menu size={18} />
         </button>
         <div className="flex items-center gap-2 rounded-xl  bg-white px-3 py-2 ">
-          <img src="/logo2.svg" alt="TrafficSaviour" className="w-7 h-7" />
+          <img src="/logo-1.png" alt="TrafficSaviour" className="w-12 h-12" />
           <div className="leading-tight">
             <p className="text-xl font-semibold text-slate-900">TrafficSaviour</p>
             
