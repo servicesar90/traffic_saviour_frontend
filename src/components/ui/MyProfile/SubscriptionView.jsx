@@ -45,7 +45,7 @@ export const SubscriptionView = () => {
 
             <h1 style={{ fontSize: "28px", margin: 0 }}>INVOICE</h1>
             <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
-              <span style={{ fontSize: "16px", color: "#111827", fontWeight: 700 }}>Click Stopper</span>
+              <span style={{ fontSize: "16px", color: "#111827", fontWeight: 700 }}>TrafficSaviour</span>
             </p>
           </div>
 
@@ -77,7 +77,7 @@ export const SubscriptionView = () => {
         </div>
 
         <div style={{ marginBottom: "30px", fontSize: "13px", color: "#374151" }}>
-          <p style={{ margin: 0 }}><b>Email:</b> billing@clickstopper.com</p>
+          <p style={{ margin: 0 }}><b>Email:</b> billing@trafficasviour.com</p>
           <p style={{ margin: 0 }}>
             <b>Phone:</b>{" "}
             <a href="tel:+13214188331" style={{ color: "#111827", textDecoration: "none" }}>
@@ -145,7 +145,7 @@ export const SubscriptionView = () => {
             This invoice reflects the successful processing of your subscription payment.
           </p>
           <p style={{ marginBottom: "6px" }}>
-            If you have any questions, please contact our billing team at <b>billing@clickstopper.com</b>.
+            If you have any questions, please contact our billing team at <b>billing@trafficsaviour.com</b>.
           </p>
           <p style={{ fontStyle: "italic" }}>Thank you for your confidence in our work.</p>
         </div>
@@ -161,7 +161,7 @@ export const SubscriptionView = () => {
         >
           This is a system generated invoice. No signature required.
           <br />
-          (c) {new Date().getFullYear()} Click Stopper. All rights reserved.
+          (c) {new Date().getFullYear()} TrafficSaviour. All rights reserved.
         </div>
       </div>
     );

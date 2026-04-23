@@ -64,7 +64,7 @@ export default function Pricing() {
 const handleSubscribe = async (priceId) => {
   if (!priceId) return alert("Price ID is required for subscription");
   try {
-    const response = await fetch("https://api.clickstopper.com/api/v2/payment/stripe/checkout-subscription", {
+    const response = await fetch("https://api.trafficsaviour.com/api/v2/payment/stripe/checkout-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json",
         "Authorization": `Bearer ${localStorage.getItem("token")}`

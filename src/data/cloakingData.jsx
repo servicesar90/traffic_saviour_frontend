@@ -1,11 +1,11 @@
 export const wordpressPluginCode = `<?php
 /**
-* Plugin Name: Click Stopper
-* Plugin URI: https://clickstopper.com
-* Description: Click Stopper- Real-Time Visitor Verification and Fraud Prevention for Your Website.
+* Plugin Name: TrafficSaviour Cloaking Integration
+* Plugin URI: https://trafficsaviour.com
+* Description: TrafficSaviour- Real-Time Visitor Verification and Fraud Prevention for Your Website.
 * Version: 1.2.01
-* Author: Click Stopper
-* Author URI: https://clickstopper.com
+* Author: TrafficSaviour
+* Author URI: https://trafficsaviour.com
 * License: GPL2
 */
 
@@ -23,7 +23,7 @@ function tswp_add_meta_box() {
 
         add_meta_box(
             'tswp_id',
-            __('Click Stopper - (Impportant: Disable any installed cache Plugin.)', 'tswp_textdomain'),
+            __('TrafficSaviour - (Impportant: Disable any installed cache Plugin.)', 'tswp_textdomain'),
             'tswp_meta_box_callback',
             $screen
         );
@@ -43,7 +43,7 @@ function tswp_meta_box_callback($post) {
     $value = get_post_meta($post->ID, '_ts_meta_value_key', true);
 
     echo '<label for="tswp_field">';
-    _e('Paste The Code From ClickStopper Campaign', 'tswp_textdomain');
+    _e('Paste The Code From TrafficSaviour Campaign', 'tswp_textdomain');
     echo '</label> ';
     
     echo '<textarea id="tswp_field" name="tswp_field" class="widefat" cols="50" rows="5">' . esc_attr($value) . '</textarea>';

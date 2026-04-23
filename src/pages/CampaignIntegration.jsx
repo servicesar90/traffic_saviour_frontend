@@ -320,10 +320,10 @@ const handleCopy = (text) => {
 
 const generateZip = async () => {
   const zip = new JSZip();
-  const folder = zip.folder("ClickStopper");
+  const folder = zip.folder("TrafficSaviourCloakingIntegration");
   folder.file("index.php", wordpressPluginCode);
   const zipBlob = await zip.generateAsync({ type: "blob" });
-  saveAs(zipBlob, "ClickStopper.zip");
+  saveAs(zipBlob, "TrafficSaviourCloakingIntegration.zip");
 };
 
 const generatePhpZip = async (phpCode) => {

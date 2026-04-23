@@ -204,7 +204,7 @@ const InvoiceTemplate = ({ item }) => {
 
         <p style={{ marginBottom: "6px" }}>
           If you have any questions regarding this invoice or your subscription,
-          please contact our billing team at <b>billing@clickstopper.com</b>.
+          please contact our billing team at <b>billing@trafficsaviour.com</b>.
         </p>
 
         <p style={{ fontStyle: "italic" }}>
@@ -223,7 +223,7 @@ const InvoiceTemplate = ({ item }) => {
         }}
       >
         This is a system generated invoice. No signature required.<br />
-        © {new Date().getFullYear()} Click Stopper. All rights reserved.
+        © {new Date().getFullYear()} TrafficSaviour. All rights reserved.
       </div>
     </div>
   );
