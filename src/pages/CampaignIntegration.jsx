@@ -15,7 +15,7 @@ const CloakingIntegration = () => {
   const camp = location?.state?.data;
   const navigate = useNavigate();
   const [showIntegrationTable, setShowIntegrationTable] = useState(
-    camp?.integration
+    !camp?.integration
   );
 
   const tabs = [

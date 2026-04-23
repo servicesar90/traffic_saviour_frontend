@@ -18,19 +18,19 @@ const Dashboard = () => {
 
   const handleMenuClick = () => {
     if (window.innerWidth < 768) {
-
-
-      setMobileVisible(!mobileVisible);
-      setIsCollapsed(!isCollapsed);
+      setMobileVisible((prev) => !prev);
+      return;
     } else {
-
-
-      setIsCollapsed(!isCollapsed);
+      setIsCollapsed((prev) => !prev);
     }
   };
 
   const handleCollapseToggle = () => {
     setIsCollapsed((prev) => !prev);
+  };
+
+  const closeMobileSidebar = () => {
+    setMobileVisible(false);
   };
 
   const steps = [
@@ -242,7 +242,7 @@ const Dashboard = () => {
             <Sidebar
               collapsed={isCollapsed}
               mobileVisible={mobileVisible}
-              onCloseMobile={handleMenuClick}
+              onCloseMobile={closeMobileSidebar}
               onToggleCollapse={handleCollapseToggle}
             />
           </div>

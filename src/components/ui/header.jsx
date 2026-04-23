@@ -103,7 +103,7 @@ const Header = ({ onMenuClick }) => {
           <Menu size={18} />
         </button>
         <div className="flex items-center gap-2 rounded-xl  bg-white px-3 py-2 ">
-          <img src="/logo-1.png" alt="TrafficSaviour" className="w-12 h-12" />
+          <img src="/logo-1.png" alt="TrafficSaviour" className="w-10 h-10" />
           <div className="leading-tight">
             <p className="text-xl font-semibold text-slate-900">TrafficSaviour</p>
             
@@ -148,48 +148,58 @@ const Header = ({ onMenuClick }) => {
               )}
             </div>
             <div className="absolute -bottom-1 -right-1 bg-white border-2 border-slate-400 rounded-full p-0.5 flex items-center justify-center">
-              <svg className="w-3 h-3 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className={`w-3 h-3 text-slate-600 transition-transform duration-200 ${
+                  showProfileModal ? "rotate-180" : "rotate-0"
+                }`}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </div>
           </div>
 
           {/* Dropdown Menu */}
-          {showProfileModal && (
-            <div className="absolute right-0 mt-3 w-56 rounded-lg bg-white shadow-[0_10px_30px_rgba(15,23,42,0.15)] z-50 border border-slate-200 overflow-hidden font-['Nunito_Sans']">
-              <div className="py-2">
-                <button
-                  onClick={() => navigate("/myProfile")}
-                  className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
-                >
-                  <Settings className="w-4 h-4 mr-3 text-slate-500" /> Account Settings
-                </button>
+          <div
+            className={`absolute right-0 mt-3 w-56 rounded-lg bg-white shadow-[0_10px_30px_rgba(15,23,42,0.15)] z-50 border border-slate-200 overflow-hidden font-['Nunito_Sans'] transition-all duration-200 origin-top-right ${
+              showProfileModal
+                ? "opacity-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 -translate-y-2 pointer-events-none"
+            }`}
+          >
+            <div className="py-2">
+              <button
+                onClick={() => navigate("/myProfile")}
+                className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
+              >
+                <Settings className="w-4 h-4 mr-3 text-slate-500" /> Account Settings
+              </button>
 
-                <button
-                  onClick={() => navigate("/Dashboard/pricing")}
-                  className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
-                >
-                  <CreditCard className="w-4 h-4 mr-3 text-slate-500" /> Billing & Plans
-                </button>
+              <button
+                onClick={() => navigate("/Dashboard/pricing")}
+                className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
+              >
+                <CreditCard className="w-4 h-4 mr-3 text-slate-500" /> Billing & Plans
+              </button>
 
-                <button
-                  onClick={() => navigate("/help")}
-                  className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
-                >
-                  <Headphones className="w-4 h-4 mr-3 text-slate-500" /> Support Center
-                </button>
+              <button
+                onClick={() => navigate("/help")}
+                className="flex items-center w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer transition font-medium"
+              >
+                <Headphones className="w-4 h-4 mr-3 text-slate-500" /> Support Center
+              </button>
 
-                <div className="border-t border-slate-100 my-1" />
+              <div className="border-t border-slate-100 my-1" />
 
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition font-medium"
-                >
-                  <LogOut className="w-4 h-4 mr-3" /> Sign Out
-                </button>
-              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition font-medium"
+              >
+                <LogOut className="w-4 h-4 mr-3" /> Sign Out
+              </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </header>

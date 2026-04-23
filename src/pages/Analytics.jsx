@@ -399,7 +399,7 @@ const addUrlCamp = async (signal) => {
                       <div className="relative group">
                         <button
                           className="h-7 w-7 inline-flex items-center justify-center rounded-md bg-[#eff6ff] text-[#2563eb] hover:bg-[#dbeafe] cursor-pointer transition-colors"
-                          onClick={() => navigate(`/Dashboard/real-time-analytics/${item.id}`)}
+                          // onClick={() => navigate(`/Dashboard/real-time-analytics/${item.id}`)}
                           aria-label="View"
                         >
                           <Eye size={16} />

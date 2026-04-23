@@ -594,276 +594,51 @@ const fetchCampaigns = useCallback(async (page = 1) => {
   }, [tasks]);
 
   // Small reusable StatCard
-  const StatStarStack = () => (
-    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
-      <svg
-        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="square"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 448 512"
-        style={{ transformOrigin: "0.1875em 0.75em", color: "#90D67F" }}
-      >
-        <g transform="translate(224 256)">
-          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
-            <path
-              fill="currentColor"
-              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
-              transform="translate(-224 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-      <svg
-        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-success"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="circle"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-        style={{ transformOrigin: "0.6875em 0.25em" }}
-      >
-        <g transform="translate(256 256)">
-          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
-            <path
-              fill="currentColor"
-              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
-              transform="translate(-256 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-      <svg
-        className="svg-inline--fa fa-star fa-stack-1x text-success fa-stack-star"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="star"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 576 512"
-        style={{ transformOrigin: "0.9375em 0em" }}
-      >
-        <g transform="translate(288 256)">
-          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
-            <path
-              fill="currentColor"
-              d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"
-              transform="translate(-288 -256)"
-            />
-          </g>
-        </g>
-      </svg>
+  const StatStack = ({ squareColor, circleColor, iconColor, iconPath, iconViewBox = "0 0 24 24" }) => (
+    <span className="stat-stack-icon" aria-hidden="true">
+      <span className="stat-stack-square" style={{ backgroundColor: squareColor }} />
+      <span className="stat-stack-circle" style={{ backgroundColor: circleColor }}>
+        <svg viewBox={iconViewBox} className="stat-stack-glyph" style={{ color: iconColor }}>
+          <path fill="currentColor" d={iconPath} />
+        </svg>
+      </span>
     </span>
+  );
+
+  const StatStarStack = () => (
+    <StatStack
+      squareColor="#90D67F"
+      circleColor="#D9FBD0"
+      iconColor="#22c55e"
+      iconPath="M12 2.75l2.82 5.72 6.31.92-4.57 4.46 1.08 6.3L12 17.2l-5.64 2.96 1.08-6.3-4.57-4.46 6.31-.92L12 2.75z"
+    />
   );
 
   const StatPauseStack = () => (
-    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
-      <svg
-        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="square"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 448 512"
-        style={{ transformOrigin: "0.1875em 0.75em", color: "#FFCC85" }}
-      >
-        <g transform="translate(224 256)">
-          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
-            <path
-              fill="currentColor"
-              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
-              transform="translate(-224 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-      <svg
-        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-warning"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="circle"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-        style={{ transformOrigin: "0.6875em 0.25em" }}
-      >
-        <g transform="translate(256 256)">
-          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
-            <path
-              fill="currentColor"
-              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
-              transform="translate(-256 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-      <svg
-        className="svg-inline--fa fa-play fa-stack-1x text-warning"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="play"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 448 512"
-        style={{ transformOrigin: "0.6875em 0em" }}
-      >
-        <g transform="translate(224 256)">
-          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
-            <path
-              fill="currentColor"
-              d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 41.6V470.4c0 35.5 43.8 51.9 72.4 34.9l352-208.1c28.6-16.9 28.6-58.6 0-75.5z"
-              transform="translate(-224 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-    </span>
+    <StatStack
+      squareColor="#FFCC85"
+      circleColor="#FFEFCA"
+      iconColor="#f59e0b"
+      iconPath="M8 5.5v13l10-6.5-10-6.5z"
+    />
   );
 
   const StatBlockStack = () => (
-    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
-      <svg
-        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="square"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 448 512"
-        style={{ transformOrigin: "0.1875em 0.75em", color: "#F48270" }}
-      >
-        <g transform="translate(224 256)">
-          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
-            <path
-              fill="currentColor"
-              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
-              transform="translate(-224 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-      <svg
-        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-danger"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="circle"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-        style={{ transformOrigin: "0.6875em 0.25em" }}
-      >
-        <g transform="translate(256 256)">
-          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
-            <path
-              fill="currentColor"
-              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
-              transform="translate(-256 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-      <svg
-        className="svg-inline--fa fa-xmark fa-stack-1x text-danger"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="xmark"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 384 512"
-        style={{ transformOrigin: "0.75em 0em" }}
-      >
-        <g transform="translate(192 256)">
-          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
-            <path
-              fill="currentColor"
-              d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
-              transform="translate(-192 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-    </span>
+    <StatStack
+      squareColor="#F48270"
+      circleColor="#FFE0DB"
+      iconColor="#ef4444"
+      iconPath="M7.05 7.05a1 1 0 011.41 0L12 10.59l3.54-3.54a1 1 0 111.41 1.41L13.41 12l3.54 3.54a1 1 0 01-1.41 1.41L12 13.41l-3.54 3.54a1 1 0 01-1.41-1.41L10.59 12 7.05 8.46a1 1 0 010-1.41z"
+    />
   );
 
   const StatAllowStack = () => (
-    <span className="fa-stack" style={{ minHeight: 46, minWidth: 46 }}>
-      <svg
-        className="svg-inline--fa fa-square fa-stack-2x fa-stack-square"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="square"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 448 512"
-        style={{ transformOrigin: "0.1875em 0.75em", color: "#90D67F" }}
-      >
-        <g transform="translate(224 256)">
-          <g transform="translate(-128, 128)  scale(1, 1)  rotate(-10 0 0)">
-            <path
-              fill="currentColor"
-              d="M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"
-              transform="translate(-224 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-      <svg
-        className="svg-inline--fa fa-circle fa-stack-2x fa-stack-circle stack-circle text-stats-circle-success"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="circle"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-        style={{ transformOrigin: "0.6875em 0.25em" }}
-      >
-        <g transform="translate(256 256)">
-          <g transform="translate(96, -128)  scale(1.125, 1.125)  rotate(0 0 0)">
-            <path
-              fill="currentColor"
-              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"
-              transform="translate(-256 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-      <svg
-        className="svg-inline--fa fa-check fa-stack-1x text-success"
-        aria-hidden="true"
-        focusable="false"
-        data-prefix="fas"
-        data-icon="check"
-        role="img"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 448 512"
-        style={{ transformOrigin: "0.75em 0em" }}
-      >
-        <g transform="translate(224 256)">
-          <g transform="translate(192, -256)  scale(0.875, 0.875)  rotate(0 0 0)">
-            <path
-              fill="currentColor"
-              d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.2 0z"
-              transform="translate(-224 -256)"
-            />
-          </g>
-        </g>
-      </svg>
-    </span>
+    <StatStack
+      squareColor="#90D67F"
+      circleColor="#D9FBD0"
+      iconColor="#22c55e"
+      iconPath="M9.2 16.2L4.8 11.8a1 1 0 111.4-1.4l3 3 8.6-8.6a1 1 0 011.4 1.4l-10 10a1 1 0 01-1.4 0z"
+    />
   );
 
   const StatItem = ({ icon, value, label }) => (
@@ -1414,20 +1189,20 @@ const fetchCampaigns = useCallback(async (page = 1) => {
     <div className="min-h-screen text-slate-900">
       {/* Page Header */}
       <div className="flex flex-col gap-4 mb-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col justify-between items-start gap-4">
           <div>
             <h2 className="dashboard-heading text-left">Viewer Demographics</h2>
             <p className="dashboard-subheading">
               Here is a snapshot of campaign performance and traffic safety.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleAddNewCampaign}
-              className="flex items-center px-4 py-2 rounded-md font-medium text-sm border transition-all duration-200 cursor-pointer bg-white/90 text-slate-700 text-xs border-slate-200 hover:bg-slate-100"
+              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
             >
               <svg
-                className="h-3 w-3 mr-2"
+                className="h-3 w-3"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1444,16 +1219,16 @@ const fetchCampaigns = useCallback(async (page = 1) => {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm border transition-all duration-200 cursor-pointer
+              className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] border transition-all duration-200
                 ${
                   isRefreshing
-                    ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed"
-                    : "bg-white/90 text-slate-700 text-xs border-slate-200 hover:bg-slate-100"
+                    ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed opacity-80"
+                    : "bg-white/90 text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
                 }
               `}
             >
               <svg
-                className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
+                className={`h-3 w-3 transition-transform duration-300 ${isRefreshing ? "animate-spin" : ""}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1473,7 +1248,7 @@ const fetchCampaigns = useCallback(async (page = 1) => {
 
       </div>
 
-      {/* Top Stats */}
+     {/* Top Stats */}
       <div className="mb-8 flex flex-wrap items-center gap-8">
         <StatItem
           icon={<StatStarStack />}

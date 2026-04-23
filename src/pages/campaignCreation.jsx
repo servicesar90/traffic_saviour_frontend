@@ -1277,7 +1277,9 @@ export default function CampaignBuilder() {
       // merge moneyPages from local state into data (to ensure latest)
       // data.money_page = moneyPages;
       data.status = activeStatus;
-   
+      console.log(data);
+      
+    
 
       if (location?.state?.mode === "edit") {
         const uid = location?.state?.id;
@@ -1289,6 +1291,8 @@ export default function CampaignBuilder() {
           cpc:data?.cpc,
           comment:data?.comment,
         }};
+        console.log(payload);
+        
         
 
         const res = await apiFunction("patch", `${createCampaignApi}/${uid}`, null, payload);

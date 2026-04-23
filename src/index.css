@@ -123,7 +123,7 @@ html {
   opacity: 0.9;
 }
 
-/* Font Awesome stack helpers (for stat card icon) */
+
 .fa-stack {
   position: relative;
   display: inline-block;
@@ -147,13 +147,13 @@ html {
 .fa-stack-1x {
   left: 50%;
   top: 50%;
-  width: 46px;
-  height: 46px;
-  transform: translate(-50%, -50%) translate(-1px, -2px);
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%);
 }
 
 .fa-stack-star {
-  transform: translate(-50%, -50%) translate(-1px, -3px);
+  transform: translate(-50%, -50%) scale(0.95);
 }
 
 .fa-stack-square {
@@ -164,6 +164,40 @@ html {
   transform: translate(var(--circle-offset-x), var(--circle-offset-y));
 }
 
+.stat-stack-icon {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 46px;
+}
+
+.stat-stack-square {
+  position: absolute;
+  left: 1px;
+  bottom: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  transform: rotate(-11deg);
+}
+
+.stat-stack-circle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-stack-glyph {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
 .dark__text-opacity-50 {
   opacity: 0.5;
 }

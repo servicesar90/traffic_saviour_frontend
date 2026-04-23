@@ -1,54 +1,58 @@
+import { ShieldCheck, CreditCard, LockKeyhole } from "lucide-react";
+
 export default function PlanRequiredModal({ open, onLogout, onUpgrade }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
-      <div className="w-full max-w-xl bg-[#0b1220] rounded-2xl border border-gray-700 shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="px-6 py-6 border-b border-gray-700 flex flex-col items-center text-center gap-2">
-          <div className="h-12 w-12 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 text-xl">
-            💳
-          </div>
-
-          <h2 className="text-lg font-semibold text-white">
-            Subscription Required
-          </h2>
-
-          <p className="text-xs text-gray-400">
-            Upgrade to unlock full dashboard access
-          </p>
-        </div>
-
-        {/* Body */}
-        <div className="px-8 py-8 text-center">
-          <h3 className="text-xl font-semibold text-white">
-            Your plan is inactive
-          </h3>
-
-          <p className="text-sm text-gray-400 mt-3">
-            Your subscription has expired or is missing. Choose a plan to
-            continue using analytics, campaigns and tools.
-          </p>
-
-          <div className="mt-5 text-xs text-gray-500">
-            🔒 No data will be lost
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 backdrop-blur-sm px-4">
+      <div className="w-full max-w-xl rounded-xl border border-[#d5d9e4] bg-white shadow-[0_24px_60px_rgba(15,23,42,0.25)] overflow-hidden">
+        <div className="px-6 py-6 border-b border-[#e2e8f0]">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 rounded-lg bg-[#eef4ff] text-[#3c79ff] flex items-center justify-center shrink-0">
+              <CreditCard size={18} />
+            </div>
+            <div className="text-left">
+              <h2 className="dashboard-heading text-left">Active Plan Needed</h2>
+              <p className="dashboard-subheading text-left mt-1">
+                Upgrade your subscription to unlock full dashboard access.
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-5 border-t border-gray-700 flex justify-between">
+        <div className="px-6 py-6">
+          <div className="rounded-md border border-[#d5d9e4] bg-[#f8fbff] px-4 py-3 text-left">
+            <p className="text-sm font-semibold text-[#1f2937]">Your subscription is currently inactive.</p>
+            <p className="text-sm text-[#64748b] mt-1">
+              Choose a plan to continue using campaigns, analytics, and traffic protection tools.
+            </p>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-[#64748b]">
+            <span className="inline-flex items-center gap-2">
+              <ShieldCheck size={14} className="text-[#3c79ff]" />
+              Your saved data remains secure
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <LockKeyhole size={14} className="text-[#3c79ff]" />
+              Resume instantly after plan activation
+            </span>
+          </div>
+        </div>
+
+        <div className="px-6 py-5 border-t border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3">
           <button
             onClick={onLogout}
-            className="px-5 py-2.5 cursor-pointer bg-red-600 hover:bg-red-700 rounded-xl text-sm text-white"
+            className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] border border-[#fecaca] bg-[#fff1f2] text-[#b91c1c] hover:bg-[#ffe4e6] cursor-pointer"
           >
             Sign out
           </button>
 
           <button
             onClick={onUpgrade}
-            className="px-6 py-2.5 cursor-pointer bg-blue-600 hover:bg-blue-700 rounded-xl text-sm text-white"
+            className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
           >
-            View Plans
+            View plans
           </button>
         </div>
       </div>

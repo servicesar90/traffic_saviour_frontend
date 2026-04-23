@@ -1,16 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronDown, ChevronUp, ChevronLeft } from "lucide-react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faList, faBan, faChartPie, faChartSimple } from "@fortawesome/free-solid-svg-icons";
-import { CreditCard, Layers } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  LayoutDashboard,
+  Megaphone,
+  ScrollText,
+  BarChart3,
+  LineChart,
+  ShieldBan,
+  BadgeDollarSign,
+  ReceiptText,
+} from "lucide-react";
 import { apiFunction } from "../../api/ApiFunction";
 import { signOutApi } from "../../api/Apis";
 
 
 // import { useSelector } from "react-redux";
 
-const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCollapse }) => {
+const SidebarContent = ({
+  isCollapsed,
+  mobileVisible,
+  onCloseMobile,
+  onToggleCollapse,
+  isMobile = false,
+}) => {
   const location = useLocation();
   const [manageIpOpen, setManageIpOpen] = useState(false);
   const showFull = !isCollapsed;
@@ -22,27 +37,32 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
   const navItems = [
     {
       label: "Dashboard",
-      icon: <FontAwesomeIcon icon={faChartPie} size="lg" />,
+      icon: <LayoutDashboard size={18} />,
       route: "/Dashboard/allStats",
     },
     {
       label: "Campaigns",
-      icon: <FontAwesomeIcon icon={faList} size="lg" />,
+      icon: <Megaphone size={18} />,
       route: "/Dashboard/allCampaign",
     },
     {
       label: "Traffic Logs",
-      icon: <FontAwesomeIcon icon={faChartSimple} size="lg" />,
+      icon: <ScrollText size={18} />,
       route: "/Dashboard/reports",
     },
     {
       label: "Stats Overview",
-      icon: <FontAwesomeIcon icon={faChartSimple} size="lg" />,
+      icon: <BarChart3 size={18} />,
       route: "/Dashboard/stats",
     },
     {
+      label: "Analytics Hub",
+      icon: <LineChart size={18} />,
+      route: "/Dashboard/analytics",
+    },
+    {
       label: "Manage IP",
-      icon: <FontAwesomeIcon icon={faBan} size="lg" />,
+      icon: <ShieldBan size={18} />,
       collapsible: true,
       subItems: [
         { label: "Blacklist IP", route: "/Dashboard/ip-blacklist" },
@@ -51,12 +71,12 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
     },
     {
       label: "Pricing",
-      icon: <CreditCard size={20} />,
+      icon: <BadgeDollarSign size={18} />,
       route: "/Dashboard/pricing",
     },
     {
       label: "Transactions",
-      icon: <Layers size={20} />,
+      icon: <ReceiptText size={18} />,
       route: "/Dashboard/billing",
     },
   ];
@@ -64,6 +84,14 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
   const handleNavigate = (route) => {
     navigate(route);
     if (mobileVisible) onCloseMobile(); // auto-close sidebar on mobile 
+  };
+
+  const handleCollapseAction = () => {
+    if (isMobile) {
+      onCloseMobile?.();
+      return;
+    }
+    onToggleCollapse?.();
   };
 
   const handleLogout = async () => {
@@ -101,33 +129,35 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
 
   return (
     <div
-      className={`flex flex-col py-3 px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed overflow-visible" : "w-64 sidebar-expanded overflow-hidden"
+      className={`flex flex-col ${isMobile ? "pt-5 pb-3" : "py-3"} px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed overflow-visible" : "w-64 sidebar-expanded overflow-hidden"
         } transition-all duration-500 ease-in-out text-slate-900 box-border min-h-0`}
-      style={{ borderTop: 0, height: "calc(100vh - 72px - 1px)" }}
+      style={{ borderTop: 0, height: isMobile ? "100%" : "calc(100vh - 72px - 1px)" }}
     >
       {/* Logo & Avatar */}
       <div
         className={`px-1 mb-4 flex items-center ${showFull ? "gap-3" : "justify-center"
           }`}
       >
-        <div className="flex items-center gap-3 rounded-2xl bg-white px-2 py-2 w-full">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 text-slate-700">
+        <div
+          className={`flex items-center rounded-xl bg-white ${showFull ? "gap-2.5 px-2 py-2 w-full" : "justify-center p-0 w-auto"
+            }`}
+        >
+          <div className="flex shrink-0 items-center justify-center w-10 h-10 min-w-10 min-h-10 rounded-full bg-slate-100 text-slate-700 ring-2 ring-[#e7eefc]">
             {user?.company?.logoUrl ? (
               <img
                 src={user?.company?.logoUrl}
                 alt="Logo"
-                className="w-8 h-8 rounded-lg object-cover"
+                className="w-9 h-9 min-w-9 min-h-9 shrink-0 rounded-full object-cover"
               />
             ) : (
-              <span className="text-xs font-semibold">
+              <span className="text-md font-bold">
                 {user?.name ? user.name.charAt(0).toUpperCase() : "A"}
               </span>
             )}
           </div>
           {showFull && (
-            <div className="flex-1 leading-tight sidebar-text">
-             
-              <p className="text-md font-bold text-slate-900 truncate">
+            <div className="flex-1 leading-tight sidebar-text text-left">
+              <p className="text-[15px] font-extrabold text-slate-900 truncate leading-none">
                 {user?.name || "Orbix Studio Team"}
               </p>
             </div>
@@ -166,12 +196,12 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
                   : "text-slate-600"
                   } relative group`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <span className={`sidebar-item-icon ${isItemActive ? "sidebar-item-active" : ""}`}>
                     {item.icon}
                   </span>
                   {showFull && (
-                    <span className="text-sm font-medium sidebar-text">{item.label}</span>
+                    <span className="text-sm font-semibold sidebar-text tracking-[0.01em]">{item.label}</span>
                   )}
                 </div>
                 {!showFull && (
@@ -216,19 +246,19 @@ const SidebarContent = ({ isCollapsed, mobileVisible, onCloseMobile, onToggleCol
           );
         })}
       </nav>
-      <div className="mt-auto pb-2">
+      <div className={`mt-auto ${isMobile ? "pb-3" : "pb-2"}`}>
         <div className="-mx-3">
           <div className="h-px w-full bg-[#CBD0DD]" />
         </div>
         <div className="mt-3">
           <div
             className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors text-slate-600 ${!showFull ? "sidebar-item-collapsed justify-center" : ""} relative group`}
-            onClick={onToggleCollapse}
+            onClick={handleCollapseAction}
           >
             <span className="sidebar-item-icon">
               <ChevronLeft size={18} />
             </span>
-            {showFull && <span className="text-sm font-medium sidebar-text">Collapsed View</span>}
+            {showFull && <span className="text-sm font-semibold sidebar-text tracking-[0.01em]">Collapsed View</span>}
             {!showFull && (
               <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md group-hover:block z-50 whitespace-nowrap">
                 Collapsed View
@@ -266,22 +296,26 @@ const Sidebar = ({ collapsed, mobileVisible, onCloseMobile, onToggleCollapse }) 
       </div>
 
       {/* Mobile Sidebar */}
-      {mobileVisible && (
-        <div className="absolute inset-0 z-50 flex md:hidden">
-          <div className="w-60 bg-white shadow-lg h-[100vh] py-1.75 overflow-hidden">
-            {/* <div className="flex justify-end pr-4">
-              <X
-                className="cursor-pointer text-gray-600"
-                onClick={onCloseMobile}
-              />
-            </div> */}
-            <div className="h-full flex flex-col justify-end">
-              <SidebarContent isCollapsed={false} />
-            </div>
-          </div>
-          {/* <div className="flex-1 bg-black bg-opacity-50" onClick={onCloseMobile} /> */}
+      <div
+        className={`fixed left-0 right-0 top-[72px] bottom-0 z-50 md:hidden transition-opacity duration-300 ${
+          mobileVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="absolute inset-0 bg-black/35" onClick={onCloseMobile} />
+        <div
+          className={`absolute left-0 top-0 bottom-0 z-[60] w-60 bg-white shadow-lg overflow-hidden transition-transform duration-300 ease-out ${
+            mobileVisible ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <SidebarContent
+            isCollapsed={false}
+            mobileVisible={mobileVisible}
+            onCloseMobile={onCloseMobile}
+            onToggleCollapse={onToggleCollapse}
+            isMobile={true}
+          />
         </div>
-      )}
+      </div>
     </>
   );
 };

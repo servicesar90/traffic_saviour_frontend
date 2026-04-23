@@ -411,14 +411,13 @@ const handleDownloadInvoice = async (item) => {
                       <div className="relative group/id max-w-[180px]">
                         <div
                           className="font-mono text-xs text-[#64748b] truncate cursor-help hover:text-[#3c79ff] transition-colors"
-                          title={item.payment_id || "N/A"}
                         >
                           {item.payment_id || "N/A"}
                         </div>
 
                         {item.payment_id && (
-                          <div className="absolute top-full left-0 mt-2 hidden group-hover/id:block bg-[#141824] text-white text-[10px] p-3 rounded-md shadow-lg border border-[#334155] z-[100] break-all w-64">
-                            <p className="text-[#cbd5e1] mb-1 border-b border-[#334155] pb-1 uppercase text-[9px] font-bold tracking-wide">
+                          <div className="absolute top-full left-0 mt-2 z-[100] w-64 break-all rounded-md border border-[#d5d9e4] bg-white p-3 text-[10px] text-[#334155] shadow-[0_10px_24px_rgba(15,23,42,0.14)] opacity-0 translate-y-1 pointer-events-none transition-all duration-150 group-hover/id:opacity-100 group-hover/id:translate-y-0 group-hover/id:pointer-events-auto">
+                            <p className="mb-1 border-b border-[#e2e8f0] pb-1 uppercase text-[9px] font-bold tracking-wide text-[#52607a]">
                               Full Payment ID
                             </p>
                             {item.payment_id}
