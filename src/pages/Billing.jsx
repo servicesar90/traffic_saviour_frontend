@@ -57,8 +57,8 @@ const InvoiceTemplate = ({ item }) => {
         <div>
           {/* LOGO PLACEHOLDER */}
          <img
-  src="/logo1.svg"
-  alt="Click Stopper Logo"
+  src="/logo-1.png"
+  alt="traffic-saviour-logoLogo"
   style={{
     width: "100px",
     height: "auto",
@@ -67,7 +67,7 @@ const InvoiceTemplate = ({ item }) => {
 />
 
  <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "-2px" }}>
-          <h3 style={{ fontSize: "25px", margin: 0, color: "#a855f7" }}>Click Stopper</h3>
+          <h3 style={{ fontSize: "25px", margin: 0, color: "#a855f7" }}>TrafficSaviour</h3>
           </p>
           
          
@@ -111,7 +111,7 @@ const InvoiceTemplate = ({ item }) => {
 
       {/* COMPANY DETAILS */}
       <div style={{ marginBottom: "30px", fontSize: "13px", color: "#374151" }}>
-        <p style={{ margin: 0 }}><b>Email:</b> billing@clickstopper.com</p>
+        <p style={{ margin: 0 }}><b>Email:</b> billing@trafficsaviour.com</p>
         <p style={{ margin: 0 }}>
   <b>Phone:</b>{" "}
   <a
