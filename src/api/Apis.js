@@ -63,4 +63,6 @@ export const getSubscription = `${base_url}/auth/v2/plan/subscription`;
 
 export const getUpdatedPlan = `${base_url}/api/v2/plan/subscription`;
 
+export const freePlanClaimApi = `${base_url}/api/v1/admin/payment/activate-subscription`
+
 

@@ -1,4 +1,7 @@
 export const isPlanValid = () => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (user?.free_claimed === true) return true;
+
   const plan = JSON.parse(localStorage.getItem("plan"));
 
   if (!plan) return false;
