@@ -44,6 +44,11 @@ const StripeTest = lazy(() => import("../pages/SrtipeTest"));
 const Billing = lazy(() => import("../pages/Billing"));
 const Verifyotp = lazy(()=> import("../auth/VerifyOtp"));
 const Statistics = lazy(()=>import("../pages/Statistics"))
+const RedirectInspector = lazy(() => import("../pages/RedirectInspector"));
+const BotScanner = lazy(() => import("../pages/BotScanner"));
+const IpIntelligence = lazy(() => import("../pages/IpIntelligence"));
+const UrlBuilderTool = lazy(() => import("../pages/UrlBuilderTool"));
+const UrlShortenerTool = lazy(() => import("../pages/UrlShortenerTool"));
 
 const Layout = () => (
   <div className="w-[100vw] h-[100vh] bg-[#0b0d14]">
@@ -154,6 +159,11 @@ export default function Routess() {
               />
               <Route path="pricing" element={<Pricing />} />
               <Route path="billing" element={<Billing />} />
+              <Route path="tools/redirect-inspector" element={<RedirectInspector />} />
+              <Route path="tools/bot-scanner" element={<BotScanner />} />
+              <Route path="tools/ip-intelligence" element={<IpIntelligence />} />
+              <Route path="tools/url-builder" element={<UrlBuilderTool />} />
+              <Route path="tools/url-shortener" element={<UrlShortenerTool />} />
            
           </Route>
 

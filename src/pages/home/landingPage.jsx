@@ -51,15 +51,8 @@ export default function LandingActions() {
   return (
     <div className="min-h-[100svh] w-full font-['Manrope'] bg-white flex flex-col md:flex-row overflow-hidden relative">
       {/* Left Panel */}
-      <div
-        className="absolute inset-0 w-full min-h-[100svh] md:static md:w-2/5 md:min-h-screen rounded-none md:rounded-tr-[40px] md:overflow-hidden relative"
-        style={{
-          backgroundImage:
-            "linear-gradient(135deg, rgba(11,26,74,0.9), rgba(11,26,74,0.8), rgba(11,26,74,0.6)), url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1600&auto=format&fit=crop')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+      <div className="absolute inset-0 w-full min-h-[100svh] md:static md:w-2/5 md:min-h-screen rounded-none md:rounded-tr-[40px] md:overflow-hidden relative auth-left">
+        <div className="absolute inset-0 auth-pattern" />
         <div className="absolute bottom-8 left-8 rounded-full bg-white/15 px-4 py-2 text-[12px] uppercase tracking-[0.34em] text-white/85 backdrop-blur">
           TrafficSaviour
         </div>
@@ -149,7 +142,7 @@ export default function LandingActions() {
               <PrimaryButton label="Sign In" onClick={() => navigate("/signin")} />
 
               <p className="text-center text-sm text-slate-600 mt-4">
-                Donâ€™t have an account?{" "}
+                Don't have an account?{" "}
                 <span
                   onClick={() => navigate("/signup")}
                   className="text-[#0066FF] font-semibold cursor-pointer hover:underline"

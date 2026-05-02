@@ -544,9 +544,9 @@ const endItem = Math.min(
     <div
       className="fixed right-0 top-full mt-2 w-48 bg-white border border-slate-200 z-20"
       style={{
-        zIndex: 9999999, // over ALL elements
+        zIndex: 70,
         left: dropdownPos.left,
-        top: dropdownPos.top, // adjust dynamically if needed
+        top: dropdownPos.top,
       }}
     >
       <div className="py-1">
@@ -1105,7 +1105,6 @@ const endItem = Math.min(
 }
 
 export default AllCampaignsDashboard;
-
 
 
 

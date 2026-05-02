@@ -299,6 +299,15 @@ html {
   animation: slideDownGlow 0.45s ease-out;
 }
 
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .dashboard-datepicker-popper {
   z-index: 10050 !important;
 }
@@ -669,6 +678,22 @@ html {
 }
 .traffic-log-scrollbar::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+@media (max-width: 767px) {
+  .mobile-sidebar-overlay {
+    isolation: isolate;
+    z-index: 2147483646 !important;
+  }
+
+  .mobile-sidebar-panel {
+    z-index: 2147483647 !important;
+  }
+
+  .dashboard-light.mobile-sidebar-open main > * {
+    position: relative;
+    z-index: 0 !important;
+  }
 }
 
 

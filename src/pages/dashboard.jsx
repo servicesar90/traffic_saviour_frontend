@@ -5,16 +5,49 @@ import { Outlet } from "react-router-dom";
 import { Steps, Hints } from "intro.js-react";
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
-import { Briefcase, Home } from "lucide-react";
-import { PhoneCall } from "lucide-react";
-import { motion } from 'framer-motion'
-import { Box } from "@mui/joy";
+import { WifiOff } from "lucide-react";
 
 const Dashboard = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileVisible, setMobileVisible] = useState(false);
   const [stepEnable, setStepEnable] = useState(false);
   const [stepsDone, setStepsDone] = useState(true);
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== "undefined" ? !navigator.onLine : false
+  );
+  const [networkChecksFailed, setNetworkChecksFailed] = useState(0);
+
+  const verifyConnectivity = async () => {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setIsOffline(true);
+      setNetworkChecksFailed(0);
+      return;
+    }
+
+    try {
+      const res = await fetch("/", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        setNetworkChecksFailed(0);
+        setIsOffline(false);
+      } else {
+        setNetworkChecksFailed((prev) => {
+          const next = prev + 1;
+          if (next >= 2) setIsOffline(true);
+          return next;
+        });
+      }
+    } catch {
+      setNetworkChecksFailed((prev) => {
+        const next = prev + 1;
+        if (next >= 2) setIsOffline(true);
+        return next;
+      });
+    }
+  };
 
   const handleMenuClick = () => {
     if (window.innerWidth < 768) {
@@ -215,8 +248,61 @@ const Dashboard = () => {
 
   }, []);
 
+  useEffect(() => {
+    const handleOffline = () => {
+      setIsOffline(true);
+      setNetworkChecksFailed(0);
+    };
+    const handleOnline = () => {
+      setIsOffline(false);
+      setNetworkChecksFailed(0);
+      verifyConnectivity();
+    };
+
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+
+    verifyConnectivity();
+    const pingInterval = window.setInterval(() => {
+      verifyConnectivity();
+    }, 7000);
+
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.clearInterval(pingInterval);
+    };
+  }, []);
+
   return (
     <>
+      {isOffline && (
+        <div className="fixed inset-0 z-[2147483647] bg-[radial-gradient(circle_at_top,_#edf4ff_0%,_#f6f9ff_42%,_#f3f6fb_100%)] flex items-center justify-center px-5 animate-[fadeIn_220ms_ease-out]">
+          <div className="w-full max-w-[560px] rounded-2xl border border-[#dbe4f3] bg-white/95 backdrop-blur-sm p-8 text-center shadow-[0_28px_60px_rgba(15,23,42,0.14)] animate-slideDownGlow">
+            <div className="mx-auto mb-4 flex h-[72px] w-[72px] items-center justify-center rounded-full border border-[#cfe0ff] bg-[#eef4ff] text-[#3c79ff] shadow-[0_10px_24px_rgba(60,121,255,0.2)]">
+              <WifiOff size={30} strokeWidth={2.2} />
+            </div>
+            <h2 className="text-[28px] font-extrabold tracking-[-0.02em] text-[#141824] leading-tight">
+              Network Disconnected
+            </h2>
+            <p className="mt-2 text-[14px] text-[#5b6782] leading-relaxed max-w-[430px] mx-auto">
+              Internet connection lost. We will automatically continue once your network is back.
+            </p>
+            <div className="mt-5 inline-flex items-center rounded-full border border-[#d5d9e4] bg-[#f8fbff] px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-[#3c79ff]">
+              Trying to reconnect...
+            </div>
+            <div className="mt-5">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center justify-center rounded-md bg-[#3c79ff] px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_12px_26px_rgba(60,121,255,0.32)] hover:bg-[#356ee6] cursor-pointer !text-white"
+              >
+                Retry Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {stepEnable && (
         <Steps
           enabled={stepsDone}
@@ -232,13 +318,13 @@ const Dashboard = () => {
           }}
         />
       )}
-      <div className="dashboard-light h-screen w-full bg-[#F5F7FA] overflow-hidden flex flex-col">
+      <div className={`dashboard-light h-screen w-full bg-[#F5F7FA] overflow-hidden flex flex-col ${mobileVisible ? "mobile-sidebar-open" : ""}`}>
         <div className="z-40 shrink-0">
           <Header onMenuClick={handleMenuClick} />
         </div>
 
         <div className="flex w-full flex-1 min-h-0 overflow-hidden">
-          <div className="h-full sticky top-0 self-start">
+          <div className="h-full sticky top-0 self-start relative z-30 md:z-auto">
             <Sidebar
               collapsed={isCollapsed}
               mobileVisible={mobileVisible}
@@ -246,7 +332,7 @@ const Dashboard = () => {
               onToggleCollapse={handleCollapseToggle}
             />
           </div>
-          <main className="flex-1 h-full overflow-y-auto">
+          <main className={`relative flex-1 h-full ${mobileVisible ? "overflow-hidden" : "overflow-y-auto"}`}>
             <div className="px-6 py-6 min-h-full">
               <Outlet context={{ onIntroReady: () => setStepEnable(true) }} />
             </div>
@@ -260,7 +346,7 @@ const Dashboard = () => {
         target="_blank"
         rel="noreferrer"
         aria-label="Chat on Telegram"
-        className="fixed bottom-[22px] right-[22px] z-[9999] no-underline transition-all duration-200 hover:scale-[1.08] hover:-translate-y-[2px]"
+        className="fixed bottom-[22px] right-[22px] z-40 no-underline transition-all duration-200 hover:scale-[1.08] hover:-translate-y-[2px]"
       >
         <span className="relative flex h-[86px] w-[86px] items-center justify-center rounded-full bg-transparent">
           <svg
