@@ -67,4 +67,8 @@ export const freePlanClaimApi = `${base_url}/api/v1/admin/payment/activate-subsc
 
 export const redirectCheckApi = `${base_url}/api/v2/new/redirectchecker`;
 
+export const botCheckApi = `${base_url}/api/v2/new/botchecker`;
+
+
+
 
