@@ -357,7 +357,7 @@ const javascriptIntegration = async (camp, url, setShowIntegrationTable) => {
 
 async function checkIntegration(camp, url, setShowIntegrationTable) {
   const URL = url.trim().replace(/\/+$/, "");
-  const res = await fetch(`${URL}/?BCG-CODE-454545=1`);
+  const res = await fetch(`${URL}/?TS-CODE-16161=1`);
   const text = await res.text();
 
   let status = "failed";

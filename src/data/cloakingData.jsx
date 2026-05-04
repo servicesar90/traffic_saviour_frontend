@@ -345,7 +345,7 @@ header("X-Accel-Expires: 0"); // Nginx proxy caching disable
 
 // integration check
 function _check() { 
-      if(isset($_GET['BCG-CODE-454545'])){ 
+      if(isset($_GET['TS-CODE-16161'])){ 
         echo "${camp?.cid}"; 
         die(); 
       } 
