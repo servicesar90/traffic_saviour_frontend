@@ -69,6 +69,8 @@ export const redirectCheckApi = `${base_url}/api/v2/new/redirectchecker`;
 
 export const botCheckApi = `${base_url}/api/v2/new/botchecker`;
 
+export const ipInfoApi = `${base_url}/api/v2/services`;
+
 
 
 

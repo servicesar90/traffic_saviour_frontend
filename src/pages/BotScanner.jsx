@@ -27,6 +27,7 @@ const botOptions = [
   { label: "Googlebot", value: "googlebot" },
 ];
 
+
 const deviceOptions = ["desktop", "mobile", "tablet"];
 
 const getStatusBadgeClass = (statusCode) => {
@@ -174,6 +175,57 @@ export default function BotScanner() {
     setSelectedDevice(lastScanMeta.device);
     setResultVisible(false);
   };
+  const handleUseFromHistory = (item) => {
+    if (!item) return;
+    setUrl(item.url || "");
+    setSelectedBot(item.bot || "");
+    setSelectedDevice(item.device || "");
+  };
+
+  const handleClearResults = () => {
+    setResultVisible(false);
+    setApiResponse(null);
+    setLastScanMeta(null);
+  };
+
+  const handleClearHistory = () => {
+    setHistory([]);
+  };
+
+  const handleExportHistoryCsv = () => {
+    if (!history.length) {
+      showErrorToast("No history available to export.");
+      return;
+    }
+
+    const header = ["url", "bot", "device", "statusCode", "executionTime", "scannedAt"];
+    const rows = history.map((item) => [
+      item.url,
+      item.bot,
+      item.device,
+      item.statusCode ?? "",
+      item.executionTime ?? "",
+      item.scannedAt ?? "",
+    ]);
+
+    const csv = [header, ...rows]
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `bot-scan-history-${Date.now()}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+  };
 
   const handleCopyResults = async () => {
     if (!apiResponse?.data) return;
@@ -292,9 +344,14 @@ export default function BotScanner() {
           <div className="rounded-md border border-[#d5d9e4] bg-white overflow-hidden">
             <div className="px-4 py-3 border-b border-[#e4e7ec] bg-[#f8fbff] flex items-center justify-between gap-2">
               <h2 className="text-[15px] font-semibold text-[#1f2a44]">Scan Result</h2>
-              <button type="button" onClick={handleCopyResults} disabled={copying} className={SECONDARY_BTN}>
-                {copying ? "Copying..." : copied ? "Copied" : "Copy Results"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={handleCopyResults} disabled={copying} className={SECONDARY_BTN}>
+                  {copying ? "Copying..." : copied ? "Copied" : "Copy Results"}
+                </button>
+                <button type="button" onClick={handleClearResults} className={SECONDARY_BTN}>
+                  Clear Results
+                </button>
+              </div>
             </div>
 
             <div className="p-4 space-y-3 bg-[#fcfcfd] border-b border-[#eaecf0]">
@@ -332,12 +389,20 @@ export default function BotScanner() {
 
           {history.length > 0 && (
             <div className="rounded-md border border-[#d5d9e4] bg-white overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#e4e7ec] bg-[#f8fbff]">
+              <div className="px-4 py-3 border-b border-[#e4e7ec] bg-[#f8fbff] flex items-center justify-between gap-2">
                 <h3 className="text-[14px] font-semibold text-[#1f2a44]">Recent Scans</h3>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={handleExportHistoryCsv} className={SECONDARY_BTN}>
+                    Export CSV
+                  </button>
+                  <button type="button" onClick={handleClearHistory} className={SECONDARY_BTN}>
+                    Clear History
+                  </button>
+                </div>
               </div>
               <div className="max-h-[320px] overflow-auto">
                 <table className="w-full min-w-[760px] text-left">
-                  <thead className="bg-[#fbfcff]">
+                  <thead className="bg-[#fbfcff] sticky top-0 z-10">
                     <tr>
                       <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-[#667085]">URL</th>
                       <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-[#667085]">Bot</th>
@@ -345,7 +410,7 @@ export default function BotScanner() {
                       <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-[#667085]">Status</th>
                       <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-[#667085]">Time</th>
                       <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-[#667085]">Scanned At</th>
-                      <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-[#667085]">Action</th>
+                      <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-[#667085]">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -361,11 +426,18 @@ export default function BotScanner() {
                         </td>
                         <td className="px-4 py-3 text-[13px] text-[#344054]">{item.executionTime ?? "-"} ms</td>
                         <td className="px-4 py-3 text-[13px] text-[#475467]">{new Date(item.scannedAt).toLocaleString()}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 space-x-2 whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleUseFromHistory(item)}
+                            className="inline-flex items-center justify-center rounded-md border border-[#d5d9e4] px-3 py-1.5 text-[12px] font-semibold text-[#344054] hover:bg-[#f9fafb] cursor-pointer"
+                          >
+                            Use This
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleScanFromHistory(item)}
-                            className="inline-flex items-center justify-center rounded-md border border-[#d5d9e4] px-3 py-1.5 text-[12px] font-semibold text-[#344054] hover:bg-[#f9fafb]"
+                            className="inline-flex items-center justify-center rounded-md border border-[#d5d9e4] px-3 py-1.5 text-[12px] font-semibold text-[#344054] hover:bg-[#f9fafb] cursor-pointer"
                             disabled={loading}
                           >
                             Re-scan
