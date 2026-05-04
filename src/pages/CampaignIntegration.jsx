@@ -86,7 +86,7 @@ header("X-Accel-Expires: 0"); // Nginx proxy caching disable
 
 // integration check
 function _check() {
-  if(isset($_GET['TS-BHDNR-84848'])){
+  if(isset($_GET['BCG-CODE-454545'])){
     echo "${camp?.cid}";
     die();
   }
@@ -357,7 +357,7 @@ const javascriptIntegration = async (camp, url, setShowIntegrationTable) => {
 
 async function checkIntegration(camp, url, setShowIntegrationTable) {
   const URL = url.trim().replace(/\/+$/, "");
-  const res = await fetch(`${URL}/?TS-BHDNR-84848=1`);
+  const res = await fetch(`${URL}/?BCG-CODE-454545=1`);
   const text = await res.text();
 
   let status = "failed";
