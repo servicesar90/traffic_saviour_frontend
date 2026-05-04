@@ -65,4 +65,10 @@ export const getUpdatedPlan = `${base_url}/api/v2/plan/subscription`;
 
 export const freePlanClaimApi = `${base_url}/api/v1/admin/payment/activate-subscription`
 
+export const redirectCheckApi = `${base_url}/api/v2/new/redirectchecker`;
+
+export const botCheckApi = `${base_url}/api/v2/new/botchecker`;
+
+
+
 

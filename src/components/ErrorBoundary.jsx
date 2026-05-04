@@ -32,18 +32,18 @@ class ErrorBoundary extends React.Component {
               <h2 className="mt-5 text-[#1f2a44] text-[50px] font-extrabold leading-none sm:hidden">
                 500
               </h2>
-              <h3 className="mt-5 text-[#1f2a44] text-[42px] sm:text-[46px] font-extrabold leading-tight">
+              <h3 className="mt-4 text-[#1f2a44] text-[28px] sm:text-[32px] font-extrabold leading-tight">
                 Unknow error!
               </h3>
-              <p className="mt-2 text-[#3f4a63] text-[22px] sm:text-[26px] leading-snug max-w-[760px]">
+              <p className="mt-2 text-[#3f4a63] text-[15px] sm:text-[16px] leading-relaxed max-w-[540px]">
                 But relax! Our cat is here to play you some music.
               </p>
               <button
                 type="button"
                 onClick={this.handleGoHome}
-                className="mt-6 h-[60px] px-10 rounded-[10px] bg-[#3c79ff] text-white text-[30px] sm:text-[34px] font-semibold hover:bg-[#2f69e8] transition-colors"
+                className="mt-5 h-10 px-5 rounded-md bg-[#3c79ff] text-white text-[13px] font-semibold hover:bg-[#2f69e8] transition-colors"
               >
-                Go Home
+                Go to Home Page
               </button>
             </div>
 

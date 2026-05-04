@@ -112,6 +112,7 @@ const Dashboard = () => {
       setLoading(true);
       const res = await apiFunction("get", ipClicks);
       const rawData = res?.data?.data || [];
+      console.log(rawData)
 
       const lastDays = rawData.slice(-chartRangeDays);
       const formattedData = lastDays.map((item) => ({
@@ -859,9 +860,9 @@ const fetchCampaigns = useCallback(async (page = 1) => {
     <div
       className="fixed right-0 top-full mt-2 w-48 rounded-xl shadow-lg bg-white border border-slate-200 z-20"
       style={{
-        zIndex: 9999999, // over ALL elements
+        zIndex: 70,
         left: dropdownPos?.left,
-        top: dropdownPos?.top, // adjust dynamically if needed
+        top: dropdownPos?.top,
       }}
     >
       <div className="py-1">
@@ -1700,7 +1701,7 @@ const fetchCampaigns = useCallback(async (page = 1) => {
                       : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
                   }`}
                 >
-                  <span className="text-lg leading-none"></span> Previous
+                  <span className="text-lg leading-none">‹</span> Previous
                 </button>
                 <button
                   disabled={countryPageSafe === countryTotalPages}
@@ -1713,7 +1714,7 @@ const fetchCampaigns = useCallback(async (page = 1) => {
                       : "text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
                   }`}
                 >
-                  Next <span className="text-lg leading-none"></span>
+                  Next <span className="text-lg leading-none">›</span>
                 </button>
               </div>
             </div>
@@ -1806,7 +1807,7 @@ const fetchCampaigns = useCallback(async (page = 1) => {
 
           <div className="bg-[#f6f5fb] rounded-xl pt-2 pb-3 pr-4 pl-0 min-h-[120px] overflow-x-hidden">
             {/*  Task List */}
-            <div className="h-[220px] overflow-y-auto overflow-x-hidden custom-scrollbar">
+            <div className="h-[160px] overflow-y-auto overflow-x-hidden custom-scrollbar">
               {filteredTasks.length === 0 ? (
                 <p className="text-slate-400 text-sm text-center">No tasks found</p>
               ) : (
@@ -1924,51 +1925,52 @@ const fetchCampaigns = useCallback(async (page = 1) => {
             </div>
 
             {/*  Task Count */}
-            <div className="mt-3 text-slate-400 text-xs text-right">
+            <div className="mt-1 text-slate-400 text-xs text-right">
               {tasks.length} tasks
             </div>
           </div>
         </div>
 {/* Click Metrics */}
-        <div className="bg-[var(--app-bg)] rounded-2xl p-3 min-h-[220px] shadow-none">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-slate-900 font-semibold">
-              Click Metrics - Realtime Logs
-            </h4>
-            <div className="text-slate-400 text-sm">
-              Recent activity in 10 days
+        <div className="p-1 min-h-[220px] text-left">
+          <div className="flex items-start justify-between gap-3 mb-5">
+            <div>
+              <h4 className="text-[22px] leading-tight font-extrabold text-[#141824]">
+                Click Metrics
+              </h4>
+              <p className="text-[12px] text-[#64748b] mt-1">Realtime Logs</p>
             </div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#bfdbfe] bg-white/80 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#1d4ed8]">
+              <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
+              Live
+            </span>
           </div>
 
-          <div className="bg-[#f6f5fb] border border-slate-200/70 rounded-xl p-6">
-            {loading ? (
-              <p className="text-center text-slate-400">Loading...</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                {/*  Total Clicks */}
-                <div className="text-center">
-                  <div className="bg-white/90 border border-slate-200/70 p-4 rounded-xl inline-block shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
-                    <div className="text-2xl font-semibold text-slate-900">
-                      {clickSummary.totalClicks}
-                    </div>
-                  </div>
-                  <div className="text-slate-400 text-xs mt-2">
-                    Total Clicks
-                  </div>
+          {loading ? (
+            <p className="text-center text-[#64748b] text-sm py-8">Loading...</p>
+          ) : (
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-md border border-[#d5d9e4] bg-white p-4">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wide text-[#64748b]">Total Clicks</p>
+                  <p className="mt-2 text-[32px] leading-none font-extrabold text-[#0f172a]">
+                    {clickSummary.totalClicks}
+                  </p>
                 </div>
 
-                {/*  Safe Clicks */}
-                <div className="text-center">
-                  <div className="bg-white/90 border border-slate-200/70 p-4 rounded-xl inline-block shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
-                    <div className="text-2xl font-semibold text-slate-900">
-                      {clickSummary.safeClicks}
-                    </div>
-                  </div>
-                  <div className="text-slate-400 text-xs mt-2">Safe Clicks</div>
+                <div className="rounded-md border border-[#d5d9e4] bg-white p-4">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wide text-[#64748b]">Safe Clicks</p>
+                  <p className="mt-2 text-[32px] leading-none font-extrabold text-[#0f172a]">
+                    {clickSummary.safeClicks}
+                  </p>
                 </div>
               </div>
-            )}
-          </div>
+
+              <div className="rounded-md border border-[#d5d9e4] bg-white px-3 py-2 text-[12px] text-[#475569]">
+                <span className="font-semibold text-[#1d4ed8]">10-day window:</span>{" "}
+                Tracking total and safe traffic trends.
+              </div>
+            </div>
+          )}
         </div>
       </div>
  

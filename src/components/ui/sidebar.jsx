@@ -12,9 +12,15 @@ import {
   ShieldBan,
   BadgeDollarSign,
   ReceiptText,
+  Route,
+  Bot,
+  LocateFixed,
+  Link2,
+  Scissors,
 } from "lucide-react";
 import { apiFunction } from "../../api/ApiFunction";
 import { signOutApi } from "../../api/Apis";
+import profileCharacter from "../../assets/vecteezy_friendly-3d-animated-character-with-glasses-smiling_57357673.png";
 
 
 // import { useSelector } from "react-redux";
@@ -79,6 +85,45 @@ const SidebarContent = ({
       icon: <ReceiptText size={18} />,
       route: "/Dashboard/billing",
     },
+    {
+      type: "heading",
+      label: "Tools",
+    },
+    {
+      label: "Redirect Inspector",
+      icon: <Route size={18} />,
+      route: "/Dashboard/tools/redirect-inspector",
+      badge: "New",
+      badgeTone: "new",
+    },
+    {
+      label: "Bot Scanner",
+      icon: <Bot size={18} />,
+      route: "/Dashboard/tools/bot-scanner",
+      badge: "New",
+      badgeTone: "new",
+    },
+    {
+      label: "IP Intelligence",
+      icon: <LocateFixed size={18} />,
+      route: "/Dashboard/tools/ip-intelligence",
+      badge: "Coming Soon",
+      badgeTone: "soon",
+    },
+    {
+      label: "URL Builder",
+      icon: <Link2 size={18} />,
+      route: "/Dashboard/tools/url-builder",
+      badge: "Coming Soon",
+      badgeTone: "soon",
+    },
+    {
+      label: "Link Shortener",
+      icon: <Scissors size={18} />,
+      route: "/Dashboard/tools/url-shortener",
+      badge: "Coming Soon",
+      badgeTone: "soon",
+    },
   ];
 
   const handleNavigate = (route) => {
@@ -135,7 +180,7 @@ const SidebarContent = ({
     >
       {/* Logo & Avatar */}
       <div
-        className={`px-1 mb-4 flex items-center ${showFull ? "gap-3" : "justify-center"
+        className={`px-1 mb-2 flex items-center ${showFull ? "gap-3" : "justify-center"
           }`}
       >
         <div
@@ -150,14 +195,17 @@ const SidebarContent = ({
                 className="w-9 h-9 min-w-9 min-h-9 shrink-0 rounded-full object-cover"
               />
             ) : (
-              <span className="text-md font-bold">
-                {user?.name ? user.name.charAt(0).toUpperCase() : "A"}
-              </span>
+              <img
+                src={profileCharacter}
+                alt="Profile"
+                className="w-9 h-9 min-w-9 min-h-9 shrink-0 rounded-full object-cover"
+              />
             )}
           </div>
           {showFull && (
             <div className="flex-1 leading-tight sidebar-text text-left">
-              <p className="text-[15px] font-extrabold text-slate-900 truncate leading-none">
+              
+              <p className="text-[16px] font-extrabold text-slate-900 truncate leading-none">
                 {user?.name || "Orbix Studio Team"}
               </p>
             </div>
@@ -171,14 +219,26 @@ const SidebarContent = ({
       </div>
 
       {/* Navigation */}
-      <nav className={`flex flex-col gap-1 text-slate-200 ${showFull ? "overflow-hidden" : "overflow-visible"}`}>
+      <nav className={`flex flex-col gap-0.5 text-slate-200 ${showFull ? "overflow-hidden" : "overflow-visible"}`}>
         {navItems.map((item, index) => {
+          if (item.type === "heading") {
+            return showFull ? (
+              <div
+                key={`heading-${index}`}
+                className="mt-4 mb-1 px-4 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6b7a96]"
+              >
+                {item.label}
+              </div>
+            ) : null;
+          }
+
           const hasSubItems = Array.isArray(item.subItems) && item.subItems.length > 0;
           const isSubItemActive = hasSubItems
             ? item.subItems.some((sub) => location.pathname === sub.route)
             : false;
           const isActive = location.pathname === item.route || isSubItemActive;
           const isItemActive = isActive;
+          const isClickable = Boolean(item.route) || item.label === "Manage IP";
 
           return (
             <div key={index}>
@@ -201,9 +261,20 @@ const SidebarContent = ({
                     {item.icon}
                   </span>
                   {showFull && (
-                    <span className="text-sm font-semibold sidebar-text tracking-[0.01em]">{item.label}</span>
+                    <span className="text-sm font-semibold sidebar-text tracking-[0.01em] truncate max-w-[132px]">{item.label}</span>
                   )}
                 </div>
+                {showFull && item.badge ? (
+                  <span
+                    className={`ml-1.5 inline-flex shrink-0 items-center rounded-full px-1 py-0 text-[6.5px] font-extrabold uppercase tracking-[0.03em] ${
+                      item.badgeTone === "new"
+                        ? "bg-[#edf4ff] text-[#2f63d6] border border-[#cfe0ff]"
+                        : "bg-[#f6f7f9] text-[#7a859b] border border-[#e3e7ef]"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                ) : null}
                 {!showFull && (
                   <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md group-hover:block z-50 whitespace-nowrap">
                     {item.label}
@@ -273,6 +344,20 @@ const SidebarContent = ({
 };
 
 const Sidebar = ({ collapsed, mobileVisible, onCloseMobile, onToggleCollapse }) => {
+  useEffect(() => {
+    if (!mobileVisible) return undefined;
+
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+    };
+  }, [mobileVisible]);
 
   return (
     <>
@@ -297,13 +382,13 @@ const Sidebar = ({ collapsed, mobileVisible, onCloseMobile, onToggleCollapse }) 
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed left-0 right-0 top-[72px] bottom-0 z-50 md:hidden transition-opacity duration-300 ${
+        className={`mobile-sidebar-overlay fixed left-0 right-0 top-[72px] bottom-0 z-[2147483646] md:hidden transition-opacity duration-300 ${
           mobileVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
         <div className="absolute inset-0 bg-black/35" onClick={onCloseMobile} />
         <div
-          className={`absolute left-0 top-0 bottom-0 z-[60] w-60 bg-white shadow-lg overflow-hidden transition-transform duration-300 ease-out ${
+          className={`mobile-sidebar-panel absolute left-0 top-0 bottom-0 z-[2147483647] w-60 bg-white shadow-lg overflow-hidden transition-transform duration-300 ease-out ${
             mobileVisible ? "translate-x-0" : "-translate-x-full"
           }`}
         >
