@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Tools Guide</title><link rel="stylesheet" href="css/tokens.css"><link rel="stylesheet" href="css/layout.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/pages.css"><link rel="stylesheet" href="css/enhance.css"><link rel="stylesheet" href="css/print.css"></head><body><header class="topbar"><div class="brand">TrafficSaviour Docs</div><div class="search-wrap"><input class="search-input" data-search placeholder="Search docs and press Enter"></div></header><div class="shell"><aside class="sidebar" data-sidebar></aside><main class="content"><h1 class="page-title">Tools Guide</h1><p class="page-intro">Deep operational guide for each tool with copy-ready SOP checklists.</p>
+
+<section class="section"><h2>Redirect Inspector</h2><h3>Inputs</h3><p>Target URL (required).</p><h3>Outputs</h3><ul><li>Redirect steps count</li><li>Final status code</li><li>Final URL</li><li>Hop-by-hop chain table</li></ul><h3>SOP Checklist (Copy-Ready)</h3><ol><li>Paste campaign URL and run scan.</li><li>Confirm final status code is expected (usually 200 for landing).</li><li>Check there are no unexpected redirect hops.</li><li>Verify final URL matches intended money/safe path.</li><li>Save screenshot of hop table for audit.</li><li>If mismatch found, pause launch and escalate with evidence.</li></ol><div class="code-block"><pre>SOP Result Template:
+URL:
+Final Status:
+Redirect Count:
+Final URL:
+Issue Found: Yes/No
+Action Taken:</pre></div><div class="media-slot"><strong>Image Placeholder: Redirect Results Table</strong><p>Add screenshot showing hop table and summary cards.</p></div></section>
+
+<section class="section"><h2>Bot Scanner</h2><h3>Inputs</h3><ul><li>URL</li><li>Bot profile</li><li>Device profile</li></ul><h3>Outputs</h3><p>Status code, execution time, response summary, and scan history.</p><h3>SOP Checklist (Copy-Ready)</h3><ol><li>Select landing URL and choose primary bot profile.</li><li>Run scan on mobile and desktop device profiles.</li><li>Repeat same scan for cloaked/alternate URL.</li><li>Compare status code and response differences.</li><li>Export scan history CSV for record.</li><li>Flag suspicious bot-only behavior to compliance lead.</li></ol><div class="code-block"><pre>SOP Result Template:
+URL:
+Bot Profile:
+Device:
+Status Code:
+Execution Time:
+Difference vs Baseline:</pre></div><div class="media-slot"><strong>Video Placeholder: Bot Scan Compare Demo</strong><p>Add demo scanning same URL with 2 different bot profiles.</p></div></section>
+
+<section class="section"><h2>IP Intelligence</h2><h3>Inputs</h3><p>IPv4 or IPv6 address.</p><h3>Outputs</h3><ul><li>Network/provider details</li><li>Location metadata</li><li>Detection flags</li><li>Export JSON and blacklist action</li></ul><h3>SOP Checklist (Copy-Ready)</h3><ol><li>Paste suspicious IP from reports/logs.</li><li>Run lookup and review provider/location/risk signals.</li><li>Cross-check with campaign geo expectations.</li><li>If high-risk, add to blacklist with reason note.</li><li>If trusted internal/partner traffic, consider whitelist.</li><li>Export JSON evidence and attach to incident note.</li></ol><div class="code-block"><pre>SOP Result Template:
+IP:
+Provider:
+Country:
+Risk Signals:
+Decision: Whitelist/Blacklist/Monitor
+Reason:</pre></div></section>
+
+<section class="section"><h2>URL Builder</h2><h3>Inputs</h3><p>Base URL + UTM source/medium/campaign/term/content + alias (optional).</p><h3>Outputs</h3><ul><li>Built URL</li><li>Length warning</li><li>Template/history</li></ul><h3>SOP Checklist (Copy-Ready)</h3><ol><li>Paste base destination URL.</li><li>Fill all required UTM fields using naming standard.</li><li>Validate URL length warning before publishing.</li><li>Copy generated URL and test in browser.</li><li>Save template for reuse by channel/team.</li><li>Store final URL in campaign notes.</li></ol><div class="code-block"><pre>SOP Result Template:
+Base URL:
+UTM Source:
+UTM Medium:
+UTM Campaign:
+Final URL:
+Tested: Yes/No</pre></div></section>
+
+<section class="section"><h2>URL Shortener</h2><h3>Purpose</h3><p>Create compact links without losing campaign intent.</p><h3>SOP Checklist (Copy-Ready)</h3><ol><li>Start from validated long URL only.</li><li>Create readable alias using campaign naming standard.</li><li>Generate short URL and open it in clean browser tab.</li><li>Confirm redirect lands on correct final page.</li><li>Run short URL through Redirect Inspector once.</li><li>Publish only after QA pass is complete.</li></ol><div class="code-block"><pre>SOP Result Template:
+Long URL:
+Alias:
+Short URL:
+Redirect Verified: Yes/No
+Final Destination:
+Approved By:</pre></div><div class="callout warn">Warning: Never run paid traffic on unverified short links.</div></section>
+
+<section class="section"><h2>Deep Operations Notes</h2><p>This section is intentionally detailed so teams can run the platform consistently across shifts. For every workflow on this page, define owner, input quality standard, expected output, and escalation condition. Keep a short run-log for each action so troubleshooting is evidence-based and reproducible.</p><h3>Execution Standard</h3><ul><li>Validate data inputs before action.</li><li>Apply one change at a time and measure impact.</li><li>Capture screenshot or log output for audit trace.</li><li>If result is unexpected, rollback and isolate variable.</li></ul><h3>Quality Control</h3><p>Use pre-check, action-check, and post-check. Pre-check verifies assumptions, action-check confirms behavior during execution, and post-check confirms business impact in reports. This three-layer method reduces silent failures in campaign operations.</p></section><div class="site-footer-nav" data-pager></div></main><aside class="toc" data-toc></aside></div><button class="back-top" data-back-top>Top</button><script src="js/navigation.js"></script><script src="js/toc.js"></script><script src="js/search.js"></script><script src="js/enhance.js"></script><script src="js/utils.js"></script></body></html>
+
+
+
+
+

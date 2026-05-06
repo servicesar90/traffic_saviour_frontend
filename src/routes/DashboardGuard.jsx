@@ -18,8 +18,18 @@ export default function DashboardGuard({ children }) {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [isClaimingFree, setIsClaimingFree] = useState(false);
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const showFreeClaimView = user?.free_claimed === false;
+  const getStoredUser = () => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw || raw === "undefined" || raw === "null") return {};
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  };
+
+  const user = getStoredUser();
+  const showFreeClaimView = user?.free_claimed !== true;
 
   const clearSession = () => {
     localStorage.removeItem("user");

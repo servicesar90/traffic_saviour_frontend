@@ -1,0 +1,35 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap");
+
+:root {
+  --font-sans: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --bg-app: #F5F7FA;
+  --bg-surface: #FFFFFF;
+  --text-primary: #141824;
+  --text-secondary: #52607a;
+  --text-muted: #64748b;
+  --border-default: #d5d9e4;
+  --app-border: #CBD0DD;
+  --border-separator: #e2e8f0;
+  --primary: #3c79ff;
+  --primary-hover: #356ee6;
+  --success-bg: #ecfdf3;
+  --success-text: #027a48;
+  --success-border: #abefc6;
+  --warning-bg: #fff8eb;
+  --warning-text: #b54708;
+  --warning-border: #fedf89;
+  --danger-bg: #fef3f2;
+  --danger-text: #b42318;
+  --danger-border: #fecdca;
+  --shadow-header: 0 6px 20px rgba(15, 23, 42, 0.06);
+  --shadow-card: none;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); background: var(--bg-app); color: var(--text-primary); }
+button, input, select, textarea { font-family: inherit; }
+a { color: var(--primary); text-decoration: none; }
+a:hover { color: var(--primary-hover); }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }

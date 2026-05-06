@@ -1,0 +1,8 @@
+@media print {
+  .topbar,.sidebar,.toc,.back-top,.enhance-bar,.section-actions,.video-toolbar,.menu-toggle { display:none !important; }
+  .shell{display:block !important}
+  .content{padding:0 !important}
+  .section{break-inside:avoid;border:1px solid #cbd5e1 !important;box-shadow:none !important;margin:0 0 10px 0 !important}
+  body{background:#fff !important;color:#111 !important}
+  a{color:#111 !important;text-decoration:none !important}
+}
