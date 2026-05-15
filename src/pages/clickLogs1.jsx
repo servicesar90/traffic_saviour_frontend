@@ -110,6 +110,7 @@ const tableControllerRef = useRef(null);
     const fetchCampaigns = async () => {
       try {
         const res = await apiFunction("get", getAllCampNames, null, null,campaignControllerRef.current.signal );
+        
         setCampaigns(res?.data?.data || []); // store campaigns
       } catch (err) {
           if (err.name !== "CanceledError") {
@@ -164,6 +165,8 @@ const tableControllerRef = useRef(null);
         null,
         tableControllerRef.current.signal
       );
+      console.log(res);
+      
 
       setTableData(res?.data?.data || []);
     } catch (err) {
@@ -318,6 +321,9 @@ const tableControllerRef = useRef(null);
                         <th className="px-6 py-3 text-center text-[12px] font-extrabold text-[#334155] uppercase tracking-wide w-100">
                           Timestamp
                         </th>
+                        <th className="px-6 py-3 text-center text-[12px] font-extrabold text-[#334155] uppercase tracking-wide min-w-36">
+                          Reason
+                        </th>
                         <th className="px-6 py-3 text-center text-[12px] font-extrabold text-[#334155] uppercase tracking-wide">
                           Outcome
                         </th>
@@ -355,7 +361,7 @@ const tableControllerRef = useRef(null);
                       {loading ? (
                         <tr>
                           <td
-                            colSpan="12"
+                            colSpan="13"
                             className="py-8 text-center text-[#64748b]"
                           >
                             Loading...
@@ -364,7 +370,7 @@ const tableControllerRef = useRef(null);
                       ) : tableData.length === 0 ? (
                         <tr>
                           <td
-                            colSpan="12"
+                            colSpan="13"
                             className="py-8 text-center text-[#64748b]"
                           >
                             No data found
@@ -397,6 +403,13 @@ const tableControllerRef = useRef(null);
                               )}
                             </td>
 
+
+                            {/* Reason Name */}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-[#334155] min-w-36">
+                              {item.reason || (
+                                <span className="text-[#94a3b8]">N/A</span>
+                              )}
+                            </td>
                             {/* Result Icon – if missing show Unknown */}
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-[#334155]">
                               <span

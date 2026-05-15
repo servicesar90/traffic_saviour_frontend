@@ -66,6 +66,7 @@ export default function IpIntelligence() {
     try {
       setLoading(true);
       const res = await apiFunction("get", ipInfoApi, ip, null);
+      console.log("IP Intelligence API response:", res);
       const responseData = res?.data || null;
       setApiResponse(responseData);
       setResultVisible(true);
