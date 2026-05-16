@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import { apiFunction } from "../../api/ApiFunction";
 import { getUpdatedPlan, signOutApi } from "../../api/Apis";
 import profileCharacter from "../../assets/vecteezy_friendly-3d-animated-character-with-glasses-smiling_57357673.png";
+import { isPlanValid } from "../../utils/checkPlan";
+
 
 const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
@@ -32,14 +34,20 @@ const Header = ({ onMenuClick }) => {
     const plan = response?.data?.data;
    
     
+    console.log("jgfjdn",plan);
 
     if (plan) {
       localStorage.setItem("plan", JSON.stringify(plan));
         setPlanName(plan?.Plan?.name);
-  setPlanStatus(plan?.status);
+        setPlanStatus(plan?.status);
+    }else{
+      localStorage.setItem("plan",null);
+      setPlanStatus("Expired");
     }
   } catch (err) {
-    // console.log(err);
+    localStorage.setItem("plan",null);
+    setPlanStatus("Expired");
+    isPlanValid();
   }
 };
 

@@ -10,7 +10,7 @@ const parseStorageJson = (key, fallback = null) => {
 
 export const isPlanValid = () => {
   const user = parseStorageJson("user", {});
-  if (user?.free_claimed === true) return true;
+  // if (user?.free_claimed === true) return true;
 
   const plan = parseStorageJson("plan", null);
   if (!plan) return false;

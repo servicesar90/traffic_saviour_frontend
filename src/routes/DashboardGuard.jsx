@@ -21,6 +21,7 @@ export default function DashboardGuard({ children }) {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [isClaimingFree, setIsClaimingFree] = useState(false);
   const [showFreeClaimView, setShowFreeClaimView] = useState(false);
+  const [isCheckingPlan, setIsCheckingPlan] = useState(false);
 
   const getStoredUser = () => {
     try {
@@ -65,10 +66,12 @@ export default function DashboardGuard({ children }) {
       if (response?.status === 200 && response?.data?.data) {
         const subscriptionData = response?.data?.data;
         localStorage.setItem("plan", JSON.stringify(subscriptionData));
+        return true;
       }
     } catch (error) {
       console.error("Failed to fetch updated plan:", error);
     }
+    return false;
   };
 
   const handleUpgrade = () => {
@@ -104,10 +107,46 @@ export default function DashboardGuard({ children }) {
   };
 
   useEffect(() => {
-    syncFreeClaimView();
-    const isAllowedRoute = PLAN_ALLOWED_ROUTES.has(location.pathname);
-    const shouldBlock = !isPlanValid() && !isAllowedRoute;
-    setShowPlanModal(shouldBlock);
+    let isMounted = true;
+    console.log("fdjgjfdjg");
+    
+    const evaluatePlanGuard = async () => {
+      syncFreeClaimView();
+
+      const isAllowedRoute = PLAN_ALLOWED_ROUTES.has(location.pathname);
+      if (isAllowedRoute) {
+        if (isMounted) setShowPlanModal(false);
+        return;
+      }
+
+      if (isPlanValid()) {
+        console.log("fgf",isPlanValid());
+        
+        if (isMounted) setShowPlanModal(false);
+        return;
+      }
+
+      const token = localStorage.getItem("plan");
+      console.log("vjfj", token);
+      if (!token) {
+        if (isMounted) setShowPlanModal(true);
+        return;
+      }
+
+      if (isMounted) setIsCheckingPlan(true);
+      await setUpdatedPlan();
+
+      if (isMounted) {
+        setShowPlanModal(!isPlanValid());
+        setIsCheckingPlan(false);
+      }
+    };
+
+    evaluatePlanGuard();
+
+    return () => {
+      isMounted = false;
+    };
   }, [location.pathname]);
 
   return (
@@ -115,7 +154,7 @@ export default function DashboardGuard({ children }) {
       {children}
 
       <PlanRequiredModal
-        open={showPlanModal}
+        open={showPlanModal && !isCheckingPlan}
         onLogout={handleLogout}
         onUpgrade={handleUpgrade}
         showFreeClaimView={showFreeClaimView}

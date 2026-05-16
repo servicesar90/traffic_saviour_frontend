@@ -44,11 +44,8 @@ export default function LoginPage() {
 
         localStorage.setItem("user", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
-        if (response.data.plan) {
-          localStorage.setItem("plan", JSON.stringify(response.data.plan));
-        } else {
-          localStorage.removeItem("plan");
-        }
+        localStorage.setItem("plan", JSON.stringify(response.data.plan));
+       
 
         showSuccessToast("Signin successful!");
 
