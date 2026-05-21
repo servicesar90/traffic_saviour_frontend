@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { DEVICE_LIST } from "../data/dataList";
 import { showErrorToast } from "../components/toast/toast";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const dropdownStyle = {
   backgroundImage:
@@ -17,6 +18,31 @@ const dropdownStyle = {
 const getDeviceIcon = (deviceName) => {
   const match = DEVICE_LIST.find((d) => d.device === deviceName);
   return match?.icon || null;
+};
+
+const extractRowsFromResponse = (res) => {
+  const payload = res?.data;
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.datalength?.data)) return payload.datalength.data;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.rows)) return payload.rows;
+  if (Array.isArray(payload?.records)) return payload.records;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.logs)) return payload.logs;
+  if (Array.isArray(payload?.clickLogs)) return payload.clickLogs;
+  if (Array.isArray(payload?.result)) return payload.result;
+  if (Array.isArray(payload?.results)) return payload.results;
+
+  const nested = payload?.data;
+  if (Array.isArray(nested?.rows)) return nested.rows;
+  if (Array.isArray(nested?.records)) return nested.records;
+  if (Array.isArray(nested?.items)) return nested.items;
+  if (Array.isArray(nested?.logs)) return nested.logs;
+  if (Array.isArray(nested?.clickLogs)) return nested.clickLogs;
+  if (Array.isArray(nested?.result)) return nested.result;
+  if (Array.isArray(nested?.results)) return nested.results;
+
+  return [];
 };
 
 const DateRangePicker = ({ dateRange, setDateRange, customRequired }) => {
@@ -94,14 +120,24 @@ const CampaignDropdown = ({ campId, setCampId, campaigns }) => {
 };
 
 const Clicklogs = () => {
+  const PAGE_LIMIT = 20;
+  const PRELOAD_OFFSET_PX = 220;
   const [dateRange, setDateRange] = useState([null, null]);
   const [campaigns, setCampaigns] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [cursor, setCursor] = useState(null);
   const [campId, setCampId] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
   const campaignControllerRef = useRef(null);
-const tableControllerRef = useRef(null);
+  const tableControllerRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+  const cursorRef = useRef(null);
+  const hasMoreRef = useRef(false);
+  const loadingRef = useRef(false);
+  const fetchingMoreRef = useRef(false);
 
 
   useEffect(() => {
@@ -125,58 +161,134 @@ const tableControllerRef = useRef(null);
   };
   }, []);
 
-  //   FETCHING TABLE CONTENT
-  const fetchData = async () => {
+  const extractNextCursor = (res, rows) =>
+    res?.data?.datalength?.nextCursor ??
+    res?.data?.nextCursor ??
+    res?.data?.data?.nextCursor ??
+    res?.data?.cursor ??
+    res?.data?.data?.cursor ??
+    (rows.length ? rows[rows.length - 1]?.tid ?? null : null) ??
+    null;
+
+  const extractHasMore = (res, rows, nextCursor) => {
+    if (typeof res?.data?.datalength?.hasMore === "boolean") {
+      return res.data.datalength.hasMore;
+    }
+    if (typeof res?.data?.hasMore === "boolean") {
+      return res.data.hasMore;
+    }
+    return rows.length === PAGE_LIMIT && nextCursor !== null && nextCursor !== undefined;
+  };
+
+  const fetchData = async (isLoadMore = false) => {
+    const shouldLoadMore = isLoadMore === true;
     const [start, end] = dateRange;
+    console.log("Fetching data with params:", )
 
     if (!start || !end) {
       showErrorToast("Please select a date range first.");
       return;
     }
 
-    // Validate campaign dropdown
     if (!campId) {
       showErrorToast("Please select a campaign.");
       return;
     }
 
-    if (tableControllerRef.current) {
-    tableControllerRef.current.abort();
-  }
-
-  tableControllerRef.current = new AbortController();
+    if (shouldLoadMore) {
+      if (loadingRef.current || fetchingMoreRef.current || !hasMoreRef.current) return;
+      setIsFetchingMore(true);
+      fetchingMoreRef.current = true;
+      if (!tableControllerRef.current) {
+        tableControllerRef.current = new AbortController();
+      }
+    } else {
+      if (tableControllerRef.current) {
+        tableControllerRef.current.abort();
+      }
+      tableControllerRef.current = new AbortController();
+      setLoading(true);
+      loadingRef.current = true;
+      setTableData([]);
+      setCursor(null);
+      setHasMore(false);
+    }
 
     const startDate = start.toISOString().split("T")[0];
     const endDate = end.toISOString().split("T")[0];
+    const requestedCursor = shouldLoadMore ? cursorRef.current : null;
+    const query = new URLSearchParams({
+      startdate: startDate,
+      enddate: endDate,
+      campId: String(campId),
+      limit: String(PAGE_LIMIT),
+    });
 
-    setLoading(true);
+    if (requestedCursor !== null && requestedCursor !== undefined) {
+      query.append("cursor", String(requestedCursor));
+    }
 
     try {
-      const payload = {
-        startDate: start.toISOString().split("T")[0],
-        endDate: end.toISOString().split("T")[0],
-      };
-
-      //   https://app.clockerly.io/api/v2/campaign/clicksbycamp?startdate=2025-11-01&enddate=2025-11-21&campId=14
+      console.log("[ClickLogs] fetchData", {
+        shouldLoadMore,
+        requestedCursor,
+        hasMore: hasMoreRef.current,
+      });
       const res = await apiFunction(
         "get",
-        `${clicksbycampaign}?startdate=${startDate}&enddate=${endDate}&campId=${campId}`,
+        `${clicksbycampaign}?${query.toString()}`,
         null,
         null,
-        tableControllerRef.current.signal
+        tableControllerRef.current?.signal
       );
-      console.log(res);
-      
+      console.log("API response:", res);
 
-      setTableData(res?.data?.data || []);
+      const rows = extractRowsFromResponse(res);
+      const nextCursor = extractNextCursor(res, rows);
+      const backendHasMore = extractHasMore(res, rows, nextCursor);
+      console.log("[ClickLogs] response", {
+        rows: rows.length,
+        nextCursor,
+        backendHasMore,
+      });
+
+      setTableData((prev) => (shouldLoadMore ? [...prev, ...rows] : rows));
+      setCursor(nextCursor);
+      setHasMore(Boolean(backendHasMore));
+      cursorRef.current = nextCursor;
+      hasMoreRef.current = Boolean(backendHasMore);
     } catch (err) {
-       if (err.name !== "CanceledError") {
-      // console.error("Error fetching data:", err);
-    }
+      if (err.name !== "CanceledError") {
+        if (!shouldLoadMore) {
+          setTableData([]);
+        }
+      }
     } finally {
-      setLoading(false);
+      if (shouldLoadMore) {
+        setIsFetchingMore(false);
+        fetchingMoreRef.current = false;
+      } else {
+        setLoading(false);
+        loadingRef.current = false;
+      }
     }
   };
+
+  useEffect(() => {
+    cursorRef.current = cursor;
+  }, [cursor]);
+
+  useEffect(() => {
+    hasMoreRef.current = hasMore;
+  }, [hasMore]);
+
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  useEffect(() => {
+    fetchingMoreRef.current = isFetchingMore;
+  }, [isFetchingMore]);
 
   useEffect(() => {
   return () => {
@@ -186,6 +298,23 @@ const tableControllerRef = useRef(null);
   };
 }, []);
 
+  const loadMoreData = () => {
+    if (!hasMoreRef.current) {
+      console.log("[ClickLogs] skip loadMore: hasMore false");
+      return;
+    }
+    if (cursorRef.current === null || cursorRef.current === undefined) {
+      console.log("[ClickLogs] skip loadMore: cursor missing");
+      return;
+    }
+    if (loadingRef.current || fetchingMoreRef.current) {
+      console.log("[ClickLogs] skip loadMore: already loading");
+      return;
+    }
+    console.log("[ClickLogs] triggering loadMore", { cursor: cursorRef.current });
+    fetchData(true);
+  };
+
   const handleReset = () => {
     setIsResetting(true);
 
@@ -194,9 +323,32 @@ const tableControllerRef = useRef(null);
       setDateRange([null, null]);
       setCampId(null);
       setTableData([]);
+      setCursor(null);
+      setHasMore(false);
       setIsResetting(false);
     }, 600); // 600ms smooth lagta hai
   };
+
+  const handleTableScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const remaining = container.scrollHeight - container.scrollTop - container.clientHeight;
+    console.log("[ClickLogs] scroll", { remaining, hasMore: hasMoreRef.current, cursor: cursorRef.current });
+    if (remaining <= PRELOAD_OFFSET_PX) {
+      loadMoreData();
+    }
+  };
+
+  useEffect(() => {
+    if (loading || isFetchingMore || !hasMore) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const remaining = container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (remaining <= PRELOAD_OFFSET_PX) {
+      loadMoreData();
+    }
+  }, [tableData, hasMore, loading, isFetchingMore]);
 
   const getOutcomeMeta = (status) =>
     status
@@ -214,6 +366,7 @@ const tableControllerRef = useRef(null);
     if (!Number.isFinite(value)) return 0;
     return Math.max(0, Math.min(100, Math.round(value)));
   };
+  const safeTableData = Array.isArray(tableData) ? tableData : [];
 
   return (
     <>
@@ -242,7 +395,7 @@ const tableControllerRef = useRef(null);
 
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <button
-                onClick={fetchData}
+                onClick={() => fetchData(false)}
                 className="min-w-[120px] h-[42px] flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white"
               >
                 Apply
@@ -262,16 +415,16 @@ const tableControllerRef = useRef(null);
 
               <button
                 onClick={() => {
-                  if (!tableData || tableData.length === 0) {
+                  if (!safeTableData || safeTableData.length === 0) {
                     showErrorToast("No data available to export.");
                     return;
                   }
 
                   const csvRows = [];
-                  const headers = Object.keys(tableData[0]);
+                  const headers = Object.keys(safeTableData[0]);
                   csvRows.push(headers.join(","));
 
-                  tableData.forEach((row) => {
+                  safeTableData.forEach((row) => {
                     csvRows.push(
                       headers
                         .map(
@@ -292,9 +445,9 @@ const tableControllerRef = useRef(null);
                   a.click();
                   window.URL.revokeObjectURL(url);
                 }}
-                disabled={!tableData || tableData.length === 0}
+                disabled={!safeTableData || safeTableData.length === 0}
                 className={`min-w-[120px] h-[42px] flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] border transition-all duration-200 ${
-                  tableData && tableData.length > 0
+                  safeTableData && safeTableData.length > 0
                     ? "bg-white text-[#3c79ff] border-[#d5d9e4] hover:bg-[#eef4ff] cursor-pointer"
                     : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
                 }`}
@@ -311,7 +464,12 @@ const tableControllerRef = useRef(null);
                 {/* Sticky Table Header */}
 
                 {/* Scrollable Table Body Container */}
-                <div className="traffic-log-scrollbar overflow-y-auto" style={{ maxHeight: "400px" }}>
+                <div
+                  ref={scrollContainerRef}
+                  onScroll={handleTableScroll}
+                  className="traffic-log-scrollbar overflow-y-auto"
+                  style={{ maxHeight: "400px" }}
+                >
                   <table className="min-w-full table-fixed">
                     <thead className="bg-[#f8fafc] sticky top-0 z-10 border-b border-[#d5d9e4]">
                       <tr>
@@ -364,10 +522,12 @@ const tableControllerRef = useRef(null);
                             colSpan="13"
                             className="py-8 text-center text-[#64748b]"
                           >
-                            Loading...
+                            <div className="inline-flex items-center justify-center">
+                              <CircularProgress size={24} thickness={4.6} sx={{ color: "#3c79ff" }} />
+                            </div>
                           </td>
                         </tr>
-                      ) : tableData.length === 0 ? (
+                      ) : safeTableData.length === 0 ? (
                         <tr>
                           <td
                             colSpan="13"
@@ -377,7 +537,8 @@ const tableControllerRef = useRef(null);
                           </td>
                         </tr>
                       ) : (
-                        tableData.map((item, index) => (
+                        <>
+                          {safeTableData.map((item, index) => (
                           <tr key={item.tid} className="border-b border-[#e8edf5] hover:bg-[#f8fbff] transition-colors">
                             {/* S.No */}
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-[#141824] font-semibold w-16">
@@ -582,7 +743,37 @@ const tableControllerRef = useRef(null);
                               )}
                             </td>
                           </tr>
-                        ))
+                        ))}
+                          {isFetchingMore && (
+                            <tr>
+                              <td colSpan="13" className="py-5 text-center">
+                                <div className="ml-4 md:ml-8 flex w-[360px] max-w-[96%] items-center gap-3 rounded-xl border border-[#d7e4ff] bg-gradient-to-r from-[#f8fbff] via-[#eef4ff] to-[#f8fbff] px-4 py-3 shadow-[0_6px_18px_rgba(60,121,255,0.12)]">
+                                  <CircularProgress size={20} thickness={4.8} sx={{ color: "#3c79ff" }} />
+                                  <div className="flex-1 text-left pl-0.5">
+                                    <p className="text-[12px] font-semibold text-[#2457d6]">
+                                      Loading more records
+                                    </p>
+                                    <div className="mt-1.5 flex items-center gap-1.5">
+                                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#3c79ff] [animation-delay:-0.3s]" />
+                                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#5e8dff] [animation-delay:-0.15s]" />
+                                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#86abff]" />
+                                    </div>
+                                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[#dbe8ff]">
+                                      <span className="block h-full w-1/2 animate-pulse rounded-full bg-[#3c79ff]" />
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                          {!hasMore && safeTableData.length > 0 && (
+                            <tr>
+                              <td colSpan="13" className="py-4 text-center text-[12px] text-[#8a94a6]">
+                                All records loaded
+                              </td>
+                            </tr>
+                          )}
+                        </>
                       )}
                     </tbody>
                   </table>
@@ -591,7 +782,6 @@ const tableControllerRef = useRef(null);
 
               {/* Pagination (Unchanged) */}
               <div className="flex items-center justify-center pt-4 pb-4 bg-white border-t border-[#e6eaf2] rounded-b-md">
-                
               </div>
             </div>
           </div>

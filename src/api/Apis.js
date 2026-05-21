@@ -24,7 +24,7 @@ export const getAllCampaign = `${base_url}/api/v2/campaign/all2`;
 
 export const getAllCampNames = `${base_url}/api/v2/campaign/campnames`;
 
-export const clicksbycampaign = `${base_url}/api/v2/campaign/clicksbycamp`;
+export const clicksbycampaign = `${base_url}/api/v2/campaign/clicksbycamp2`;
 
 export const signOutApi = `${base_url}/auth/signout`;  
 
