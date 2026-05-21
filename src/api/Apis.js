@@ -26,6 +26,8 @@ export const getAllCampNames = `${base_url}/api/v2/campaign/campnames`;
 
 export const clicksbycampaign = `${base_url}/api/v2/campaign/clicksbycamp2`;
 
+export const clicksbycampaign1 = `${base_url}/api/v2/campaign/clicksbycamp`;
+
 export const signOutApi = `${base_url}/auth/signout`;  
 
 export const ipClicks = `${base_url}/api/v2/analytics/ipclicks`;

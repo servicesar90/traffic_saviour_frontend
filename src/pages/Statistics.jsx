@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFunction } from "../api/ApiFunction";
-import { clicksbycampaign, getAllCampNames } from "../api/Apis";
+import { clicksbycampaign1, getAllCampNames } from "../api/Apis";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { showErrorToast } from "../components/toast/toast";
@@ -351,7 +351,7 @@ const Statistics = () => {
     try {
       const res = await apiFunction(
         "get",
-        `${clicksbycampaign}?startdate=${startDate}&enddate=${endDate}&campId=${campId}`,
+        `${clicksbycampaign1}?startdate=${startDate}&enddate=${endDate}&campId=${campId}`,
         null,
         null,
         tableControllerRef.current.signal,
