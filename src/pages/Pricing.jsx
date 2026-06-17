@@ -9,7 +9,6 @@ import Checkout from "../components/Stripe/Checkout";
 import { stripePromise } from "../utils/stripe";
 import Subscribe from "./Stripe/StripeSubscription";
 
-
 /* ===================== PAYMENT DETAILS ===================== */
 
 const PAYMENT_DETAILS = {
@@ -58,49 +57,53 @@ export default function Pricing() {
     fetchPlans();
   }, []);
 
+  // ====================== STRIPE PAYMENT =====================
+  /* ===================== PAYMENT HANDLERS ===================== */
+  const handleSubscribe = async (priceId) => {
+    if (!priceId) return alert("Price ID is required for subscription");
+    try {
+      const response = await fetch(
+        "https://api.trafficsaviour.com/api/v2/payment/stripe/checkout-subscription",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ planId: selectedPlan?.id, priceId: priceId }),
+        },
+      );
+      const data = await response.json();
+      console.log("Subscription Response:", data);
+      window.location.href = data.url; // Redirect to Stripe Checkout
+    } catch (error) {
+      console.log("Error", error);
+    }
+  };
 
   // ====================== STRIPE PAYMENT =====================
-   /* ===================== PAYMENT HANDLERS ===================== */
-const handleSubscribe = async (priceId) => {
-  if (!priceId) return alert("Price ID is required for subscription");
-  try {
-    const response = await fetch("https://api.trafficsaviour.com/api/v2/payment/stripe/checkout-subscription", {
-      method: "POST",
-      headers: { "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({ planId: selectedPlan?.id, priceId: priceId }),
-    });
-    const data = await response.json();
-    console.log("Subscription Response:", data); 
-    window.location.href = data.url; // Redirect to Stripe Checkout   
-  } catch (error) {
-    console.log("Error",error);  
-    
-  }
-}
-
-  // ====================== STRIPE PAYMENT =====================
-   /* ===================== PAYMENT HANDLERS ===================== */
-const dodoPaymentCheckout = async (priceId) => {
-  if (!priceId) return alert("Price ID is required for subscription");
-  try {
-    const response = await fetch("https://api.trafficsaviour.com/api/v2/dodo/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({ planId: selectedPlan?.id, priceId: priceId }),
-    });
-    const data = await response.json();
-    console.log("Subscription Response:", data); 
-    window.location.href = data.checkout_url; // Redirect to Stripe Checkout   
-  } catch (error) {
-    console.log("Error",error);  
-    
-  }
-}
-
+  /* ===================== PAYMENT HANDLERS ===================== */
+  const dodoPaymentCheckout = async (priceId) => {
+    if (!priceId) return alert("Price ID is required for subscription");
+    try {
+      const response = await fetch(
+        "https://api.trafficsaviour.com/api/v2/dodo/checkout",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ planId: selectedPlan?.id, priceId: priceId }),
+        },
+      );
+      const data = await response.json();
+      console.log("Subscription Response:", data);
+      window.location.href = data.checkout_url; // Redirect to Stripe Checkout
+    } catch (error) {
+      console.log("Error", error);
+    }
+  };
 
   /* ===================== HELPERS ===================== */
 
@@ -156,29 +159,38 @@ const dodoPaymentCheckout = async (priceId) => {
   });
 
   const isCurrentPlan = (plan) => {
-    const flag = plan?.isCurrentPlan ?? plan?.isCurrent ?? plan?.current ?? plan?.isActivePlan ?? false;
+    const flag =
+      plan?.isCurrentPlan ??
+      plan?.isCurrent ??
+      plan?.current ??
+      plan?.isActivePlan ??
+      false;
     const status = String(plan?.status || "").toLowerCase();
     return Boolean(flag) || status === "active" || status === "current";
   };
 
   const totalAmount = selectedPlan ? selectedPlan.price : 0;
-  const modalProgress = modalStep === 4 ? 100 : modalStep === 3 ? 75 : modalStep === 2 ? 50 : 25;
+  const modalProgress =
+    modalStep === 4 ? 100 : modalStep === 3 ? 75 : modalStep === 2 ? 50 : 25;
   const modalStepLabel =
     modalStep === 1
       ? "Review Order"
       : modalStep === 2
-      ? paymentMethod === "USDT"
-        ? "Choose Network"
-        : paymentMethod === "card"
-        ? "Card Checkout"
-        : "Dodo Checkout"
-      : modalStep === 3
-      ? "Confirm Transfer"
-      : "Payment Submitted";
+        ? paymentMethod === "USDT"
+          ? "Choose Network"
+          : paymentMethod === "card"
+            ? "Card Checkout"
+            : "Dodo Checkout"
+        : modalStep === 3
+          ? "Confirm Transfer"
+          : "Payment Submitted";
 
   const makeCryptoPayment = async (payload) => {
     return await apiFunction("post", cryptoPayment, null, payload);
   };
+
+  // const discountedPrice = +(plan.price * 0.7).toFixed(2);
+  // const savings = +(plan.price - discountedPrice).toFixed(2);
 
   /* ===================== LOADER ===================== */
 
@@ -192,7 +204,10 @@ const dodoPaymentCheckout = async (priceId) => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-xl border border-[#d5d9e4] bg-white p-8">
+              <div
+                key={i}
+                className="rounded-xl border border-[#d5d9e4] bg-white p-8"
+              >
                 <div className="h-6 w-36 rounded bg-slate-200 animate-pulse" />
                 <div className="h-10 w-28 rounded bg-slate-200 animate-pulse mt-4" />
                 <div className="h-4 w-48 rounded bg-slate-200 animate-pulse mt-3" />
@@ -209,7 +224,6 @@ const dodoPaymentCheckout = async (priceId) => {
       </div>
     );
   }
-  
 
   /* ===================== UI ===================== */
 
@@ -274,9 +288,12 @@ const dodoPaymentCheckout = async (priceId) => {
         {/* PLANS */}
         {filteredPlans.length === 0 ? (
           <div className="rounded-xl border border-[#d5d9e4] bg-white p-8 text-center">
-            <h3 className="text-[18px] font-semibold text-[#1e293b]">No Plans Available</h3>
+            <h3 className="text-[18px] font-semibold text-[#1e293b]">
+              No Plans Available
+            </h3>
             <p className="mt-2 text-[14px] text-[#64748b]">
-              No plans are currently available for <span className="font-semibold">{billing}</span> billing.
+              No plans are currently available for{" "}
+              <span className="font-semibold">{billing}</span> billing.
             </p>
             <p className="mt-1 text-[13px] text-[#64748b]">
               Try switching to Monthly, quarterly, or Yearly.
@@ -285,102 +302,116 @@ const dodoPaymentCheckout = async (priceId) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {filteredPlans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`relative bg-white border rounded-xl p-8 shadow-sm ${
-                plan.name.includes("Pro")
-                  ? "border-[#3c79ff] ring-1 ring-[#3c79ff]"
-                  : "border-[#d5d9e4]"
-              }`}
-            >
-              {isCurrentPlan(plan) && (
-                <span className="absolute -top-3 right-4 bg-[#0ea5a6] !text-white text-[11px] px-3 py-1 rounded-full font-semibold">
-                  Current Plan
-                </span>
-              )}
-              {plan.name.includes("Pro") && (
-                <span
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#3c79ff] to-[#2f69e8] !text-white text-xs px-4 py-1 rounded-full"
+              <div
+                key={plan.id}
+                className={`relative bg-white border rounded-xl p-8 shadow-sm ${
+                  plan.name.includes("Pro")
+                    ? "border-[#3c79ff] ring-1 ring-[#3c79ff]"
+                    : "border-[#d5d9e4]"
+                }`}
+              >
+                {isCurrentPlan(plan) && (
+                  <span className="absolute -top-3 right-4 bg-[#0ea5a6] !text-white text-[11px] px-3 py-1 rounded-full font-semibold">
+                    Current Plan
+                  </span>
+                )}
+                {plan.name.includes("Edge") && (
+                  <span
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#3c79ff] to-[#2f69e8] !text-white text-xs px-4 py-1 rounded-full"
+                    style={{ color: "#ffffff" }}
+                  >
+                    Most Popular
+                  </span>
+                )}
+
+                <h3 className="text-xl font-bold text-[#0f172a]">
+                  {plan.name}
+                </h3>
+                <p className="text-xs text-red-500 font-medium mt-1 bg-gradient-to-r from-[#6b0404] to-[#d33636] !text-white px-2 py-1 rounded-full inline-block animate-pulse">
+                    🔥 Limited Time Offer – 30% OFF
+                </p>
+                <p className="mt-1 text-[12px] text-[#64748b]">
+                  {plan.name.includes("Core")
+                    ? "Best for launching your first campaigns"
+                    : plan.name.includes("Edge")
+                      ? "Best for performance-focused growth teams"
+                      : "Best for scaling operations at volume"}
+                </p>
+
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-[#0f172a] ">
+                    ${(plan.price * 0.7).toFixed(2)}
+                  </span>
+                  <span className="text-sm text-[#64748b] line-through ml-2">
+                    ${plan.price.toFixed(2)}
+                  </span>
+                  {/* <span className="text-[#64748b] ml-2">/ {billing}</span> */}
+                </div>
+                <p className="text-[12px] text-[#64748b] mt-1">
+                  ~ $
+                  {billing === "Yearly"
+                    ? (plan.price * 0.7 / 12).toFixed(2)
+                    : billing === "quarterly"
+                      ? (plan.price * 0.7 / 3).toFixed(2)
+                      : (plan.price * 0.7).toFixed(2)}{" "}
+                  / month effective
+                </p>
+
+                <p className="mt-3 text-[#64748b] text-sm">
+                  {plan.maxCampaigns === -1
+                    ? "Unlimited Campaigns"
+                    : `${plan.maxCampaigns} ${
+                        plan.maxCampaigns === 1 ? "Campaign" : "Campaigns"
+                      }`}{" "}
+                  •{" "}
+                  {plan.clicksPerCampaign === -1
+                    ? "Unlimited Clicks"
+                    : `${plan.clicksPerCampaign} Clicks/day`}
+                </p>
+
+                <div className="mt-6 text-sm text-[#334155]">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wide text-[#64748b] mb-2 text-left">
+                    Included Features
+                  </p>
+                  <ul className="space-y-1.5">
+                    {parseFeatures(plan.features).map((f, idx) => (
+                      <li key={idx} className="flex gap-2 items-start">
+                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-[#ecfdf3] text-[#16a34a] text-[11px] font-bold mt-[1px]">
+                          ✓
+                        </span>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedPlan(plan);
+                    setModalStep(1);
+                  }}
+                  disabled={isCurrentPlan(plan)}
+                  className={`mt-8 w-full py-3 rounded-lg !text-white font-semibold cursor-pointer ${
+                    isCurrentPlan(plan)
+                      ? "bg-[#94a3b8] cursor-not-allowed"
+                      : plan.name.includes("Pro")
+                        ? "bg-[#3c79ff] hover:bg-[#2f69e8]"
+                        : "bg-[#334155] hover:bg-[#1e293b]"
+                  }`}
                   style={{ color: "#ffffff" }}
                 >
-                  Most Popular
-                </span>
-              )}
-
-              <h3 className="text-xl font-bold text-[#0f172a]">{plan.name}</h3>
-              <p className="mt-1 text-[12px] text-[#64748b]">
-                {plan.name.includes("Starter")
-                  ? "Best for launching your first campaigns"
-                  : plan.name.includes("Pro")
-                    ? "Best for performance-focused growth teams"
-                    : "Best for scaling operations at volume"}
-              </p>
-
-              <div className="mt-4">
-                <span className="text-4xl font-bold text-[#0f172a]">${plan.price}</span>
-                <span className="text-[#64748b] ml-2">/ {billing}</span>
+                  {isCurrentPlan(plan)
+                    ? "Current Plan"
+                    : plan.name.includes("Core")
+                      ? "Start Core"
+                      : plan.name.includes("Edge")
+                        ? "Go Edege"
+                        : "Scale with Apex"}
+                </button>
               </div>
-              <p className="text-[12px] text-[#64748b] mt-1">
-                ~ $
-                {billing === "Yearly"
-                  ? (plan.price / 12).toFixed(2)
-                  : billing === "quarterly"
-                    ? (plan.price / 3).toFixed(2)
-                    : plan.price.toFixed(2)}{" "}
-                / month effective
-              </p>
-
-              <p className="mt-3 text-[#64748b] text-sm">
-                {plan.maxCampaigns === -1 ? "Unlimited Campaigns" : `${plan.maxCampaigns} Campaigns`} •{" "}
-                {plan.clicksPerCampaign === -1
-                  ? "Unlimited Clicks"
-                  : `${plan.clicksPerCampaign} Clicks/day`}
-              </p>
-
-              <div className="mt-6 text-sm text-[#334155]">
-                <p className="text-[11px] font-extrabold uppercase tracking-wide text-[#64748b] mb-2 text-left">
-                  Included Features
-                </p>
-                <ul className="space-y-1.5">
-                  {parseFeatures(plan.features).map((f, idx) => (
-                    <li key={idx} className="flex gap-2 items-start">
-                      <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-[#ecfdf3] text-[#16a34a] text-[11px] font-bold mt-[1px]">
-                        ✓
-                      </span>
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <button
-                onClick={() => {
-                  setSelectedPlan(plan);
-                  setModalStep(1);
-                }}
-                disabled={isCurrentPlan(plan)}
-                className={`mt-8 w-full py-3 rounded-lg !text-white font-semibold cursor-pointer ${
-                  isCurrentPlan(plan)
-                    ? "bg-[#94a3b8] cursor-not-allowed"
-                    : plan.name.includes("Pro")
-                    ? "bg-[#3c79ff] hover:bg-[#2f69e8]"
-                    : "bg-[#334155] hover:bg-[#1e293b]"
-                }`}
-                style={{ color: "#ffffff" }}
-              >
-                {isCurrentPlan(plan)
-                  ? "Current Plan"
-                  : plan.name.includes("Core")
-                  ? "Start Core"
-                  : plan.name.includes("Edge")
-                    ? "Go Edege"
-                    : "Scale with Apex"}
-              </button>
-            </div>
             ))}
           </div>
         )}
-
       </div>
 
       {/* ===================== MODAL ===================== */}
@@ -393,16 +424,24 @@ const dodoPaymentCheckout = async (priceId) => {
                 <span>Step {Math.min(modalStep, 4)} of 4</span>
               </div>
               <div className="h-2 w-full bg-[#e2e8f0] rounded-full overflow-hidden">
-                <div className="h-full bg-[#3c79ff] transition-all duration-300" style={{ width: `${modalProgress}%` }} />
+                <div
+                  className="h-full bg-[#3c79ff] transition-all duration-300"
+                  style={{ width: `${modalProgress}%` }}
+                />
               </div>
             </div>
 
             {selectedPlan && modalStep < 4 && (
               <div className="mb-4 rounded-lg border border-[#d5d9e4] bg-[#f8fbff] px-3 py-2.5 text-left">
                 <div className="text-[12px] text-[#64748b]">
-                  <span className="font-semibold text-[#334155]">{selectedPlan.name}</span> • {billing}
+                  <span className="font-semibold text-[#334155]">
+                    {selectedPlan.name}
+                  </span>{" "}
+                  • {billing}
                 </div>
-                <div className="text-[13px] font-bold text-[#1e293b] mt-0.5">${totalAmount}</div>
+                <div className="text-[13px] font-bold text-[#1e293b] mt-0.5">
+                  ${totalAmount}
+                </div>
               </div>
             )}
             <button
@@ -416,16 +455,26 @@ const dodoPaymentCheckout = async (priceId) => {
             {/* STEP 1 */}
             {modalStep === 1 && (
               <>
-                <h2 className="text-xl font-bold text-[#141824]">Confirm Purchase</h2>
+                <h2 className="text-xl font-bold text-[#141824]">
+                  Confirm Purchase
+                </h2>
                 <p className="text-[#475569] mt-2 text-sm">
                   Activate <b>{selectedPlan.name}</b> for <b>${totalAmount}</b>?
                 </p>
 
                 <div className="mt-6 space-y-2.5">
                   {[
-                    { key: "USDT", title: "USDT", hint: "Crypto transfer with TX hash verification" },
+                    {
+                      key: "USDT",
+                      title: "USDT",
+                      hint: "Crypto transfer with TX hash verification",
+                    },
                     // { key: "card", title: "Card", hint: "Pay quickly using card checkout" },
-                    { key: "dodo", title: "Dodo", hint: "Continue via Dodo payment gateway" },
+                    {
+                      key: "dodo",
+                      title: "Dodo",
+                      hint: "Continue via Dodo payment gateway",
+                    },
                   ].map((m) => (
                     <button
                       key={m.key}
@@ -438,7 +487,9 @@ const dodoPaymentCheckout = async (priceId) => {
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <p className="text-[13px] font-semibold text-[#1e293b]">{m.title}</p>
+                        <p className="text-[13px] font-semibold text-[#1e293b]">
+                          {m.title}
+                        </p>
                         <span
                           className={`h-4 w-4 rounded-full border ${
                             paymentMethod === m.key
@@ -447,7 +498,9 @@ const dodoPaymentCheckout = async (priceId) => {
                           }`}
                         />
                       </div>
-                      <p className="text-[11px] text-[#64748b] mt-0.5">{m.hint}</p>
+                      <p className="text-[11px] text-[#64748b] mt-0.5">
+                        {m.hint}
+                      </p>
                     </button>
                   ))}
                 </div>
@@ -465,15 +518,16 @@ const dodoPaymentCheckout = async (priceId) => {
                       setModalStep(2);
                       console.log(paymentMethod);
 
-                  
-
-                      if (paymentMethod === "card" || paymentMethod === "dodo") {
+                      if (
+                        paymentMethod === "card" ||
+                        paymentMethod === "dodo"
+                      ) {
                         // handleSubscribe(selectedPlan.stripePriceId);
                         const { start_date, end_date } =
                           calculateStartEndDates(billing);
                         setPayload({
                           plan_id: selectedPlan.id,
-                          price_id: selectedPlan.stripePriceId, 
+                          price_id: selectedPlan.stripePriceId,
                           plan_name: selectedPlan.name,
                           billing_cycle: billing,
 
@@ -499,7 +553,9 @@ const dodoPaymentCheckout = async (priceId) => {
                       }
                     }}
                     className={`px-4 py-2 rounded-md cursor-pointer !text-white ${
-                      !paymentMethod ? "bg-[#94a3b8] cursor-not-allowed" : "bg-[#3c79ff] hover:bg-[#356ee6]"
+                      !paymentMethod
+                        ? "bg-[#94a3b8] cursor-not-allowed"
+                        : "bg-[#3c79ff] hover:bg-[#356ee6]"
                     }`}
                     style={{ color: "#ffffff" }}
                   >
@@ -554,12 +610,17 @@ const dodoPaymentCheckout = async (priceId) => {
             {/* STEP 2 - USDT */}
             {modalStep === 2 && paymentMethod === "USDT" && (
               <>
-                <h2 className="text-xl font-bold text-[#141824]">Select Network</h2>
+                <h2 className="text-xl font-bold text-[#141824]">
+                  Select Network
+                </h2>
                 <p className="text-[12px] text-[#64748b] mt-1">
                   Send exact amount on selected network only.
                 </p>
                 {["ERC20", "TRC20"].map((n) => (
-                  <label key={n} className="flex gap-3 mt-4 cursor-pointer rounded-md border border-[#d5d9e4] bg-[#f8fafc] px-3 py-2.5">
+                  <label
+                    key={n}
+                    className="flex gap-3 mt-4 cursor-pointer rounded-md border border-[#d5d9e4] bg-[#f8fafc] px-3 py-2.5"
+                  >
                     <input
                       type="radio"
                       checked={network === n}
@@ -578,10 +639,13 @@ const dodoPaymentCheckout = async (priceId) => {
                   </button>
                   <button
                     disabled={!network}
-                    onClick={() =>{
-                      setModalStep(3)}}
+                    onClick={() => {
+                      setModalStep(3);
+                    }}
                     className={`px-4 py-2 rounded-md cursor-pointer !text-white ${
-                      !network ? "bg-[#94a3b8] cursor-not-allowed" : "bg-[#3c79ff] hover:bg-[#356ee6]"
+                      !network
+                        ? "bg-[#94a3b8] cursor-not-allowed"
+                        : "bg-[#3c79ff] hover:bg-[#356ee6]"
                     }`}
                     style={{ color: "#ffffff" }}
                   >
@@ -609,9 +673,7 @@ const dodoPaymentCheckout = async (priceId) => {
                     )
                   } */}
 
-
-                                {/* <h2 className="text-center text-black">Redirecting to stripe payment gateway...</h2> */}
-
+                  {/* <h2 className="text-center text-black">Redirecting to stripe payment gateway...</h2> */}
 
                   {/* <PayPalIntegration cart={payload} /> */}
                   <PayPalSubscription cart={payload} />
@@ -626,14 +688,20 @@ const dodoPaymentCheckout = async (priceId) => {
             )}
 
             {/* dodpayment */}
-             {modalStep === 2 && paymentMethod === "dodo" && (
+            {modalStep === 2 && paymentMethod === "dodo" && (
               <>
                 <div className="text-left">
-                 <h2 className="text-lg font-semibold text-[#141824]">Continue to Dodo Checkout</h2>
-                 <p className="text-[12px] text-[#64748b] mt-1">You will be redirected securely to complete payment.</p>
-                 <button
+                  <h2 className="text-lg font-semibold text-[#141824]">
+                    Continue to Dodo Checkout
+                  </h2>
+                  <p className="text-[12px] text-[#64748b] mt-1">
+                    You will be redirected securely to complete payment.
+                  </p>
+                  <button
                     className="mt-6 cursor-pointer py-2 px-4 mr-2 rounded-md bg-[#3c79ff] hover:bg-[#356ee6] !text-white"
-                    onClick={() => dodoPaymentCheckout(selectedPlan.stripePriceId)}
+                    onClick={() =>
+                      dodoPaymentCheckout(selectedPlan.stripePriceId)
+                    }
                     style={{ color: "#ffffff" }}
                   >
                     Continue to Pay
@@ -652,7 +720,9 @@ const dodoPaymentCheckout = async (priceId) => {
             {/* STEP 3 */}
             {modalStep === 3 && (
               <>
-                <h2 className="text-xl font-bold text-[#141824]">Confirm Transfer</h2>
+                <h2 className="text-xl font-bold text-[#141824]">
+                  Confirm Transfer
+                </h2>
 
                 <p className="mt-2 text-sm text-[#64748b]">
                   You selected <b>USDT</b> on <b>{network}</b> network
@@ -666,7 +736,9 @@ const dodoPaymentCheckout = async (priceId) => {
 
                 {/* Amount */}
                 <div className="mt-4">
-                  <label className="text-sm text-[#64748b]">Amount to Pay</label>
+                  <label className="text-sm text-[#64748b]">
+                    Amount to Pay
+                  </label>
                   <input
                     disabled
                     value={`${totalAmount} USDT`}
@@ -697,7 +769,9 @@ const dodoPaymentCheckout = async (priceId) => {
                     onChange={(e) => setTxHash(e.target.value)}
                     className="w-full mt-1 p-2.5 bg-white border border-[#d5d9e4] rounded text-[#1e293b] focus:outline-none focus:border-[#3c79ff]"
                   />
-                  <p className="text-[11px] text-[#94a3b8] mt-1">Paste full hash exactly as shown in your wallet explorer.</p>
+                  <p className="text-[11px] text-[#94a3b8] mt-1">
+                    Paste full hash exactly as shown in your wallet explorer.
+                  </p>
                 </div>
 
                 <div className="flex justify-between mt-6">
@@ -816,8 +890,3 @@ const dodoPaymentCheckout = async (priceId) => {
     </div>
   );
 }
-
-
-
-
-
