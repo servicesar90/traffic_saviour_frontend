@@ -11,6 +11,7 @@ import { LoginProtector, RoutesProtector } from "./routesProtector";
 import UpdatePassword from "../auth/updatePassword";
 import DashboardGuard from "./DashboardGuard";
 import DevToolsBlocked from "../utils/devtools-blocked";
+import BrandLoader from "../components/ui/BrandLoader";
 
 // ✅ Lazy imports
 const LandingPage = lazy(() => import("../pages/home/landingPage"));
@@ -57,11 +58,7 @@ const Layout = () => (
 );
 
 // ✅ Simple loading spinner (you can replace it with skeleton or spinner component)
-const Loader = () => (
-  <div className="flex items-center justify-center w-screen h-screen bg-gray-50">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-700"></div>
-  </div>
-);
+const Loader = () => <BrandLoader />;
 
 export default function Routess() {
   return (
@@ -204,3 +201,4 @@ export default function Routess() {
     </Router>
   );
 }
+

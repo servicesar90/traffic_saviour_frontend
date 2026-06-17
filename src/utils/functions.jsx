@@ -31,7 +31,7 @@ export const javascriptIntegration = async (camp) => {
 export async function checkIntegration(camp) {
     const url = camp?.url;
   
-    const res = await fetch(`${url}/?TS-BHDNR-84848=1`);
+    const res = await fetch(`${url}?TS-CODE-16161=1`);
     
   
     const text = await res.text();

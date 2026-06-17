@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFunction } from "../api/ApiFunction";
-import { clicksbycampaign, getAllCampNames } from "../api/Apis";
+import { clicksbycampaign1, getAllCampNames } from "../api/Apis";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { showErrorToast } from "../components/toast/toast";
@@ -47,105 +47,6 @@ const TOOLTIP_STYLE = {
   borderRadius: "6px",
   color: "#141824",
 };
-const DEMO_ROWS = [
-  {
-    ip: "87.122.142.147",
-    proxy: "yes",
-    risk: 81,
-    status: 1,
-    country: "Germany",
-    os: "Windows",
-    device: "desktop",
-    referrer: "google.com",
-    isp: "Deutsche Telekom AG",
-    user_agent: "Chrome Desktop",
-  },
-  {
-    ip: "2a02:908:15a7:c20:75de:7207:be7c:c10c",
-    proxy: "no",
-    risk: 24,
-    status: 0,
-    country: "Germany",
-    os: "OS X",
-    device: "desktop",
-    referrer: "youtube.com",
-    isp: "Vodafone GmbH",
-    user_agent: "Safari Mac",
-  },
-  {
-    ip: "145.239.86.111",
-    proxy: "yes",
-    risk: 74,
-    status: 1,
-    country: "France",
-    os: "Linux",
-    device: "robot",
-    referrer: "doubleclick.net",
-    isp: "OVH SAS",
-    user_agent: "Bot Agent",
-  },
-  {
-    ip: "205.147.17.34",
-    proxy: "no",
-    risk: 19,
-    status: 0,
-    country: "United States",
-    os: "Android",
-    device: "phone",
-    referrer: "facebook.com",
-    isp: "AT&T",
-    user_agent: "Chrome Android",
-  },
-  {
-    ip: "91.180.53.248",
-    proxy: "yes",
-    risk: 92,
-    status: 1,
-    country: "Belgium",
-    os: "Windows",
-    device: "desktop",
-    referrer: "googleadservices.com",
-    isp: "Proximus",
-    user_agent: "Edge Windows",
-  },
-  {
-    ip: "87.65.125.33",
-    proxy: "yes",
-    risk: 88,
-    status: 1,
-    country: "Belgium",
-    os: "Windows",
-    device: "desktop",
-    referrer: "google.com",
-    isp: "Telenet",
-    user_agent: "Chrome Desktop",
-  },
-  {
-    ip: "91.180.53.248",
-    proxy: "yes",
-    risk: 90,
-    status: 1,
-    country: "Belgium",
-    os: "Windows",
-    device: "desktop",
-    referrer: "googleadservices.com",
-    isp: "Proximus",
-    user_agent: "Edge Windows",
-  },
-  {
-    ip: "87.122.142.147",
-    proxy: "no",
-    risk: 45,
-    status: 0,
-    country: "Germany",
-    os: "Windows",
-    device: "desktop",
-    referrer: "bing.com",
-    isp: "Deutsche Telekom AG",
-    user_agent: "Chrome Desktop",
-  },
-];
-
 const normalizeText = (value, fallback = "Unknown") => {
   if (value === null || value === undefined) return fallback;
   const text = String(value).trim();
@@ -450,7 +351,7 @@ const Statistics = () => {
     try {
       const res = await apiFunction(
         "get",
-        `${clicksbycampaign}?startdate=${startDate}&enddate=${endDate}&campId=${campId}`,
+        `${clicksbycampaign1}?startdate=${startDate}&enddate=${endDate}&campId=${campId}`,
         null,
         null,
         tableControllerRef.current.signal,
@@ -477,8 +378,8 @@ const Statistics = () => {
     }, 500);
   };
 
-  const isPreviewMode = tableData.length === 0;
-  const sourceRows = isPreviewMode ? DEMO_ROWS : tableData;
+  const hasLiveData = tableData.length > 0;
+  const sourceRows = tableData;
 
   const derived = useMemo(() => {
     const totalClicks = sourceRows.length;
@@ -666,10 +567,10 @@ const Statistics = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {isPreviewMode && (
-              <div className="rounded-xl border border-[#fcd34d] bg-[#fffbeb] px-4 py-3 text-sm text-[#92400e]">
-                Preview mode: sample data is displayed until live API data is
-                available.
+            {!hasLiveData && (
+              <div className="rounded-xl border border-[#c7d2fe] bg-[#eef2ff] px-4 py-3 text-sm text-[#3730a3]">
+                No data available for this filter. Select campaign/date and click
+                Apply to load live analytics.
               </div>
             )}
 

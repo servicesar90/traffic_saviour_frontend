@@ -87,14 +87,7 @@ const Dashboard = () => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  const countryTraffic = [
-    { country: "India", value: 1240, lat: 20.5937, lng: 78.9629 },
-    { country: "United States", value: 980, lat: 37.0902, lng: -95.7129 },
-    { country: "United Kingdom", value: 640, lat: 55.3781, lng: -3.4360 },
-    { country: "Germany", value: 520, lat: 51.1657, lng: 10.4515 },
-    { country: "Brazil", value: 420, lat: -14.2350, lng: -51.9253 },
-    { country: "Australia", value: 360, lat: -25.2744, lng: 133.7751 },
-  ];
+  const countryTraffic = [];
 
   const maxTrafficValue = Math.max(...countryTraffic.map((c) => c.value));
   const COUNTRIES_PER_PAGE = 5;
@@ -700,15 +693,8 @@ const fetchCampaigns = useCallback(async (page = 1) => {
     );
   };
 
-  const demo30Days = Array.from({ length: 30 }, (_, i) => {
-    const day = String(i + 1).padStart(2, "0");
-    const safe = 80 + Math.round(Math.sin((i + 1) / 3) * 60 + i * 4);
-    const money = 40 + Math.round(Math.cos((i + 1) / 4) * 40 + i * 3);
-    return { date: `${day} May`, Safe: safe, Money: money };
-  });
-
-  const baseSeriesFull = chartData?.length ? chartData : demo30Days;
-  const baseSeries = baseSeriesFull.slice(-chartRangeDays);
+  const hasTrafficData = chartData.length > 0;
+  const baseSeries = chartData.slice(-chartRangeDays);
   const rangeTotalClicks = baseSeries.reduce((sum, point) => {
     const safe = Number(point.Safe || 0);
     const money = Number(point.Money || 0);
@@ -1301,6 +1287,15 @@ const fetchCampaigns = useCallback(async (page = 1) => {
           <div className="bg-[#F5F7FA]" style={{ width: "100%", height: 280 }}>
             {loading ? (
               <p className="text-center text-slate-400 mt-6">Loading...</p>
+            ) : !hasTrafficData ? (
+              <div className="h-full rounded-2xl border border-dashed border-[#cbd5e1] bg-white/80 flex items-center justify-center text-center px-6">
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">No chart data yet</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Data will appear here once clicks are available from API.
+                  </p>
+                </div>
+              </div>
             ) : (
               <ResponsiveContainer>
                   <LineChart
@@ -1663,26 +1658,35 @@ const fetchCampaigns = useCallback(async (page = 1) => {
                   Traffic by Country
                 </h3>
                 <p className="text-[#525b75] leading-[1.2] text-sm text-left">
-                  Dummy data preview for geography-based traffic.
+                  Country-wise traffic distribution from live tracking data.
                 </p>
               </div>
             </div>
 
             <div className="space-y-4">
-              {countrySlice.map((row) => (
-                <div key={row.country} className="flex items-center gap-4">
-                  <div className="w-28 text-xs text-slate-700 text-xs">{row.country}</div>
-                  <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-[#3874FF]"
-                      style={{ width: `${Math.round((row.value / maxTrafficValue) * 100)}%` }}
-                    />
-                  </div>
-                  <div className="w-16 text-right text-xs text-slate-500">
-                    {row.value.toLocaleString("en-US")}
-                  </div>
+              {countryTraffic.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-white/80 p-6 text-center">
+                  <p className="text-sm font-semibold text-slate-700">No country data yet</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Country-level clicks will show once geo data is received.
+                  </p>
                 </div>
-              ))}
+              ) : (
+                countrySlice.map((row) => (
+                  <div key={row.country} className="flex items-center gap-4">
+                    <div className="w-28 text-xs text-slate-700 text-xs">{row.country}</div>
+                    <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-[#3874FF]"
+                        style={{ width: `${Math.round((row.value / maxTrafficValue) * 100)}%` }}
+                      />
+                    </div>
+                    <div className="w-16 text-right text-xs text-slate-500">
+                      {row.value.toLocaleString("en-US")}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             <div className="mt-6 flex items-center justify-between text-sm text-slate-500">
@@ -1722,40 +1726,51 @@ const fetchCampaigns = useCallback(async (page = 1) => {
 
           {/* Right map */}
           <div className="relative border-l border-slate-200/70 border-y-0 bg-[#F7F9FC] p-0 overflow-hidden h-[380px]">
-            <MapContainer
-              center={[20, 10]}
-              zoom={2}
-              zoomControl={false}
-              style={{ height: "100%", width: "100%" }}
-            >
-              <ZoomControl position="topleft" />
-              <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                attribution=""
-              />
-              {countryTraffic.map((row) => {
-                const radius = Math.max(
-                  6,
-                  Math.round((row.value / maxTrafficValue) * 16)
-                );
-                return (
-                  <CircleMarker
-                    key={row.country}
-                    center={[row.lat, row.lng]}
-                    radius={radius}
-                    pathOptions={{
-                      color: "#3874FF",
-                      fillColor: "#3874FF",
-                      fillOpacity: 0.35,
-                    }}
-                  >
-                    <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
-                      {row.country}: {row.value.toLocaleString("en-US")}
-                    </LeafletTooltip>
-                  </CircleMarker>
-                );
-              })}
-            </MapContainer>
+            {countryTraffic.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-center px-6">
+                <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-white/90 px-6 py-5">
+                  <p className="text-sm font-semibold text-slate-700">No geo map data</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Map pins will appear when country coordinates are available.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <MapContainer
+                center={[20, 10]}
+                zoom={2}
+                zoomControl={false}
+                style={{ height: "100%", width: "100%" }}
+              >
+                <ZoomControl position="topleft" />
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  attribution=""
+                />
+                {countryTraffic.map((row) => {
+                  const radius = Math.max(
+                    6,
+                    Math.round((row.value / maxTrafficValue) * 16)
+                  );
+                  return (
+                    <CircleMarker
+                      key={row.country}
+                      center={[row.lat, row.lng]}
+                      radius={radius}
+                      pathOptions={{
+                        color: "#3874FF",
+                        fillColor: "#3874FF",
+                        fillOpacity: 0.35,
+                      }}
+                    >
+                      <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                        {row.country}: {row.value.toLocaleString("en-US")}
+                      </LeafletTooltip>
+                    </CircleMarker>
+                  );
+                })}
+              </MapContainer>
+            )}
           </div>
         </div>
         <hr

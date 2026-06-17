@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   ChevronDown,
@@ -34,6 +35,8 @@ const SidebarContent = ({
 }) => {
   const location = useLocation();
   const [manageIpOpen, setManageIpOpen] = useState(false);
+  const [hoverTip, setHoverTip] = useState(null);
+  const hoverHideTimerRef = useRef(null);
   const showFull = !isCollapsed;
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -107,15 +110,15 @@ const SidebarContent = ({
       label: "IP Intelligence",
       icon: <LocateFixed size={18} />,
       route: "/Dashboard/tools/ip-intelligence",
-      badge: "Coming Soon",
-      badgeTone: "soon",
+      badge: "New",
+      badgeTone: "new",
     },
     {
       label: "URL Builder",
       icon: <Link2 size={18} />,
       route: "/Dashboard/tools/url-builder",
-      badge: "Coming Soon",
-      badgeTone: "soon",
+      badge: "New",
+      badgeTone: "new",
     },
     {
       label: "Link Shortener",
@@ -138,6 +141,44 @@ const SidebarContent = ({
     }
     onToggleCollapse?.();
   };
+
+  const showTooltip = (label, event) => {
+    if (showFull || isMobile) return;
+    if (hoverHideTimerRef.current) {
+      clearTimeout(hoverHideTimerRef.current);
+      hoverHideTimerRef.current = null;
+    }
+    const rect = event.currentTarget.getBoundingClientRect();
+    setHoverTip({
+      label,
+      top: rect.top + rect.height / 2,
+      left: rect.right + 10,
+    });
+  };
+
+  const hideTooltip = () => {
+    if (hoverHideTimerRef.current) {
+      clearTimeout(hoverHideTimerRef.current);
+    }
+    hoverHideTimerRef.current = setTimeout(() => {
+      setHoverTip(null);
+    }, 140);
+  };
+
+  const keepTooltip = () => {
+    if (hoverHideTimerRef.current) {
+      clearTimeout(hoverHideTimerRef.current);
+      hoverHideTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverHideTimerRef.current) {
+        clearTimeout(hoverHideTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -174,7 +215,7 @@ const SidebarContent = ({
 
   return (
     <div
-      className={`flex flex-col ${isMobile ? "pt-5 pb-3" : "py-3"} px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed overflow-visible" : "w-64 sidebar-expanded overflow-hidden"
+      className={`flex flex-col ${isMobile ? "pt-5 pb-3" : "py-3"} px-3 bg-white border-r border-slate-200 ${isCollapsed ? "w-16 sidebar-collapsed overflow-visible relative z-[2147483647] isolate" : "w-64 sidebar-expanded overflow-hidden"
         } transition-all duration-500 ease-in-out text-slate-900 box-border min-h-0`}
       style={{ borderTop: 0, height: isMobile ? "100%" : "calc(100vh - 72px - 1px)" }}
     >
@@ -219,7 +260,9 @@ const SidebarContent = ({
       </div>
 
       {/* Navigation */}
-      <nav className={`flex flex-col gap-0.5 text-slate-200 ${showFull ? "overflow-hidden" : "overflow-visible"}`}>
+      <nav
+        className={`flex-1 min-h-0 flex flex-col ${showFull ? "gap-0.5" : "gap-[2px]"} text-slate-200 overflow-y-auto overflow-x-hidden no-scrollbar pr-1`}
+      >
         {navItems.map((item, index) => {
           if (item.type === "heading") {
             return showFull ? (
@@ -251,6 +294,8 @@ const SidebarContent = ({
                     handleNavigate(item.route);
                   }
                 }}
+                onMouseEnter={(e) => showTooltip(item.label, e)}
+                onMouseLeave={hideTooltip}
                 className={`sidebar-item flex items-center ${showFull ? "justify-between" : "justify-center"} rounded-xl cursor-pointer transition-colors ${!showFull ? "sidebar-item-collapsed" : ""} ${isItemActive
                   ? "sidebar-item-active"
                   : "text-slate-600"
@@ -275,11 +320,6 @@ const SidebarContent = ({
                     {item.badge}
                   </span>
                 ) : null}
-                {!showFull && (
-                  <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md group-hover:block z-50 whitespace-nowrap">
-                    {item.label}
-                  </span>
-                )}
                 {(item.collapsible || hasSubItems) && showFull && (
                   <span className="text-slate-300/70 sidebar-text">
                     {item.label === "Manage IP" ? (
@@ -324,20 +364,30 @@ const SidebarContent = ({
         <div className="mt-3">
           <div
             className={`sidebar-item flex items-center gap-3 rounded-xl cursor-pointer transition-colors text-slate-600 ${!showFull ? "sidebar-item-collapsed justify-center" : ""} relative group`}
+            onMouseEnter={(e) => showTooltip("Collapsed View", e)}
+            onMouseLeave={hideTooltip}
             onClick={handleCollapseAction}
           >
             <span className="sidebar-item-icon">
               <ChevronLeft size={18} />
             </span>
             {showFull && <span className="text-sm font-semibold sidebar-text tracking-[0.01em]">Collapsed View</span>}
-            {!showFull && (
-              <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md group-hover:block z-50 whitespace-nowrap">
-                Collapsed View
-              </span>
-            )}
           </div>
         </div>
       </div>
+
+      {hoverTip &&
+        createPortal(
+          <div
+            className="fixed z-[2147483647] -translate-y-1/2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-md whitespace-nowrap"
+            style={{ top: `${hoverTip.top}px`, left: `${hoverTip.left}px` }}
+            onMouseEnter={keepTooltip}
+            onMouseLeave={hideTooltip}
+          >
+            {hoverTip.label}
+          </div>,
+          document.body
+        )}
 
     </div>
   );
@@ -363,7 +413,7 @@ const Sidebar = ({ collapsed, mobileVisible, onCloseMobile, onToggleCollapse }) 
     <>
       {/* Desktop Sidebar */}
       <div
-        className={`hidden md:block ${collapsed ? "overflow-visible" : "overflow-hidden"}`}
+        className={`hidden md:block ${collapsed ? "overflow-visible relative z-[2147483647] isolate" : "overflow-hidden"}`}
       >
         <div
           className={`h-[calc(100vh-72px)] ${collapsed ? "w-16" : "w-64"

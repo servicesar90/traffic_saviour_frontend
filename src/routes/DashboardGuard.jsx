@@ -12,14 +12,32 @@ const PLAN_ALLOWED_ROUTES = new Set([
   "/Dashboard/billing",
 ]);
 
+const toBool = (value) =>
+  value === true || value === "true" || value === 1 || value === "1";
+
 export default function DashboardGuard({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [isClaimingFree, setIsClaimingFree] = useState(false);
+  const [showFreeClaimView, setShowFreeClaimView] = useState(false);
+  const [isCheckingPlan, setIsCheckingPlan] = useState(false);
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const showFreeClaimView = user?.free_claimed === false;
+  const getStoredUser = () => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw || raw === "undefined" || raw === "null") return {};
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  };
+
+  const syncFreeClaimView = () => {
+    const user = getStoredUser();
+    setShowFreeClaimView(!toBool(user?.free_claimed));
+    return user;
+  };
 
   const clearSession = () => {
     localStorage.removeItem("user");
@@ -45,15 +63,15 @@ export default function DashboardGuard({ children }) {
   const setUpdatedPlan = async () => {
     try {
       const response = await apiFunction("get", getUpdatedPlan, null, null);
-      console.log("user paln",response);
-      
       if (response?.status === 200 && response?.data?.data) {
         const subscriptionData = response?.data?.data;
         localStorage.setItem("plan", JSON.stringify(subscriptionData));
+        return true;
       }
     } catch (error) {
       console.error("Failed to fetch updated plan:", error);
     }
+    return false;
   };
 
   const handleUpgrade = () => {
@@ -65,20 +83,19 @@ export default function DashboardGuard({ children }) {
     try {
       setIsClaimingFree(true);
 
+      const currentUser = getStoredUser();
       const body = {
         planId: "c56bad95-f3d3-11f0-a7eb-0ec2a4ae6687",
-        userId: user?.id,
+        userId: currentUser?.id,
       };
 
       const response = await apiFunction("post", freePlanClaimApi, null, body);
-      console.log(response);
-
-      
 
       if (response?.data?.success || response?.status === 200) {
-        setUpdatedPlan();
-        const updatedUser = { ...user, free_claimed: true };
+        await setUpdatedPlan();
+        const updatedUser = { ...currentUser, free_claimed: true };
         localStorage.setItem("user", JSON.stringify(updatedUser));
+        setShowFreeClaimView(false);
         setShowPlanModal(false);
         showSuccessToast("Free plan claimed successfully.");
       }
@@ -90,9 +107,46 @@ export default function DashboardGuard({ children }) {
   };
 
   useEffect(() => {
-    const isAllowedRoute = PLAN_ALLOWED_ROUTES.has(location.pathname);
-    const shouldBlock = !isPlanValid() && !isAllowedRoute;
-    setShowPlanModal(shouldBlock);
+    let isMounted = true;
+    console.log("fdjgjfdjg");
+    
+    const evaluatePlanGuard = async () => {
+      syncFreeClaimView();
+
+      const isAllowedRoute = PLAN_ALLOWED_ROUTES.has(location.pathname);
+      if (isAllowedRoute) {
+        if (isMounted) setShowPlanModal(false);
+        return;
+      }
+
+      if (isPlanValid()) {
+        console.log("fgf",isPlanValid());
+        
+        if (isMounted) setShowPlanModal(false);
+        return;
+      }
+
+      const token = localStorage.getItem("plan");
+      console.log("vjfj", token);
+      if (!token) {
+        if (isMounted) setShowPlanModal(true);
+        return;
+      }
+
+      if (isMounted) setIsCheckingPlan(true);
+      await setUpdatedPlan();
+
+      if (isMounted) {
+        setShowPlanModal(!isPlanValid());
+        setIsCheckingPlan(false);
+      }
+    };
+
+    evaluatePlanGuard();
+
+    return () => {
+      isMounted = false;
+    };
   }, [location.pathname]);
 
   return (
@@ -100,7 +154,7 @@ export default function DashboardGuard({ children }) {
       {children}
 
       <PlanRequiredModal
-        open={showPlanModal}
+        open={showPlanModal && !isCheckingPlan}
         onLogout={handleLogout}
         onUpgrade={handleUpgrade}
         showFreeClaimView={showFreeClaimView}

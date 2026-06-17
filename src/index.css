@@ -95,9 +95,9 @@ html {
 
 .sidebar-item.sidebar-item-collapsed {
   margin: 0 auto;
-  padding: 8px;
-  width: 40px;
-  height: 40px;
+  padding: 6px;
+  width: 36px;
+  height: 36px;
   justify-content: center;
 }
 

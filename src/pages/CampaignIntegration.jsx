@@ -357,7 +357,10 @@ const javascriptIntegration = async (camp, url, setShowIntegrationTable) => {
 
 async function checkIntegration(camp, url, setShowIntegrationTable) {
   const URL = url.trim().replace(/\/+$/, "");
+  console.log("gfjdgjfdi",URL);
+  
   const res = await fetch(`${URL}/?TS-CODE-16161=1`);
+  console.log("Checking integration with URL:", url);
   const text = await res.text();
 
   let status = "failed";
@@ -636,7 +639,10 @@ const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl, setShowIntegrationTa
 
     <TestButton
       enabled={Boolean(pastedUrl.trim())}
-      onClick={() => checkIntegration(camp, pastedUrl, setShowIntegrationTable)}
+      onClick={() => {
+        console.log("Testing integration with URL:", pastedUrl);
+        checkIntegration(camp, pastedUrl, setShowIntegrationTable)
+      }}
     />
   </SectionCard>
 );
