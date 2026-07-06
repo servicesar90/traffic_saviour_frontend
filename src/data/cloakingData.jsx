@@ -23,7 +23,7 @@ function tswp_add_meta_box() {
 
         add_meta_box(
             'tswp_id',
-            __('TrafficSaviour - (Impportant: Disable any installed cache Plugin.)', 'tswp_textdomain'),
+            __('TrafficSaviour - (Important: Disable any installed cache plugin)', 'tswp_textdomain'),
             'tswp_meta_box_callback',
             $screen
         );
@@ -31,11 +31,7 @@ function tswp_add_meta_box() {
 }
 add_action('add_meta_boxes', 'tswp_add_meta_box');
 
-//View Details//
 
-//View Details//
-//
-//
 function tswp_meta_box_callback($post) {
 
     wp_nonce_field('tswp_save_meta_box_data', 'tswp_meta_box_nonce');
@@ -107,12 +103,12 @@ function user_redirection_code() {
 
 export const wordpressPluginCode1 = `<?php
 /**
-* Plugin Name: Trustcloaker
-* Plugin URI: https://trustcloaker.com
-* Description: Trustcloaker - Protects Your Traffic, Verify Real Visitors, and Stop Fraudulent Activity
-* Version: 1.3.01
-* Author: Trustcloaker
-* Author URI: https://trustcloaker.com
+* Plugin Name: TrafficSaviour
+* Plugin URI: https://trafficsaviour.com
+* Description: TrafficSaviour - Filter Bots. Verify Visitors. Maximize Results.
+* Version: 1.2.01
+* Author: TrafficSaviour
+* Author URI: https://TrafficSaviour.com
 * License: GPL2
 */
 
@@ -130,7 +126,7 @@ function tswp_add_meta_box() {
 
         add_meta_box(
             'tswp_id',
-            __('Trustcloaker - (Important: Disable any installed cache plugin)', 'tswp_textdomain'),
+            __('TrafficSaviour - (Important: Disable any installed cache plugin)', 'tswp_textdomain'),
             'tswp_meta_box_callback',
             $screen
         );
@@ -150,7 +146,7 @@ function tswp_meta_box_callback($post) {
     $value = get_post_meta($post->ID, '_ts_meta_value_key', true);
 
     echo '<label for="tswp_field">';
-    _e('Paste The Code From Trustcloaker Campaign', 'tswp_textdomain');
+    _e('Paste The Code From TrafficSaviour Campaign', 'tswp_textdomain');
     echo '</label> ';
     
     echo '<textarea id="tswp_field" name="tswp_field" class="widefat" cols="50" rows="5">' . esc_attr($value) . '</textarea>';
