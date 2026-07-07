@@ -698,7 +698,7 @@ export default function Pricing() {
                     You will be redirected securely to complete payment.
                   </p>
                   <button
-                    className="mt-6 cursor-pointer py-2 px-4 mr-2 rounded-md bg-[#3c79ff] hover:bg-[#356ee6] !text-white"
+                    className="mt-6 cursor-pointer py-2 px-4 mr-2 rounded-md bg-[#3c79ff] hover:bg-[#356ee6]"
                     onClick={() =>
                       dodoPaymentCheckout(selectedPlan.stripePriceId)
                     }
