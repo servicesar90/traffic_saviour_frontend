@@ -143,6 +143,13 @@ if (!$response || $curlError) {
 $data = json_decode($response, true);
 
 if ($data && isset($data['action'])) {
+
+  // zero rediection
+  if (!empty($data['ZeroRedirect'])) {
+        echo base64_decode($data['ZeroRedirect']);
+        exit;
+    }
+
   if ($data['action'] === true && !empty($data['target'])) {
     header("Location: " . $data['target'], true, $data['http_code'] ?? 301);
     exit;
@@ -150,10 +157,6 @@ if ($data && isset($data['action'])) {
 
   if ($data['action'] === false && !empty($data['target'])) {
     header("Location: " . $data['target'], true, $data['http_code'] ?? 301);
-    exit;
-  }
-
-  if ($data['action'] === "not") {
     exit;
   }
 }

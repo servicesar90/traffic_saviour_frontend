@@ -80,7 +80,7 @@ export default function PlanRequiredModal({
             View plans
           </button>
 
-          {showFreeClaimView && (
+          {/* {showFreeClaimView && (
             <button
               onClick={onClaimFree}
               disabled={isClaimingFree}
@@ -88,7 +88,7 @@ export default function PlanRequiredModal({
             >
               {isClaimingFree ? "Claiming..." : "Claim free plan"}
             </button>
-          )}
+          )} */}
         </div>
       </div>
     </div>

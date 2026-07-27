@@ -387,12 +387,6 @@ $visitorData = [
 ];
 
 
-// log visitors data
-echo "<pre>";
-print_r($visitorData);
-echo "</pre>";
-
-
 // Send to API
 $ch = curl_init($cloakerApiUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

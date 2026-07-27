@@ -35,7 +35,7 @@ export default function DashboardGuard({ children }) {
 
   const syncFreeClaimView = () => {
     const user = getStoredUser();
-    setShowFreeClaimView(!toBool(user?.free_claimed));
+    setShowFreeClaimView(false);
     return user;
   };
 
@@ -108,7 +108,6 @@ export default function DashboardGuard({ children }) {
 
   useEffect(() => {
     let isMounted = true;
-    console.log("fdjgjfdjg");
     
     const evaluatePlanGuard = async () => {
       syncFreeClaimView();
@@ -120,7 +119,6 @@ export default function DashboardGuard({ children }) {
       }
 
       if (isPlanValid()) {
-        console.log("fgf",isPlanValid());
         
         if (isMounted) setShowPlanModal(false);
         return;
