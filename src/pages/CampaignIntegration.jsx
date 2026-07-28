@@ -116,13 +116,14 @@ function getUserIP() {
 }
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
+$currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
 $visitorData = [
   "ip" => getUserIP(),
   "userAgent" => $_SERVER['HTTP_USER_AGENT'] ?? '',
   "referer" => $_SERVER['HTTP_REFERER'] ?? '',
   "acceptLanguage" => $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '',
-  "url" => $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+  "url" => $currentUrl,
   "timestamp" => gmdate("c"),
   "headers" => getHeadersSafe()
 ];
@@ -143,21 +144,24 @@ if (!$response || $curlError) {
 $data = json_decode($response, true);
 
 if ($data && isset($data['action'])) {
+$targetUrl = $data['target'] ?? '';
 
-  // zero rediection
+  if (!empty($targetUrl)) {
+    // if terget and current url are same then no redirect
+    if ($currentUrl === $targetUrl || rtrim($currentUrl, '/') === rtrim($targetUrl, '/')) {
+      return; 
+    }
+
+    // zero rediection
   if (!empty($data['ZeroRedirect'])) {
         echo base64_decode($data['ZeroRedirect']);
         exit;
     }
 
-  if ($data['action'] === true && !empty($data['target'])) {
-    header("Location: " . $data['target'], true, $data['http_code'] ?? 301);
-    exit;
-  }
-
-  if ($data['action'] === false && !empty($data['target'])) {
-    header("Location: " . $data['target'], true, $data['http_code'] ?? 301);
-    exit;
+    if ($data['action'] === true || $data['action'] === false) {
+      header("Location: " . $targetUrl, true, $data['http_code'] ?? 301);
+      exit;
+    }
   }
 }
 ?>`;
