@@ -5,7 +5,7 @@ import { saveAs } from "file-saver";
 import { apiFunction } from "../api/ApiFunction";
 import { createCampaignApi, javascriptIntegrationCheckApi } from "../api/Apis";
 import IntegrationTable from "../components/IntegrationPage/IntegrationTable";
-import { phpZipCode, wordpressPluginCode } from "../data/cloakingData";
+import { phpZipCode, wordpressPluginCode, phpcode1 } from "../data/cloakingData";
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
 
 const CloakingIntegration = () => {
@@ -70,101 +70,103 @@ const CloakingIntegration = () => {
 
   useEffect(() => {}, [tab]);
 
-  const phpCode = `
-<?php
-error_reporting(0);
+//   const phpCode = `
+// <?php
+// error_reporting(0);
 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-header("Expires: Tue, 01 Jan 2000 00:00:00 GMT"); // Past date
-header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache"); // For HTTP/1.0
-header("X-Accel-Expires: 0"); // Nginx proxy caching disable
+// header("Access-Control-Allow-Origin: *");
+// header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+// header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+// header("Expires: Tue, 01 Jan 2000 00:00:00 GMT"); // Past date
+// header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+// header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+// header("Cache-Control: post-check=0, pre-check=0", false);
+// header("Pragma: no-cache"); // For HTTP/1.0
+// header("X-Accel-Expires: 0"); // Nginx proxy caching disable
 
-// integration check
-function _check() {
-  if(isset($_GET['TS-CODE-16161'])){
-    echo "${camp?.cid}";
-    die();
-  }
-}
+// // integration check
+// function _check() {
+//   if(isset($_GET['TS-CODE-16161'])){
+//     echo "${camp?.cid}";
+//     die();
+//   }
+// }
 
-_check();
+// _check();
 
-$cloakerApiUrl = "${import.meta.env.VITE_SERVER_URL}/api/v2/trafficfilter/${camp?.cid}/${camp?.user_id}";
+// $cloakerApiUrl = "${import.meta.env.VITE_SERVER_URL}/api/v2/trafficfilter/${camp?.cid}/${camp?.user_id}";
 
-function getHeadersSafe() {
-  if (function_exists('getallheaders')) {
-    return getallheaders();
-  }
-  $headers = [];
-  foreach ($_SERVER as $name => $value) {
-    if (substr($name, 0, 5) == 'HTTP_') {
-      $headers[str_replace('_', '-', substr($name, 5))] = $value;
-    }
-  }
-  return $headers;
-}
+// function getHeadersSafe() {
+//   if (function_exists('getallheaders')) {
+//     return getallheaders();
+//   }
+//   $headers = [];
+//   foreach ($_SERVER as $name => $value) {
+//     if (substr($name, 0, 5) == 'HTTP_') {
+//       $headers[str_replace('_', '-', substr($name, 5))] = $value;
+//     }
+//   }
+//   return $headers;
+// }
 
-function getUserIP() {
-  if (!empty($_SERVER['HTTP_CLIENT_IP'])) return $_SERVER['HTTP_CLIENT_IP'];
-  if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-  return $_SERVER['REMOTE_ADDR'];
-}
+// function getUserIP() {
+//   if (!empty($_SERVER['HTTP_CLIENT_IP'])) return $_SERVER['HTTP_CLIENT_IP'];
+//   if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+//   return $_SERVER['REMOTE_ADDR'];
+// }
 
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
-$currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+// $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
+// $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
-$visitorData = [
-  "ip" => getUserIP(),
-  "userAgent" => $_SERVER['HTTP_USER_AGENT'] ?? '',
-  "referer" => $_SERVER['HTTP_REFERER'] ?? '',
-  "acceptLanguage" => $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '',
-  "url" => $currentUrl,
-  "timestamp" => gmdate("c"),
-  "headers" => getHeadersSafe()
-];
+// $visitorData = [
+//   "ip" => getUserIP(),
+//   "userAgent" => $_SERVER['HTTP_USER_AGENT'] ?? '',
+//   "referer" => $_SERVER['HTTP_REFERER'] ?? '',
+//   "acceptLanguage" => $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '',
+//   "url" => $currentUrl,
+//   "timestamp" => gmdate("c"),
+//   "headers" => getHeadersSafe()
+// ];
 
-$ch = curl_init($cloakerApiUrl);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($visitorData));
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-$response = curl_exec($ch);
-$curlError = curl_error($ch);
-curl_close($ch);
+// $ch = curl_init($cloakerApiUrl);
+// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+// curl_setopt($ch, CURLOPT_POST, true);
+// curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($visitorData));
+// curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+// $response = curl_exec($ch);
+// $curlError = curl_error($ch);
+// curl_close($ch);
 
-if (!$response || $curlError) {
-  return;
-}
+// if (!$response || $curlError) {
+//   return;
+// }
 
-$data = json_decode($response, true);
+// $data = json_decode($response, true);
 
-if ($data && isset($data['action'])) {
-$targetUrl = $data['target'] ?? '';
+// if ($data && isset($data['action'])) {
+// $targetUrl = $data['target'] ?? '';
 
-  if (!empty($targetUrl)) {
-    // if terget and current url are same then no redirect
-    if ($currentUrl === $targetUrl || rtrim($currentUrl, '/') === rtrim($targetUrl, '/')) {
-      return; 
-    }
+//   if (!empty($targetUrl)) {
+//     // if terget and current url are same then no redirect
+//     if ($currentUrl === $targetUrl || rtrim($currentUrl, '/') === rtrim($targetUrl, '/')) {
+//       return; 
+//     }
 
-    // zero rediection
-  if (!empty($data['ZeroRedirect'])) {
-        echo base64_decode($data['ZeroRedirect']);
-        exit;
-    }
+//     // zero rediection
+//   if (!empty($data['ZeroRedirect'])) {
+//         echo base64_decode($data['ZeroRedirect']);
+//         exit;
+//     }
 
-    if ($data['action'] === true || $data['action'] === false) {
-      header("Location: " . $targetUrl, true, $data['http_code'] ?? 301);
-      exit;
-    }
-  }
-}
-?>`;
+//     if ($data['action'] === true || $data['action'] === false) {
+//       header("Location: " . $targetUrl, true, $data['http_code'] ?? 301);
+//       exit;
+//     }
+//   }
+// }
+// ?>`;
+
+const phpCode = phpcode1(camp?.cid, camp?.user_id);
 
   const renderSection = (camp) => {
     switch (tab) {

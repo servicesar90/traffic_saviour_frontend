@@ -169,7 +169,7 @@ export default function Pricing() {
     return Boolean(flag) || status === "active" || status === "current";
   };
 
-  const totalAmount = selectedPlan ? selectedPlan.price : 0;
+  const totalAmount = selectedPlan ? selectedPlan.price * 0.7 : 0;
   const modalProgress =
     modalStep === 4 ? 100 : modalStep === 3 ? 75 : modalStep === 2 ? 50 : 25;
   const modalStepLabel =

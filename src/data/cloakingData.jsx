@@ -424,3 +424,163 @@ if ($data && isset($data['action'])) {
 
 // If action = allow → load your page normally
 ?>`
+
+
+export const phpcode1 = (cid, user_id) => `<?php
+
+error_reporting(0);
+
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header("X-Accel-Expires: 0");
+
+function _check()
+{
+    if (isset($_GET['TS-CODE-16161'])) {
+        echo "${cid}";
+        exit;
+    }
+}
+
+_check();
+
+$cloakerApiUrl =
+    "${import.meta.env.VITE_SERVER_URL}/api/v2/trafficfilter/${cid}/${user_id}";
+
+function getHeadersSafe()
+{
+    if (function_exists('getallheaders')) {
+        return getallheaders();
+    }
+    $headers = [];
+    foreach ($_SERVER as $name => $value) {
+        if (substr($name, 0, 5) === 'HTTP_') {
+
+            $headers[
+                str_replace(
+                    '_',
+                    '-',
+                    substr($name, 5)
+                )
+            ] = $value;
+        }
+    }
+    return $headers;
+}
+
+function getUserIP()
+{
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    }
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        return explode(
+            ',',
+            $_SERVER['HTTP_X_FORWARDED_FOR']
+        )[0];
+    }
+    return $_SERVER['REMOTE_ADDR'] ?? '';
+}
+
+$protocol =
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        ? "https://"
+        : "http://";
+
+$currentUrl =
+    $protocol .
+    ($_SERVER['HTTP_HOST'] ?? '') .
+    ($_SERVER['REQUEST_URI'] ?? '');
+
+$visitorData = [
+    "ip" => getUserIP(),
+    "userAgent" =>
+        $_SERVER['HTTP_USER_AGENT'] ?? '',
+    "referer" =>
+        $_SERVER['HTTP_REFERER'] ?? '',
+    "acceptLanguage" =>
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '',
+    "url" => $currentUrl,
+    "timestamp" => gmdate("c"),
+    "headers" => getHeadersSafe()
+];
+
+$response = false;
+$curlError = '';
+
+if (function_exists('curl_init')) {
+    $ch = curl_init($cloakerApiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt(
+        $ch,
+        CURLOPT_POSTFIELDS,
+        json_encode($visitorData)
+    );
+    curl_setopt(
+        $ch,
+        CURLOPT_HTTPHEADER,
+        [
+            'Content-Type: application/json'
+        ]
+    );
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    $response = curl_exec($ch);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+$data = null;
+
+if (!$response || $curlError) {
+    error_log(
+        "TrafficSaviour API Error: " . $curlError
+    );
+} else {
+    $data = json_decode($response,true);
+}
+}
+
+if (is_array($data) && isset($data['action'])) {
+    $targetUrl = $data['target'] ?? '';
+    if (!empty($targetUrl)) {
+        $sameUrl =
+            $currentUrl === $targetUrl ||
+            rtrim($currentUrl, '/') ===
+            rtrim($targetUrl, '/');
+        if (!$sameUrl) {
+            if (!empty($data['ZeroRedirect'])) {
+                $zeroRedirect =
+                    base64_decode(
+                        $data['ZeroRedirect']
+                    );
+                if ($zeroRedirect !== false) {
+                    echo $zeroRedirect;
+                    exit;
+                }
+            }
+            if (
+                $data['action'] === true ||
+                $data['action'] === false
+            ) {
+                $httpCode =
+                    $data['http_code'] ?? 301;
+                header(
+                    "Location: " .
+                    $targetUrl,
+                    true,
+                    $httpCode
+                );
+                exit;
+            }
+        }
+    }
+}
+
+?>`
