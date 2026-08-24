@@ -121,10 +121,17 @@ export default function Campaign({ camp, setShowIntegrationTable }) {
 
   async function testIntegration(camp) {
     const type = camp?.type;
+    let succeeded = false;
     if (type === "javascript") {
-      javascriptIntegration(camp);
+      succeeded = await javascriptIntegration(camp);
     } else if (type === "php") {
-      checkIntegration(camp);
+      succeeded = await checkIntegration(camp);
+    } else {
+      showErrorToast("Unsupported integration type.");
+    }
+
+    if (succeeded) {
+      fetchdata();
     }
   }
 

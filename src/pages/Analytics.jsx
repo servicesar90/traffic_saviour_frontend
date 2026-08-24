@@ -194,36 +194,36 @@ const addUrlCamp = async (signal) => {
 
   // integration check
   const javascriptIntegration = async (camp) => {
-    // console.log("ghfdu", camp?.selectedCdnCode?.item);
-    const item = camp?.selectedCdnCode?.item;
-    const url = item?.integrationUrl
-    const data = {
-      url: url,        // client site URL
-      campId: item?.id           // expected camp id
-    }
-    const res = await apiFunction(
-      "post",
-      javascriptIntegrationCheckApi, null, data
-    );
-    // console.log(res);
-  
-    if (res.status === 200) {
-      const data = {
+    try {
+      const item = camp?.selectedCdnCode?.item;
+      const url = item?.integrationUrl?.trim();
+      new URL(url);
+
+      const res = await apiFunction(
+        "post",
+        javascriptIntegrationCheckApi,
+        null,
+        { url, campId: item?.id }
+      );
+
+      if (!res?.data?.success) {
+        showErrorToast(
+          res?.data?.message ||
+            "Integration check failed. Script tag was not detected."
+        );
+        return;
+      }
+
+      await apiFunction("patch", getAllAnalyticsCamp, item?.id, {
         integration: true,
-      }
-      try {
-        // console.log("guhsuhuahu");
-        
-        const integrate = await apiFunction("patch", getAllAnalyticsCamp, item?.id, data)
-        // console.log(integrate);
-      } catch (error) {
-        // console.log("error",error);
-        
-      }
-      
-      showSuccessToast("✅ Integration Successful");
-    } else {
-      showErrorToast("❌ Integration Failed");
+      });
+      showSuccessToast("Integration completed successfully.");
+    } catch (error) {
+      showErrorToast(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Integration check failed. Please verify the URL and try again."
+      );
     }
   };
 

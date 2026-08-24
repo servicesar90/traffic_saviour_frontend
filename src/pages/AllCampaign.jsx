@@ -618,11 +618,23 @@ const endItem = Math.min(
       {campaigns.map((item, index) => {
         const campaignId = item.campaign_info?.campaign_id || index;
         const isDropdownOpen = openDropdownId === item?.uid;
+        const campaignName = item.campaign_info?.campaignName || "-";
+        const visibleCampaignName =
+          campaignName.length > 24
+            ? `${campaignName.slice(0, 24).trimEnd()}...`
+            : campaignName;
         return(
           <>
           <tr key={item.campaignId} className="odd:bg-white even:bg-slate-50/40 hover:bg-slate-100/60 transition-colors">
           <td className="px-3 py-1 text-sm text-left text-slate-600">{index + 1}</td>
-          <td className="px-3 py-1 text-sm text-left text-slate-900 font-medium">{item.campaign_info?.campaignName}</td>
+          <td className="px-3 py-1 text-sm text-left text-slate-900 font-medium overflow-hidden">
+            <span
+              className="block w-full overflow-hidden whitespace-nowrap"
+              title={campaignName}
+            >
+              {visibleCampaignName}
+            </span>
+          </td>
           <td className="px-3 py-1 text-sm text-left text-slate-600">{item.campaign_info?.trafficSource}</td>
           <td className="px-3 py-1 text-left">
              <button
@@ -1105,7 +1117,6 @@ const endItem = Math.min(
 }
 
 export default AllCampaignsDashboard;
-
 
 
 

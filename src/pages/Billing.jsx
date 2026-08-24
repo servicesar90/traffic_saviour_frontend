@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { apiFunction } from "../api/ApiFunction";
-import { showErrorToast } from "../components/toast/toast";
+import { showErrorToast, showSuccessToast } from "../components/toast/toast";
 import { cryptoPayment } from "../api/Apis";
 import {
   FaCalendarAlt,
+  FaCopy,
   FaCreditCard,
   FaFileInvoiceDollar,
   FaFingerprint,
@@ -25,6 +26,13 @@ const gridLayout =
 const BillingPage = () => {
   const [billingList, setBillingList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [user] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
+  });
 
   const fetchBillingData = async (signal) => {
     try {
@@ -101,6 +109,12 @@ const InvoiceTemplate = ({ item }) => {
         <h3 style={{ fontSize: "14px", marginBottom: "6px", color: "#111827" }}>
           Billed For
         </h3>
+        <p style={{ fontSize: "13px", color: "#374151", margin: 0 }}>
+          <b>Name:</b> {user?.name || "N/A"}
+        </p>
+        <p style={{ fontSize: "13px", color: "#374151", margin: 0 }}>
+          <b>Email:</b> {user?.email || "N/A"}
+        </p>
         <p style={{ fontSize: "13px", color: "#374151", margin: 0 }}>
           Subscription Plan: <b>{item.plan_name || "N/A"}</b>
         </p>
@@ -302,6 +316,15 @@ const handleDownloadInvoice = async (item) => {
   const pendingCount = billingList.filter((item) => item.status === "Pending").length;
   const rejectedCount = billingList.filter((item) => item.status === "Rejected").length;
 
+  const copyPaymentId = async (paymentId) => {
+    try {
+      await navigator.clipboard.writeText(paymentId);
+      showSuccessToast("Payment ID copied to clipboard.");
+    } catch {
+      showErrorToast("Unable to copy the Payment ID.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f5f7fa] p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -359,7 +382,7 @@ const handleDownloadInvoice = async (item) => {
                   Payment Mode
                 </div>
                 <div>Charge</div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-start gap-2 text-left">
                   <FaFingerprint className="text-[#64748b]" />
                   Reference ID
                 </div>
@@ -408,12 +431,25 @@ const handleDownloadInvoice = async (item) => {
                         {item.amount ? `$${item.amount}` : "N/A"}
                       </div>
 
-                      <div className="relative group/id max-w-[180px]">
-                        <div
-                          className="font-mono text-xs text-[#64748b] truncate cursor-help hover:text-[#3c79ff] transition-colors"
+                      <div className="relative group/id flex min-w-0 max-w-[220px] items-center justify-start gap-1.5 text-left">
+                        <span
+                          className="inline-block min-w-0 max-w-[170px] truncate text-left font-mono text-xs text-[#64748b] cursor-help hover:text-[#3c79ff] transition-colors"
+                          title={item.payment_id || "N/A"}
                         >
                           {item.payment_id || "N/A"}
-                        </div>
+                        </span>
+
+                        {item.payment_id && (
+                          <button
+                            type="button"
+                            onClick={() => copyPaymentId(item.payment_id)}
+                            className="shrink-0 rounded p-1 text-[#64748b] hover:bg-[#eaf1ff] hover:text-[#3c79ff] cursor-pointer transition-colors"
+                            aria-label="Copy Payment ID"
+                            title="Copy Payment ID"
+                          >
+                            <FaCopy size={11} />
+                          </button>
+                        )}
 
                         {item.payment_id && (
                           <div className="absolute top-full left-0 mt-2 z-[100] w-64 break-all rounded-md border border-[#d5d9e4] bg-white p-3 text-[10px] text-[#334155] shadow-[0_10px_24px_rgba(15,23,42,0.14)] opacity-0 translate-y-1 pointer-events-none transition-all duration-150 group-hover/id:opacity-100 group-hover/id:translate-y-0 group-hover/id:pointer-events-auto">

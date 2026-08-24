@@ -79,11 +79,6 @@ const Dashboard = () => {
 
   const ITEMS_PER_PAGE = 5;
 
-  const [clickSummary, setClickSummary] = useState({
-    totalClicks: 0,
-    safeClicks: 0,
-    moneyClicks: 0,
-  });
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -105,35 +100,30 @@ const Dashboard = () => {
       setLoading(true);
       const res = await apiFunction("get", ipClicks);
       const rawData = res?.data?.data || [];
-      console.log(rawData)
+      const formattedData = [...rawData]
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .map((item) => {
+          const safe = Number(item.total_s_clicks || 0);
+          const money = Number(item.total_m_clicks || 0);
+          const total =
+            item.total_t_clicks == null
+              ? safe + money
+              : Number(item.total_t_clicks || 0);
 
-      const lastDays = rawData.slice(-chartRangeDays);
-      const formattedData = lastDays.map((item) => ({
-        date: new Date(item.date).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-        }),
-        Safe: Number(item.total_s_clicks || 0),
-        Money: Number(item.total_m_clicks || 0),
-        Total: Number(item.total_t_clicks || 0),
-      }));
+          return {
+            date: new Date(item.date).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+            }),
+            Safe: safe,
+            Money: money,
+            Total: total,
+          };
+        });
 
       setChartData(formattedData);
-
-      const totals = lastDays.reduce(
-        (acc, item) => {
-          acc.totalClicks += Number(item.total_t_clicks || 0);
-          acc.safeClicks += Number(item.total_s_clicks || 0);
-          acc.moneyClicks += Number(item.total_m_clicks || 0);
-          return acc;
-        },
-        { totalClicks: 0, safeClicks: 0, moneyClicks: 0 }
-      );
-
-      setClickSummary(totals);
     } catch (err) {
       setChartData([]);
-      setClickSummary({ totalClicks: 0, safeClicks: 0, moneyClicks: 0 });
     } finally {
       setLoading(false);
     }
@@ -693,8 +683,8 @@ const fetchCampaigns = useCallback(async (page = 1) => {
     );
   };
 
-  const hasTrafficData = chartData.length > 0;
   const baseSeries = chartData.slice(-chartRangeDays);
+  const hasTrafficData = baseSeries.length > 0;
   const rangeTotalClicks = baseSeries.reduce((sum, point) => {
     const safe = Number(point.Safe || 0);
     const money = Number(point.Money || 0);
@@ -708,6 +698,15 @@ const fetchCampaigns = useCallback(async (page = 1) => {
     (sum, point) => sum + Number(point.Money || 0),
     0
   );
+  const rangeNewTraffic = baseSeries.reduce(
+    (sum, point) => sum + Number(point.Total || 0),
+    0
+  );
+  const clickSummary = {
+    totalClicks: rangeNewTraffic,
+    safeClicks: rangeSafeClicks,
+    moneyClicks: rangeMoneyClicks,
+  };
   const safePercent = rangeTotalClicks
     ? Math.round((rangeSafeClicks / rangeTotalClicks) * 100)
     : 0;
@@ -919,6 +918,11 @@ const fetchCampaigns = useCallback(async (page = 1) => {
         {campaigns.map((item, index) => {
           const campaignId = item.campaign_info?.campaign_id || index;
           const isDropdownOpen = openDropdownId === item?.uid;
+          const campaignName = item.campaign_info?.campaignName || "-";
+          const visibleCampaignName =
+            campaignName.length > 24
+              ? `${campaignName.slice(0, 24).trimEnd()}...`
+              : campaignName;
           return (
             <>
               <tr
@@ -928,8 +932,13 @@ const fetchCampaigns = useCallback(async (page = 1) => {
                 <td className="px-3 py-1.5 text-sm  text-left text-slate-600">
                   {index + 1}
                 </td>
-                <td className="px-3 py-1.5 text-sm text-left text-slate-900 font-medium">
-                  {item.campaign_info?.campaignName}
+                <td className="px-3 py-1.5 text-sm text-left text-slate-900 font-medium overflow-hidden">
+                  <span
+                    className="block w-full overflow-hidden whitespace-nowrap"
+                    title={campaignName}
+                  >
+                    {visibleCampaignName}
+                  </span>
                 </td>
                 <td className="px-3 py-1.5 text-sm text-left text-slate-600">
                   {item.campaign_info?.trafficSource}
@@ -1428,31 +1437,48 @@ const fetchCampaigns = useCallback(async (page = 1) => {
                 <p className="text-sm font-bold text-slate-900">New traffic</p>
                 <p className="text-xs text-slate-400">Last {chartRangeDays} days</p>
               </div>
-              <div className="text-lg font-semibold text-slate-900">356</div>
+              <div className={`font-semibold text-slate-900 ${hasTrafficData ? "text-lg" : "text-xs"}`}>
+                {loading
+                  ? "—"
+                  : hasTrafficData
+                    ? rangeNewTraffic.toLocaleString("en-US")
+                    : "No data"}
+              </div>
             </div>
             <div className="mt-4 h-20">
-              <svg viewBox="0 0 140 50" className="w-full h-full">
-                <polyline
-                  points="4,36 24,34 42,28 60,30 78,24 96,12 114,18 134,8"
-                  fill="none"
-                  stroke="#3874FF"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <polyline
-                  points="4,40 24,38 42,34 60,36 78,32 96,26 114,28 134,24"
-                  fill="none"
-                  stroke="#D6E2FF"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              {loading ? (
+                <div className="h-full flex items-center justify-center text-xs text-slate-400">
+                  Loading...
+                </div>
+              ) : !hasTrafficData ? (
+                <div className="h-full flex items-center justify-center rounded-md border border-dashed border-[#d5d9e4] text-xs text-slate-400">
+                  No traffic data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={baseSeries} margin={{ top: 5, right: 3, left: 3, bottom: 5 }}>
+                    <Tooltip content={<ChartTooltip />} cursor={false} />
+                    <Line
+                      type="linear"
+                      dataKey="Total"
+                      stroke="#3874FF"
+                      strokeWidth={3}
+                      dot={false}
+                    />
+                    <Line
+                      type="linear"
+                      dataKey="Safe"
+                      stroke="#D6E2FF"
+                      strokeWidth={3}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
             <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
-              <span>01 May</span>
-              <span>07 May</span>
+              <span>{hasTrafficData ? baseSeries[0]?.date : "—"}</span>
+              <span>{hasTrafficData ? baseSeries[baseSeries.length - 1]?.date : "—"}</span>
             </div>
           </div>
 
@@ -1981,7 +2007,7 @@ const fetchCampaigns = useCallback(async (page = 1) => {
               </div>
 
               <div className="rounded-md border border-[#d5d9e4] bg-white px-3 py-2 text-[12px] text-[#475569]">
-                <span className="font-semibold text-[#1d4ed8]">10-day window:</span>{" "}
+                <span className="font-semibold text-[#1d4ed8]">{chartRangeDays}-day window:</span>{" "}
                 Tracking total and safe traffic trends.
               </div>
             </div>

@@ -1,68 +1,77 @@
 import { apiFunction } from "../api/ApiFunction";
 import { createCampaignApi, javascriptIntegrationCheckApi } from "../api/Apis";
-import { showSuccessToast } from "../components/toast/toast";
+import { showErrorToast, showSuccessToast } from "../components/toast/toast";
+
+const getIntegrationErrorMessage = (error) =>
+  error?.response?.data?.message ||
+  error?.message ||
+  "Integration check failed. Please verify the URL and try again.";
 
 export const javascriptIntegration = async (camp) => {
-  const url = camp?.url
-  const data = {
-    url: url,        // client site URL
-    campId: camp?.cid           // expected camp id
-  }
-  const res = await apiFunction(
-    "post",
-    javascriptIntegrationCheckApi, null, data
-  );
-  
+  try {
+    const url = camp?.url?.trim();
+    new URL(url);
 
-  if (res.status === 200) {
-    const data = {
+    const res = await apiFunction(
+      "post",
+      javascriptIntegrationCheckApi,
+      null,
+      { url, campId: camp?.cid }
+    );
+
+    if (!res?.data?.success) {
+      showErrorToast(
+        res?.data?.message ||
+          "Integration check failed. Script tag was not detected."
+      );
+      return false;
+    }
+
+    await apiFunction("patch", createCampaignApi, camp?.id, {
       integration: true,
       integrationUrl: url,
-      integrationType: "javascript"
-    }
-    const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data)
-    alert("✅ Integration Successful");
-  } else {
-    alert("❌ Integration Failed");
+      integrationType: "javascript",
+    });
+    showSuccessToast("Integration completed successfully.");
+    return true;
+  } catch (error) {
+    showErrorToast(getIntegrationErrorMessage(error));
+    return false;
   }
 };
 
-
 export async function checkIntegration(camp) {
-    const url = camp?.url;
-  
-    const res = await fetch(`${url}?TS-CODE-16161=1`);
-    
-  
+  try {
+    const url = new URL(camp?.url?.trim());
+    url.searchParams.set("TS-CODE-16161", "1");
+
+    const res = await fetch(url.toString());
+    if (!res.ok) {
+      throw new Error(`Integration URL returned HTTP ${res.status}.`);
+    }
+
     const text = await res.text();
-   
-  
-    let status = "failed";
-    if (text.trim() != camp?.cid) {
-      status = "false";
-      showSuccessToast("Integration Error try again " + status);
-      const data = {
-      integration: false,
-      integrationUrl: null,
-      integrationType: null
+    if (text.trim() !== camp?.cid) {
+      await apiFunction("patch", createCampaignApi, camp?.id, {
+        integration: false,
+        integrationUrl: null,
+        integrationType: null,
+      });
+      showErrorToast(
+        "Integration check failed. Campaign code was not found at this URL."
+      );
+      return false;
     }
-  
-    const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data);
-    
-      return
-    }
-    if (text.trim() === camp?.cid) {
-      status = "success";
-    }
-    const data = {
+
+    await apiFunction("patch", createCampaignApi, camp?.id, {
       integration: true,
-      integrationUrl: url,
-      integrationType: "php"
-    }
-   
-    const integrate = await apiFunction("patch", createCampaignApi, camp?.id, data)
-   
-    
-    if (integrate.status === 200) return showSuccessToast("Integration Status: " + status);
-    showErrorToast("Integration Error try again" + status);
+      integrationUrl: camp.url.trim(),
+      integrationType: "php",
+    });
+    showSuccessToast("Integration completed successfully.");
+    return true;
+  } catch (error) {
+    showErrorToast(getIntegrationErrorMessage(error));
+    return false;
   }
+}

@@ -7,7 +7,7 @@ import {
   FaHeadset,
   FaMapMarkerAlt,
   FaEnvelope,
-  FaPhoneAlt,
+  FaClock,
 } from "react-icons/fa";
 
 import { AccountDetailsForm } from "../components/ui/MyProfile/AccountDetailsForm";
@@ -18,7 +18,62 @@ import { SupportTicketsView } from "../components/ui/MyProfile/SupportTicketsVie
 import { useNavigate } from "react-router-dom";
 import { apiFunction } from "../api/ApiFunction";
 import { signOutApi } from "../api/Apis";
+import { COUNTRY_LIST } from "../data/dataList";
+import { getCountryIcon } from "../utils/getCountryIcon";
 import profileCharacter from "../assets/vecteezy_friendly-3d-animated-character-with-glasses-smiling_57357673.png";
+
+const normalizeObjectKey = (key) => String(key).replace(/[_\s-]/g, "").toLowerCase();
+
+const findStoredValue = (source, aliases, depth = 0) => {
+  if (!source || typeof source !== "object" || depth > 5) return "";
+  const normalizedAliases = new Set(aliases.map(normalizeObjectKey));
+
+  for (const [key, value] of Object.entries(source)) {
+    if (!normalizedAliases.has(normalizeObjectKey(key))) continue;
+    if (value != null && typeof value !== "object") return String(value).trim();
+
+    if (value && typeof value === "object") {
+      const nestedValue =
+        value.countryCode ||
+        value.country_code ||
+        value.code ||
+        value.iso2 ||
+        value.name ||
+        value.value ||
+        value.label;
+      if (nestedValue != null) return String(nestedValue).trim();
+    }
+  }
+
+  for (const value of Object.values(source)) {
+    if (value && typeof value === "object") {
+      const result = findStoredValue(value, aliases, depth + 1);
+      if (result) return result;
+    }
+  }
+
+  return "";
+};
+
+const getBrowserLocationFallback = () => {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+  const timezoneCountryMap = {
+    "Asia/Calcutta": "in",
+    "Asia/Kolkata": "in",
+  };
+
+  let localeRegion = "";
+  try {
+    localeRegion = new Intl.Locale(navigator.language).region?.toLowerCase() || "";
+  } catch {
+    localeRegion = "";
+  }
+
+  return {
+    timezone,
+    countryCode: timezoneCountryMap[timezone] || localeRegion,
+  };
+};
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -70,7 +125,7 @@ const MyProfile = () => {
   const handleLogout = async () => {
     try {
       await apiFunction("get", signOutApi, null, null);
-    } catch (error) {
+    } catch {
       // Continue local logout even if API fails.
     } finally {
       clearSession();
@@ -81,6 +136,35 @@ const MyProfile = () => {
   const joinedDate = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString()
     : "Recently joined";
+  const storedCountry = findStoredValue(user, [
+    "country_code",
+    "countryCode",
+    "country_iso",
+    "countryIso",
+    "country_iso2",
+    "isoCountryCode",
+    "geoCountry",
+    "country",
+    "countryName",
+  ]);
+  const browserLocation = getBrowserLocationFallback();
+  const countryMatch = COUNTRY_LIST.find(
+    (item) =>
+      item.code.toLowerCase() === String(storedCountry).toLowerCase() ||
+      item.country.toLowerCase() === String(storedCountry).toLowerCase()
+  );
+  const countryCode =
+    countryMatch?.code ||
+    (String(storedCountry).length === 2 ? String(storedCountry).toLowerCase() : "") ||
+    browserLocation.countryCode;
+  const timeZone = findStoredValue(user, [
+    "timezone",
+    "timeZone",
+    "time_zone",
+    "timezoneId",
+    "timezoneName",
+    "tz",
+  ]) || browserLocation.timezone || "Not added";
 
   return (
     <div className="w-full min-h-screen bg-[#F5F7FA] text-slate-900 px-4 md:px-6 py-6 md:py-8 font-sans">
@@ -88,7 +172,14 @@ const MyProfile = () => {
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div>
             <p className="text-[12px] text-[#64748b]">
-              Dashboard &gt;{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/Dashboard/allStats")}
+                className="hover:text-[#3c79ff] hover:underline cursor-pointer transition-colors"
+              >
+                Dashboard
+              </button>{" "}
+              &gt;{" "}
               <span className="text-[#3c79ff] font-semibold">{breadcrumbNames[activeTab]}</span>
             </p>
             <h1 className="text-[28px] leading-8 font-extrabold tracking-tight text-[#141824] mt-2">My Account</h1>
@@ -137,9 +228,27 @@ const MyProfile = () => {
           <section className="lg:col-span-4 bg-white border border-[#d5d9e4] rounded-md p-5">
             <h3 className="text-[22px] font-extrabold text-[#141824]">Primary Contact</h3>
             <div className="mt-3 pt-1 space-y-4 text-[15px]">
-              <InfoRow icon={<FaMapMarkerAlt />} label="Location" value={user?.address || "Not added"} />
+              <InfoRow
+                icon={<FaMapMarkerAlt />}
+                label="Location"
+                value={
+                  countryCode ? (
+                    <span className="inline-flex items-center gap-2.5">
+                      <img
+                        src={getCountryIcon(countryCode, 80)}
+                        alt={`${countryCode.toUpperCase()} flag`}
+                        title={countryMatch?.country || countryCode.toUpperCase()}
+                        loading="eager"
+                        decoding="async"
+                        className="h-auto max-h-4 w-6 shrink-0 rounded-[2px] border border-[#d5d9e4] object-contain shadow-sm"
+                      />
+                      <span>{countryCode.toUpperCase()}</span>
+                    </span>
+                  ) : "Not added"
+                }
+              />
+              <InfoRow icon={<FaClock />} label="Time Zone" value={timeZone} />
               <InfoRow icon={<FaEnvelope />} label="Email ID" value={user?.email || "Not added"} />
-              <InfoRow icon={<FaPhoneAlt />} label="Phone Number" value={user?.phone || "Not added"} />
             </div>
           </section>
         </div>
