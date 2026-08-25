@@ -13,10 +13,11 @@ import { useNavigate } from "react-router-dom";
 import { checkIntegration, javascriptIntegration } from "../../utils/functions";
 import { useEffect, useMemo, useState } from "react";
 
-export default function Campaign({ camp, setShowIntegrationTable }) {
+export default function Campaign({ camp, setShowIntegrationTable, onCampaignChange }) {
   const [campaign, setCampaign] = useState(camp);
+  const [activeAction, setActiveAction] = useState("");
 
-  const campaignName = camp?.campaign_info?.campaignName || "NA";
+  const campaignName = campaign?.campaign_info?.campaignName || "NA";
   const navigate = useNavigate();
 
   const tableData = campaign
@@ -24,7 +25,7 @@ export default function Campaign({ camp, setShowIntegrationTable }) {
         {
           id: campaign.uid,
           cid: campaign.cid,
-          url: campaign.integrationUrl || "https://webservices.press",
+          url: campaign.integrationUrl || "-",
           status: campaign.status || "Inactive",
           type: campaign.integrationType,
           firstInstalled: campaign.createdAt
@@ -40,13 +41,13 @@ export default function Campaign({ camp, setShowIntegrationTable }) {
   const row = tableData[0];
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "Active":
+    switch (String(status || "").toLowerCase()) {
+      case "active":
         return "bg-[#ecfdf3] text-[#027a48] border border-[#abefc6]";
-      case "Block":
-      case "Inactive":
+      case "block":
+      case "inactive":
         return "bg-[#fff1f3] text-[#be123c] border border-[#fecdd3]";
-      case "Pending":
+      case "pending":
         return "bg-[#fffbeb] text-[#b45309] border border-[#fde68a]";
       default:
         return "bg-[#f8fafc] text-[#475569] border border-[#d5d9e4]";
@@ -99,7 +100,12 @@ export default function Campaign({ camp, setShowIntegrationTable }) {
 
   const handleDelete = async (id) => {
     if (!id) return;
+    const confirmed = window.confirm(
+      "Remove this integration? The campaign will return to setup mode, but the campaign itself will not be deleted."
+    );
+    if (!confirmed) return;
 
+    setActiveAction("remove");
     try {
       const payload = {
         integration: false,
@@ -108,41 +114,72 @@ export default function Campaign({ camp, setShowIntegrationTable }) {
       };
 
       await apiFunction("patch", createCampaignApi, id, payload);
-      showSuccessToast("Cloaking Activity Closed");
+      const updatedCampaign = { ...campaign, ...payload };
+      setCampaign(updatedCampaign);
+      onCampaignChange?.(updatedCampaign);
+      showSuccessToast("Integration removed. The campaign is ready for a new setup.");
       setShowIntegrationTable(true);
     } catch (error) {
-      showErrorToast(error?.response?.data?.message || "Failed to delete campaign");
+      showErrorToast(error?.response?.data?.message || "Integration could not be removed. Please try again.");
+    } finally {
+      setActiveAction("");
     }
   };
 
-  const handleRefresh = () => {
-    fetchdata();
+  const handleRefresh = async () => {
+    if (activeAction) return;
+    setActiveAction("refresh");
+    await fetchdata(true);
+    setActiveAction("");
   };
 
   async function testIntegration(camp) {
+    if (activeAction) return;
+    setActiveAction("test");
     const type = camp?.type;
-    let succeeded = false;
-    if (type === "javascript") {
-      succeeded = await javascriptIntegration(camp);
-    } else if (type === "php") {
-      succeeded = await checkIntegration(camp);
-    } else {
-      showErrorToast("Unsupported integration type.");
-    }
-
-    if (succeeded) {
-      fetchdata();
+    try {
+      if (type === "javascript") {
+        await javascriptIntegration(camp);
+      } else if (type === "php") {
+        await checkIntegration(camp);
+      } else {
+        showErrorToast("This campaign does not have a supported integration method to test.");
+      }
+      await fetchdata(false);
+    } finally {
+      setActiveAction("");
     }
   }
 
-  const fetchdata = async () => {
-    const res = await apiFunction("get", createCampaignApi, camp.uid, null);
-    if (res.status === 200) setCampaign(res.data.data);
+  const fetchdata = async (showToast = false) => {
+    if (!camp?.uid) {
+      if (showToast) showErrorToast("Campaign details are missing. Reopen it from the campaign list.");
+      return false;
+    }
+    try {
+      const res = await apiFunction("get", createCampaignApi, camp.uid, null);
+      if (res?.status === 200 && res?.data?.data) {
+        setCampaign(res.data.data);
+        onCampaignChange?.(res.data.data);
+        if (showToast) showSuccessToast("Integration data refreshed.");
+        return true;
+      }
+      if (showToast) showErrorToast("The latest integration data could not be loaded.");
+      return false;
+    } catch (error) {
+      if (showToast) {
+        showErrorToast(error?.response?.data?.message || "Integration data could not be refreshed.");
+      }
+      return false;
+    }
   };
 
   useEffect(() => {
-    fetchdata();
-  }, []);
+    setCampaign(camp);
+    fetchdata(false);
+    // The campaign ID is the fetch identity; parent object updates must not refetch recursively.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [camp?.uid]);
 
   if (!row) {
     return (
@@ -247,24 +284,27 @@ export default function Campaign({ camp, setShowIntegrationTable }) {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => testIntegration(row)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[#d5d9e4] text-[#3c79ff] hover:bg-[#eef4ff] cursor-pointer text-[12px] font-semibold"
+                  disabled={Boolean(activeAction)}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[#d5d9e4] text-[#3c79ff] hover:bg-[#eef4ff] cursor-pointer text-[12px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <FaPlayCircle className="w-4 h-4" />
-                  Test Integration
+                  {activeAction === "test" ? "Testing..." : "Test Integration"}
                 </button>
                 <button
-                  onClick={() => handleRefresh(row.id)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[#d5d9e4] text-[#475569] hover:bg-[#f8fafc] cursor-pointer text-[12px] font-semibold"
+                  onClick={handleRefresh}
+                  disabled={Boolean(activeAction)}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[#d5d9e4] text-[#475569] hover:bg-[#f8fafc] cursor-pointer text-[12px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <FaSyncAlt className="w-4 h-4" />
-                  Refresh Data
+                  {activeAction === "refresh" ? "Refreshing..." : "Refresh Data"}
                 </button>
                 <button
                   onClick={() => handleDelete(row.id)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[#fecdd3] text-[#e11d48] hover:bg-[#fff1f2] cursor-pointer text-[12px] font-semibold"
+                  disabled={Boolean(activeAction)}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[#fecdd3] text-[#e11d48] hover:bg-[#fff1f2] cursor-pointer text-[12px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <FaTrashAlt className="w-4 h-4" />
-                  Remove Integration
+                  {activeAction === "remove" ? "Removing..." : "Remove Integration"}
                 </button>
               </div>
             </div>

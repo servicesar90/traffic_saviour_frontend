@@ -502,7 +502,16 @@ function CampaignBuilderInner() {
         }};
         
 
-        await updateMutation.mutateAsync({ id: uid, payload });
+        const res = await updateMutation.mutateAsync({ id: uid, payload });
+        const responseCampaign =
+          res?.data?.data || (res?.data?.uid ? res.data : null) || {};
+        const updatedCampaign = {
+          ...(location?.state?.data || {}),
+          ...(campaignData || {}),
+          ...responseCampaign,
+          ...payload,
+          uid,
+        };
     
         
         showSuccessToast("Campaign updated successfully!");
@@ -510,7 +519,8 @@ function CampaignBuilderInner() {
           state: {
             mode: "edit",
             id:uid,
-            data: location.state.data,
+            data: updatedCampaign,
+            openSetup: true,
           },
         });
       } else {

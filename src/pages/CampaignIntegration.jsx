@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -12,10 +12,11 @@ const CloakingIntegration = () => {
   const [pastedUrl, setPastedUrl] = useState("");
   const [tab, setTab] = useState("php-paste");
   const location = useLocation();
-  const camp = location?.state?.data;
+  const initialCamp = location?.state?.data;
+  const [camp, setCamp] = useState(initialCamp);
   const navigate = useNavigate();
   const [showIntegrationTable, setShowIntegrationTable] = useState(
-    !camp?.integration
+    location?.state?.openSetup ? true : !initialCamp?.integration
   );
 
   const tabs = [
@@ -67,8 +68,6 @@ const CloakingIntegration = () => {
       ),
     },
   ];
-
-  useEffect(() => {}, [tab]);
 
 //   const phpCode = `
 // <?php
@@ -168,6 +167,15 @@ const CloakingIntegration = () => {
 
 const phpCode = phpcode1(camp?.cid, camp?.user_id);
 
+  const handleIntegrationSuccess = (integrationData) => {
+    setCamp((current) => ({ ...current, ...integrationData }));
+    setShowIntegrationTable(false);
+  };
+
+  const handleIntegrationFailure = () => {
+    setCamp((current) => ({ ...current, integration: false }));
+  };
+
   const renderSection = (camp) => {
     switch (tab) {
       case "php-upload":
@@ -177,7 +185,8 @@ const phpCode = phpcode1(camp?.cid, camp?.user_id);
             phpCode={phpCode}
             pastedUrl={pastedUrl}
             setPastedUrl={setPastedUrl}
-            setShowIntegrationTable={setShowIntegrationTable}
+            onIntegrationSuccess={handleIntegrationSuccess}
+            onIntegrationFailure={handleIntegrationFailure}
           />
         );
       case "php-paste":
@@ -187,7 +196,8 @@ const phpCode = phpcode1(camp?.cid, camp?.user_id);
             phpCode={phpCode}
             pastedUrl={pastedUrl}
             setPastedUrl={setPastedUrl}
-            setShowIntegrationTable={setShowIntegrationTable}
+            onIntegrationSuccess={handleIntegrationSuccess}
+            onIntegrationFailure={handleIntegrationFailure}
           />
         );
       case "wordpress":
@@ -197,7 +207,8 @@ const phpCode = phpcode1(camp?.cid, camp?.user_id);
             phpCode={phpCode}
             pastedUrl={pastedUrl}
             setPastedUrl={setPastedUrl}
-            setShowIntegrationTable={setShowIntegrationTable}
+            onIntegrationSuccess={handleIntegrationSuccess}
+            onIntegrationFailure={handleIntegrationFailure}
           />
         );
       case "javascript":
@@ -206,7 +217,8 @@ const phpCode = phpcode1(camp?.cid, camp?.user_id);
             camp={camp}
             pastedUrl={pastedUrl}
             setPastedUrl={setPastedUrl}
-            setShowIntegrationTable={setShowIntegrationTable}
+            onIntegrationSuccess={handleIntegrationSuccess}
+            onIntegrationFailure={handleIntegrationFailure}
           />
         );
       default:
@@ -216,13 +228,34 @@ const phpCode = phpcode1(camp?.cid, camp?.user_id);
             phpCode={phpCode}
             pastedUrl={pastedUrl}
             setPastedUrl={setPastedUrl}
-            setShowIntegrationTable={setShowIntegrationTable}
+            onIntegrationSuccess={handleIntegrationSuccess}
+            onIntegrationFailure={handleIntegrationFailure}
           />
         );
     }
   };
 
   const activeTab = tabs.find((t) => t.id === tab);
+
+  if (!camp?.uid || !camp?.cid) {
+    return (
+      <div className="min-h-screen bg-[var(--app-bg)] p-4 md:p-8">
+        <div className="mx-auto max-w-xl rounded-md border border-[#d5d9e4] bg-white p-6 text-left">
+          <h1 className="text-xl font-bold text-[#141824]">Campaign data unavailable</h1>
+          <p className="mt-2 text-[13px] text-[#52607a]">
+            Open the integration screen from a campaign so its setup details can be loaded safely.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/Dashboard/allCampaign")}
+            className={`${primaryActionClass} mt-5`}
+          >
+            Back to Campaigns
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return showIntegrationTable ? (
     <div className="min-h-screen bg-[var(--app-bg)] text-slate-900 p-4 md:p-8">
@@ -285,7 +318,11 @@ const phpCode = phpcode1(camp?.cid, camp?.user_id);
     </div>
   ) : (
     <div className="min-h-screen bg-[var(--app-bg)]">
-      <IntegrationTable camp={camp} setShowIntegrationTable={setShowIntegrationTable} />
+      <IntegrationTable
+        camp={camp}
+        setShowIntegrationTable={setShowIntegrationTable}
+        onCampaignChange={setCamp}
+      />
     </div>
   );
 };
@@ -317,14 +354,14 @@ const Tab = ({ index, t, tab, setTab }) => (
 
 const handleCopy = (text) => {
   const formatted =
-    typeof data === "object" ? JSON.stringify(text, null, 2) : String(text);
+    typeof text === "object" ? JSON.stringify(text, null, 2) : String(text);
 
   navigator.clipboard
     .writeText(formatted)
     .then(() => {
       showSuccessToast("Copied to clipboard!");
     })
-    .catch(() => {});
+    .catch(() => showErrorToast("Copy failed. Please copy the code manually."));
 };
 
 const generateZip = async () => {
@@ -342,15 +379,51 @@ const generatePhpZip = async (phpCode) => {
   saveAs(zipBlob, "index.zip");
 };
 
-const getIntegrationErrorMessage = (error) =>
-  error?.response?.data?.message ||
-  error?.message ||
-  "Integration check failed. Please verify the URL and try again.";
+const getIntegrationErrorMessage = (error) => {
+  if (error?.name === "AbortError") {
+    return "URL test timed out. Check that the page is online and try again.";
+  }
+  if (error instanceof TypeError && error?.message === "Failed to fetch") {
+    return "The URL could not be reached. Check the address, HTTPS, and CORS settings.";
+  }
+  return (
+    error?.response?.data?.message ||
+    error?.message ||
+    "Integration check failed. Please verify the URL and try again."
+  );
+};
 
-const javascriptIntegration = async (camp, url, setShowIntegrationTable) => {
+const parseIntegrationUrl = (value) => {
+  const trimmed = value?.trim();
+  if (!trimmed) throw new Error("Enter the integration URL before running the test.");
+
+  let parsed;
   try {
-    const integrationUrl = url.trim();
-    new URL(integrationUrl);
+    parsed = new URL(trimmed);
+  } catch {
+    throw new Error("Enter a valid full URL, for example https://example.com/page.");
+  }
+
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error("Only HTTP or HTTPS URLs can be tested.");
+  }
+  return parsed;
+};
+
+const validateCampaignForIntegration = (camp) => {
+  if (!camp?.uid || !camp?.cid) {
+    throw new Error("Campaign details are missing. Reopen this screen from the campaign list.");
+  }
+};
+
+const markIntegrationAsFailed = async (camp) => {
+  await apiFunction("patch", createCampaignApi, camp?.uid, { integration: false });
+};
+
+const javascriptIntegration = async (camp, url, onIntegrationFailure) => {
+  try {
+    validateCampaignForIntegration(camp);
+    const integrationUrl = parseIntegrationUrl(url).toString();
 
     const checkPayload = {
       url: integrationUrl,
@@ -363,10 +436,11 @@ const javascriptIntegration = async (camp, url, setShowIntegrationTable) => {
       checkPayload
     );
 
-    if (!res?.data?.success) {
-      setShowIntegrationTable(true);
+    if (res?.data?.success !== true) {
+      await markIntegrationAsFailed(camp);
+      onIntegrationFailure?.();
       showErrorToast(res?.data?.message || "Integration check failed. Script tag was not detected.");
-      return;
+      return null;
     }
 
     const updatePayload = {
@@ -376,41 +450,51 @@ const javascriptIntegration = async (camp, url, setShowIntegrationTable) => {
     };
     await apiFunction("patch", createCampaignApi, camp?.uid, updatePayload);
     showSuccessToast("Integration completed successfully.");
-    setShowIntegrationTable(false);
+    return updatePayload;
   } catch (error) {
-    setShowIntegrationTable(true);
     showErrorToast(getIntegrationErrorMessage(error));
+    return null;
   }
 };
 
-async function checkIntegration(camp, url, setShowIntegrationTable) {
+async function checkIntegration(camp, url, onIntegrationFailure) {
   try {
-    const integrationUrl = new URL(url.trim());
+    validateCampaignForIntegration(camp);
+    const integrationUrl = parseIntegrationUrl(url);
+    const savedIntegrationUrl = integrationUrl.toString();
     integrationUrl.searchParams.set("TS-CODE-16161", "1");
 
-    const res = await fetch(integrationUrl.toString());
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+    let res;
+    try {
+      res = await fetch(integrationUrl.toString(), { signal: controller.signal });
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
     if (!res.ok) {
-      throw new Error(`Integration URL returned HTTP ${res.status}.`);
+      throw new Error(`URL test failed: the page returned HTTP ${res.status}.`);
     }
 
     const text = await res.text();
     if (text.trim() !== camp?.cid) {
-      setShowIntegrationTable(true);
-      showErrorToast("Integration check failed. Campaign code was not found at this URL.");
-      return;
+      await markIntegrationAsFailed(camp);
+      onIntegrationFailure?.();
+      showErrorToast("Integration failed: this URL does not contain the expected campaign code.");
+      return null;
     }
 
     const updatePayload = {
       integration: true,
-      integrationUrl: url.trim(),
+      integrationUrl: savedIntegrationUrl,
       integrationType: "php",
     };
     await apiFunction("patch", createCampaignApi, camp?.uid, updatePayload);
     showSuccessToast("Integration completed successfully.");
-    setShowIntegrationTable(false);
+    return updatePayload;
   } catch (error) {
-    setShowIntegrationTable(true);
     showErrorToast(getIntegrationErrorMessage(error));
+    return null;
   }
 }
 
@@ -418,8 +502,6 @@ const fieldLabelClass =
   "flex items-center text-[11px] font-extrabold uppercase text-[#52607a] tracking-wide mb-2";
 const inputClass =
   "w-full bg-white border border-[#d5d9e4] text-sm rounded-md py-2.5 px-4 text-[#141824] placeholder-[#95a1b8] focus:outline-none focus:border-[#3c79ff] focus:shadow-[inset_0_0_0_1px_#3c79ff] transition-colors";
-const codeBlockClass =
-  "bg-[#0f172a] border border-[#1e293b] rounded-md p-4 font-mono text-[12px] overflow-auto max-h-96 shadow-sm";
 const primaryActionClass =
   "inline-flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-[13px] bg-[#3c79ff] text-white hover:bg-[#356ee6] cursor-pointer !text-white";
 const successActionClass =
@@ -561,12 +643,25 @@ const UrlField = ({ label, value, onChange, placeholder }) => (
   </div>
 );
 
-const TestButton = ({ enabled, onClick, text = "Run URL Test" }) => (
-  <button
-    disabled={!enabled}
-    onClick={onClick}
+const TestButton = ({ enabled, onClick, text = "Run URL Test" }) => {
+  const [testing, setTesting] = useState(false);
+
+  const handleTest = async () => {
+    if (!enabled || testing) return;
+    setTesting(true);
+    try {
+      await onClick();
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return <button
+    type="button"
+    disabled={!enabled || testing}
+    onClick={handleTest}
     className={`${successActionClass} ${
-      enabled
+      enabled && !testing
         ? "bg-[#16a34a] hover:bg-[#15803d] text-white cursor-pointer"
         : "bg-[#e2e8f0] text-[#8a94ab] cursor-not-allowed"
     }`}
@@ -574,11 +669,11 @@ const TestButton = ({ enabled, onClick, text = "Run URL Test" }) => (
     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="5 3 19 12 5 21 5 3" />
     </svg>
-    {text}
+    {testing ? "Testing URL..." : text}
   </button>
-);
+};
 
-const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl, setShowIntegrationTable }) => (
+const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl, onIntegrationSuccess, onIntegrationFailure }) => (
   <SectionCard
     title="PHP File Upload Method"
     subtitle="Download the script package, upload it on a separate domain, then verify the integration URL."
@@ -621,12 +716,15 @@ const Phpupload = ({ camp, phpCode, pastedUrl, setPastedUrl, setShowIntegrationT
 
     <TestButton
       enabled={Boolean(pastedUrl.trim())}
-      onClick={() => checkIntegration(camp, pastedUrl, setShowIntegrationTable)}
+      onClick={async () => {
+        const result = await checkIntegration(camp, pastedUrl, onIntegrationFailure);
+        if (result) onIntegrationSuccess(result);
+      }}
     />
   </SectionCard>
 );
 
-const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl, setShowIntegrationTable }) => (
+const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl, onIntegrationSuccess, onIntegrationFailure }) => (
   <SectionCard
     title="PHP Snippet Method"
     subtitle="Paste the snippet at the top of your safe page, then verify the deployed URL."
@@ -663,15 +761,15 @@ const PhpPaste = ({ camp, phpCode, pastedUrl, setPastedUrl, setShowIntegrationTa
 
     <TestButton
       enabled={Boolean(pastedUrl.trim())}
-      onClick={() => {
-        console.log("Testing integration with URL:", pastedUrl);
-        checkIntegration(camp, pastedUrl, setShowIntegrationTable)
+      onClick={async () => {
+        const result = await checkIntegration(camp, pastedUrl, onIntegrationFailure);
+        if (result) onIntegrationSuccess(result);
       }}
     />
   </SectionCard>
 );
 
-const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl, setShowIntegrationTable }) => (
+const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl, onIntegrationSuccess, onIntegrationFailure }) => (
   <SectionCard
     title="WordPress Plugin Method"
     subtitle="Install the plugin first, then place the PHP snippet inside your WordPress page or post."
@@ -713,12 +811,15 @@ const Wordpress = ({ camp, phpCode, pastedUrl, setPastedUrl, setShowIntegrationT
 
     <TestButton
       enabled={Boolean(pastedUrl.trim())}
-      onClick={() => checkIntegration(camp, pastedUrl, setShowIntegrationTable)}
+      onClick={async () => {
+        const result = await checkIntegration(camp, pastedUrl, onIntegrationFailure);
+        if (result) onIntegrationSuccess(result);
+      }}
     />
   </SectionCard>
 );
 
-const Javascript = ({ camp, pastedUrl, setPastedUrl, setShowIntegrationTable }) => (
+const Javascript = ({ camp, pastedUrl, setPastedUrl, onIntegrationSuccess, onIntegrationFailure }) => (
   <SectionCard
     title="JavaScript CDN Method"
     subtitle="Add the CDN snippet inside the head tag and validate your safe-page URL."
@@ -763,7 +864,10 @@ const Javascript = ({ camp, pastedUrl, setPastedUrl, setShowIntegrationTable }) 
 
     <TestButton
       enabled={Boolean(pastedUrl.trim())}
-      onClick={() => javascriptIntegration(camp, pastedUrl, setShowIntegrationTable)}
+      onClick={async () => {
+        const result = await javascriptIntegration(camp, pastedUrl, onIntegrationFailure);
+        if (result) onIntegrationSuccess(result);
+      }}
       text="Run URL Test"
     />
   </SectionCard>

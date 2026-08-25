@@ -8,8 +8,8 @@ import { Elements } from "@stripe/react-stripe-js";
 import Checkout from "../components/Stripe/Checkout";
 import { stripePromise } from "../utils/stripe";
 import Subscribe from "./Stripe/StripeSubscription";
-import { FaCopy } from "react-icons/fa";
-import { SiBitcoin, SiBnbchain, SiEthereum } from "react-icons/si";
+import { FaCopy, FaCreditCard } from "react-icons/fa";
+import { SiBitcoin, SiBnbchain, SiEthereum, SiTether } from "react-icons/si";
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
 
 /* ===================== PAYMENT DETAILS ===================== */
@@ -244,7 +244,7 @@ export default function Pricing() {
           ? "Choose Network"
           : paymentMethod === "card"
             ? "Card Checkout"
-            : "Dodo Checkout"
+            : "Card Checkout"
         : modalStep === 3
           ? "Confirm Transfer"
           : "Payment Submitted";
@@ -544,12 +544,14 @@ export default function Pricing() {
                       key: "USDT",
                       title: "USDT",
                       hint: "Crypto transfer with TX hash verification",
+                      icon: SiTether,
                     },
                     // { key: "card", title: "Card", hint: "Pay quickly using card checkout" },
                     {
                       key: "dodo",
-                      title: "Dodo",
-                      hint: "Continue via Dodo payment gateway",
+                      title: "Card Payment",
+                      hint: "Pay securely using your card",
+                      icon: FaCreditCard,
                     },
                   ].map((m) => (
                     <button
@@ -563,9 +565,19 @@ export default function Pricing() {
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <p className="text-[13px] font-semibold text-[#1e293b]">
-                          {m.title}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <m.icon
+                            aria-hidden="true"
+                            className={`text-[17px] ${
+                              m.key === "USDT"
+                                ? "text-[#26a17b]"
+                                : "text-[#3c79ff]"
+                            }`}
+                          />
+                          <p className="text-[13px] font-semibold text-[#1e293b]">
+                            {m.title}
+                          </p>
+                        </div>
                         <span
                           className={`h-4 w-4 rounded-full border ${
                             paymentMethod === m.key
@@ -778,7 +790,7 @@ export default function Pricing() {
               <>
                 <div className="text-left">
                   <h2 className="text-lg font-semibold text-[#141824]">
-                    Continue to Dodo Checkout
+                    Continue to Card Payment
                   </h2>
                   <p className="text-[12px] text-[#64748b] mt-1">
                     You will be redirected securely to complete payment.

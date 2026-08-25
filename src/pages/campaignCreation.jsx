@@ -519,6 +519,7 @@ export default function CampaignBuilder() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const [loadedCampaign, setLoadedCampaign] = useState(location?.state?.data || null);
   const draftStorageKey = React.useMemo(() => {
     const idPart = location?.state?.id ? `-${location.state.id}` : "";
     return `campaignCreationDraft${idPart}`;
@@ -559,6 +560,7 @@ export default function CampaignBuilder() {
    
     
     const c = res.data.data;
+    if (c) setLoadedCampaign(c);
 
     
 
@@ -1296,6 +1298,15 @@ export default function CampaignBuilder() {
         
 
         const res = await apiFunction("patch", `${createCampaignApi}/${uid}`, null, payload);
+        const responseCampaign =
+          res?.data?.data || (res?.data?.uid ? res.data : null) || {};
+        const updatedCampaign = {
+          ...(location?.state?.data || {}),
+          ...(loadedCampaign || {}),
+          ...responseCampaign,
+          ...payload,
+          uid,
+        };
     
         
         showSuccessToast("Campaign updated successfully!");
@@ -1305,7 +1316,8 @@ export default function CampaignBuilder() {
           state: {
             mode: "edit",
             id:uid,
-            data: location.state.data,
+            data: updatedCampaign,
+            openSetup: true,
           },
         });
       } else {
