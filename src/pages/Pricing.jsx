@@ -8,19 +8,83 @@ import { Elements } from "@stripe/react-stripe-js";
 import Checkout from "../components/Stripe/Checkout";
 import { stripePromise } from "../utils/stripe";
 import Subscribe from "./Stripe/StripeSubscription";
+import { FaCopy } from "react-icons/fa";
+import { SiBitcoin, SiBnbchain, SiEthereum } from "react-icons/si";
+import { showErrorToast, showSuccessToast } from "../components/toast/toast";
 
 /* ===================== PAYMENT DETAILS ===================== */
 
 const PAYMENT_DETAILS = {
   ERC20: {
     address: "0x8A8e46327fdA6ca4505bCBE5d7839a591ee82A32",
-    qr: "/ERC.jpeg",
+    qr: "/ERC20.jpeg",
+    asset: "USDT",
+    currency: "USDT (ERC20)",
   },
   TRC20: {
     address: "TN26mZ3G2RyFbbUT2T7CMn42tBBX8hLo9W",
-    qr: "/TRC.jpeg",
+    qr: "/TRC20.jpeg",
+    asset: "USDT",
+    currency: "USDT (TRC20)",
+  },
+  BEP20: {
+    address: "0x8A8e46327fdA6ca4505bCBE5d7839a591ee82A32",
+    qr: "/BEP20.jpeg",
+    asset: "USDT",
+    currency: "USDT (BEP20)",
+  },
+  BTC: {
+    address: "bc1q4e3p0zhc6yznmk0kcj0rjrjvgr9aqlsgz420zy",
+    qr: "/BTC.jpeg",
+    asset: "BTC",
+    currency: "BTC",
   },
 };
+
+const TronIcon = ({ size = 19 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M3.5 3.25 20.5 6.4 10.75 21 3.5 3.25Zm0 0 8.85 7.25M20.5 6.4l-8.15 4.1M10.75 21l1.6-10.5"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const NETWORK_OPTIONS = [
+  {
+    name: "ERC20",
+    icon: SiEthereum,
+    iconColor: "#627eea",
+    iconBackground: "#eef2ff",
+  },
+  {
+    name: "TRC20",
+    icon: TronIcon,
+    iconColor: "#ef0027",
+    iconBackground: "#fff1f2",
+  },
+  {
+    name: "BEP20",
+    icon: SiBnbchain,
+    iconColor: "#f3ba2f",
+    iconBackground: "#fffbeb",
+  },
+  {
+    name: "BTC",
+    icon: SiBitcoin,
+    iconColor: "#f7931a",
+    iconBackground: "#fff7ed",
+  },
+];
 
 /* ===================== COMPONENT ===================== */
 
@@ -187,6 +251,18 @@ export default function Pricing() {
 
   const makeCryptoPayment = async (payload) => {
     return await apiFunction("post", cryptoPayment, null, payload);
+  };
+
+  const copyPaymentAddress = async () => {
+    const address = PAYMENT_DETAILS[network]?.address;
+    if (!address) return;
+
+    try {
+      await navigator.clipboard.writeText(address);
+      showSuccessToast("Wallet address copied to clipboard.");
+    } catch {
+      showErrorToast("Unable to copy the wallet address.");
+    }
   };
 
   // const discountedPrice = +(plan.price * 0.7).toFixed(2);
@@ -616,17 +692,27 @@ export default function Pricing() {
                 <p className="text-[12px] text-[#64748b] mt-1">
                   Send exact amount on selected network only.
                 </p>
-                {["ERC20", "TRC20"].map((n) => (
+                {NETWORK_OPTIONS.map(({ name: n, icon: NetworkIcon, iconColor, iconBackground }) => (
                   <label
                     key={n}
-                    className="flex gap-3 mt-4 cursor-pointer rounded-md border border-[#d5d9e4] bg-[#f8fafc] px-3 py-2.5"
+                    className={`flex items-center gap-3 mt-4 cursor-pointer rounded-md border px-3 py-2.5 transition-colors ${
+                      network === n
+                        ? "border-[#3c79ff] bg-[#eef4ff]"
+                        : "border-[#d5d9e4] bg-[#f8fafc] hover:bg-white"
+                    }`}
                   >
                     <input
                       type="radio"
                       checked={network === n}
                       onChange={() => setNetwork(n)}
                     />
-                    {n}
+                    <span
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                      style={{ color: iconColor, backgroundColor: iconBackground }}
+                    >
+                      <NetworkIcon size={19} />
+                    </span>
+                    <span className="font-medium text-[#1e293b]">{n}</span>
                   </label>
                 ))}
 
@@ -725,7 +811,7 @@ export default function Pricing() {
                 </h2>
 
                 <p className="mt-2 text-sm text-[#64748b]">
-                  You selected <b>USDT</b> on <b>{network}</b> network
+                  You selected <b>{PAYMENT_DETAILS[network].asset}</b> on <b>{network}</b> network
                 </p>
 
                 <img
@@ -741,7 +827,11 @@ export default function Pricing() {
                   </label>
                   <input
                     disabled
-                    value={`${totalAmount} USDT`}
+                    value={
+                      network === "BTC"
+                        ? `$${totalAmount} USD equivalent in BTC`
+                        : `${totalAmount} USDT`
+                    }
                     className="w-full mt-1 p-2.5 bg-[#f8fafc] border border-[#d5d9e4] rounded text-[#1e293b]"
                   />
                 </div>
@@ -751,11 +841,22 @@ export default function Pricing() {
                   <label className="text-sm text-[#64748b]">
                     Pay to this address
                   </label>
-                  <input
-                    disabled
-                    value={PAYMENT_DETAILS[network].address}
-                    className="w-full mt-1 p-2.5 bg-[#f8fafc] border border-[#d5d9e4] rounded text-[#1e293b]"
-                  />
+                  <div className="relative mt-1">
+                    <input
+                      disabled
+                      value={PAYMENT_DETAILS[network].address}
+                      className="w-full p-2.5 pr-11 bg-[#f8fafc] border border-[#d5d9e4] rounded text-[#1e293b]"
+                    />
+                    <button
+                      type="button"
+                      onClick={copyPaymentAddress}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-[#d5d9e4] bg-white p-2 text-[#64748b] shadow-sm transition hover:border-[#3c79ff] hover:text-[#3c79ff] cursor-pointer"
+                      aria-label="Copy wallet address"
+                      title="Copy wallet address"
+                    >
+                      <FaCopy size={12} />
+                    </button>
+                  </div>
                 </div>
 
                 {/* TX HASH */}
@@ -805,8 +906,7 @@ export default function Pricing() {
                         billing_cycle: billing,
                         method: "cryptocurrency",
                         amount: totalAmount,
-                        currency:
-                          network === "ERC20" ? "USDT (ERC20)" : "USDT (TRC20)",
+                        currency: PAYMENT_DETAILS[network].currency,
                         start_date,
                         end_date,
                         payment_id: txHash,
