@@ -18,9 +18,12 @@ import {
   LocateFixed,
   Link2,
   Scissors,
+  Sparkles,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import { apiFunction } from "../../api/ApiFunction";
 import { signOutApi } from "../../api/Apis";
+import { isPlanValid } from "../../utils/checkPlan";
 import profileCharacter from "../../assets/vecteezy_friendly-3d-animated-character-with-glasses-smiling_57357673.png";
 
 
@@ -91,6 +94,36 @@ const SidebarContent = ({
     {
       type: "heading",
       label: "Tools",
+    },
+    {
+      label: "AI Builder",
+      icon: <Sparkles size={18} />,
+      action: () => {
+        const token = localStorage.getItem("token");
+        const builderUrl = import.meta.env.VITE_AI_BUILDER?.trim();
+
+        if (!token) {
+          toast.error("Please sign in again to open AI Builder.");
+          return;
+        }
+        if (!isPlanValid()) {
+          toast.error("An active plan is required to access AI Builder.");
+          navigate("/Dashboard/pricing");
+          if (mobileVisible) onCloseMobile?.();
+          return;
+        }
+        if (!builderUrl) {
+          toast.error("AI Builder is currently unavailable.");
+          return;
+        }
+
+        const url = new URL(builderUrl);
+        url.hash = `token=${encodeURIComponent(token)}`;
+        window.open(url.href, "_blank", "noopener,noreferrer");
+        if (mobileVisible) onCloseMobile?.();
+      },
+      badge: "New",
+      badgeTone: "new",
     },
     {
       label: "Redirect Inspector",
@@ -281,14 +314,18 @@ const SidebarContent = ({
             : false;
           const isActive = location.pathname === item.route || isSubItemActive;
           const isItemActive = isActive;
-          const isClickable = Boolean(item.route) || item.label === "Manage IP";
+          const NavItemTag = item.action ? "button" : "div";
 
           return (
             <div key={index}>
-              <div
+              <NavItemTag
                 id={item.label}
+                type={item.action ? "button" : undefined}
+                aria-label={item.action ? `${item.label} (opens in a new tab)` : undefined}
                 onClick={() => {
-                  if (item.label === "Manage IP") {
+                  if (item.action) {
+                    item.action();
+                  } else if (item.label === "Manage IP") {
                     setManageIpOpen(!manageIpOpen);
                   } else if (item.route) {
                     handleNavigate(item.route);
@@ -296,7 +333,7 @@ const SidebarContent = ({
                 }}
                 onMouseEnter={(e) => showTooltip(item.label, e)}
                 onMouseLeave={hideTooltip}
-                className={`sidebar-item flex items-center ${showFull ? "justify-between" : "justify-center"} rounded-xl cursor-pointer transition-colors ${!showFull ? "sidebar-item-collapsed" : ""} ${isItemActive
+                className={`sidebar-item w-full text-left flex items-center ${showFull ? "justify-between" : "justify-center"} rounded-xl cursor-pointer transition-colors ${!showFull ? "sidebar-item-collapsed" : ""} ${isItemActive
                   ? "sidebar-item-active"
                   : "text-slate-600"
                   } relative group`}
@@ -333,7 +370,7 @@ const SidebarContent = ({
                     )}
                   </span>
                 )}
-              </div>
+              </NavItemTag>
 
               {hasSubItems && showFull && manageIpOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-1">
