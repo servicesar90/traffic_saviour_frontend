@@ -20,10 +20,9 @@ import {
   Scissors,
   Sparkles,
 } from "lucide-react";
-import toast from "react-hot-toast";
 import { apiFunction } from "../../api/ApiFunction";
 import { signOutApi } from "../../api/Apis";
-import { isPlanValid } from "../../utils/checkPlan";
+import { openAiBuilder } from "../../utils/openAiBuilder";
 import profileCharacter from "../../assets/vecteezy_friendly-3d-animated-character-with-glasses-smiling_57357673.png";
 
 
@@ -98,30 +97,7 @@ const SidebarContent = ({
     {
       label: "AI Builder",
       icon: <Sparkles size={18} />,
-      action: () => {
-        const token = localStorage.getItem("token");
-        const builderUrl = import.meta.env.VITE_AI_BUILDER?.trim();
-
-        if (!token) {
-          toast.error("Please sign in again to open AI Builder.");
-          return;
-        }
-        if (!isPlanValid()) {
-          toast.error("An active plan is required to access AI Builder.");
-          navigate("/Dashboard/pricing");
-          if (mobileVisible) onCloseMobile?.();
-          return;
-        }
-        if (!builderUrl) {
-          toast.error("AI Builder is currently unavailable.");
-          return;
-        }
-
-        const url = new URL(builderUrl);
-        url.hash = `token=${encodeURIComponent(token)}`;
-        window.open(url.href, "_blank", "noopener,noreferrer");
-        if (mobileVisible) onCloseMobile?.();
-      },
+      action: () => openAiBuilder(navigate, mobileVisible ? onCloseMobile : undefined),
       badge: "New",
       badgeTone: "new",
     },

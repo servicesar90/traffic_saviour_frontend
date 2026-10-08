@@ -207,13 +207,22 @@ export default function Pricing() {
     };
   };
 
-  const parseFeatures = (features) => {
-    try {
-      return JSON.parse(features);
-    } catch {
-      return [];
-    }
-  };
+ const parseFeatures = (features) => {
+  if (Array.isArray(features)) {
+    return features;
+  }
+
+  if (typeof features !== "string") {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(features);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
 
   const filteredPlans = plans.filter((plan) => {
     if (billing === "Monthly") return plan.durationInMonths === 1;

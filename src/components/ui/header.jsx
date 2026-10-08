@@ -6,6 +6,7 @@ import {
   CreditCard,
   Search,
   Bell,
+  Sparkles,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +14,8 @@ import { apiFunction } from "../../api/ApiFunction";
 import { getUpdatedPlan, signOutApi } from "../../api/Apis";
 import profileCharacter from "../../assets/vecteezy_friendly-3d-animated-character-with-glasses-smiling_57357673.png";
 import { isPlanValid } from "../../utils/checkPlan";
+import { openAiBuilder } from "../../utils/openAiBuilder";
+import "./aiBuilderLaunch.css";
 
 
 const Header = ({ onMenuClick }) => {
@@ -100,7 +103,7 @@ const Header = ({ onMenuClick }) => {
   
 
   return (
-    <header className="w-full flex items-center justify-between bg-white/90 px-6 py-4 border-b border-slate-200 text-slate-900 backdrop-blur shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
+    <header className="w-full flex items-center justify-between bg-white/90 px-3 sm:px-6 py-4 border-b border-slate-200 text-slate-900 backdrop-blur shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
       {/* Left: Brand + Collapse */}
       <div className="flex items-center gap-3">
         <button
@@ -113,7 +116,7 @@ const Header = ({ onMenuClick }) => {
         <div className="flex items-center gap-2 rounded-xl  bg-white px-3 py-2 ">
           <img src="/logo-1.png" alt="TrafficSaviour" className="w-10 h-10" />
           <div className="leading-tight">
-            <p className="text-xl font-semibold text-slate-900">TrafficSaviour</p>
+            <p className="hidden sm:block text-xl font-semibold text-slate-900">TrafficSaviour</p>
             
           </div>
         </div>
@@ -121,6 +124,17 @@ const Header = ({ onMenuClick }) => {
 
       {/* Right: Search + Actions + Avatar */}
       <div className="flex items-center gap-4 flex-shrink-0">
+        <button
+          type="button"
+          onClick={() => openAiBuilder(navigate)}
+          aria-label="AI Builder (opens in a new tab)"
+          className="header-ai-launch"
+          title="Try the newly launched AI Builder"
+        >
+          <Sparkles size={15} className="header-ai-launch__icon" aria-hidden="true" />
+          <span>AI Builder</span>
+          <span className="header-ai-launch__badge">New</span>
+        </button>
         
 
        
