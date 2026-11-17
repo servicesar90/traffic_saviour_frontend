@@ -11,6 +11,7 @@ import Subscribe from "./Stripe/StripeSubscription";
 import { FaCopy, FaCreditCard } from "react-icons/fa";
 import { SiBitcoin, SiBnbchain, SiEthereum, SiTether } from "react-icons/si";
 import { showErrorToast, showSuccessToast } from "../components/toast/toast";
+import PayButton from "../components/RazorPay/Razorpay";
 
 /* ===================== PAYMENT DETAILS ===================== */
 
@@ -242,7 +243,9 @@ export default function Pricing() {
     return Boolean(flag) || status === "active" || status === "current";
   };
 
-  const totalAmount = selectedPlan ? selectedPlan.price * 0.7 : 0;
+  const totalAmount = selectedPlan
+  ? (selectedPlan.price * 0.7).toFixed(2)
+  : "0.00";
   const modalProgress =
     modalStep === 4 ? 100 : modalStep === 3 ? 75 : modalStep === 2 ? 50 : 25;
   const modalStepLabel =
@@ -613,7 +616,6 @@ export default function Pricing() {
                     disabled={!paymentMethod}
                     onClick={() => {
                       setModalStep(2);
-                      console.log(paymentMethod);
 
                       if (
                         paymentMethod === "card" ||
@@ -625,6 +627,7 @@ export default function Pricing() {
                         setPayload({
                           plan_id: selectedPlan.id,
                           price_id: selectedPlan.stripePriceId,
+                          razorpay_price_id: selectedPlan.razorpayPriceId,
                           plan_name: selectedPlan.name,
                           billing_cycle: billing,
 
@@ -804,7 +807,8 @@ export default function Pricing() {
                   <p className="text-[12px] text-[#64748b] mt-1">
                     You will be redirected securely to complete payment.
                   </p>
-                  <button
+                  <PayButton payload={payload}></PayButton>
+                  {/* <button
                     className="mt-6 cursor-pointer py-2 px-4 mr-2 rounded-md bg-[#3c79ff] hover:bg-[#356ee6]"
                     onClick={() =>
                       dodoPaymentCheckout(selectedPlan.stripePriceId)
@@ -812,7 +816,7 @@ export default function Pricing() {
                     style={{ color: "#ffffff" }}
                   >
                     Continue to Pay
-                  </button>
+                  </button> */}
                   <button
                     className="mt-6 cursor-pointer py-2 px-4 rounded-md border border-[#d5d9e4] bg-white text-[#475569] hover:bg-[#f8fafc]"
                     onClick={() => setModalStep(1)}

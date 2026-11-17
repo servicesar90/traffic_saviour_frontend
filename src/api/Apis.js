@@ -74,5 +74,9 @@ export const botCheckApi = `${base_url}/api/v2/new/botchecker`;
 export const ipInfoApi = `${base_url}/api/v2/services`;
 
 
+export const createRazorPaySub = `${base_url}/api/v2/razorpay/create-subscription`;
+export const varifyRazorPaySub = `${base_url}/api/v2/razorpay/verify-payment`;
+
+
 
 
